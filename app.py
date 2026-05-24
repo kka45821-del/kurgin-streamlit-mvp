@@ -1,164 +1,38 @@
 import streamlit as st
 
-st.set_page_config(
-    page_title="KURGIN MVP",
-    page_icon="💎",
-    layout="centered",
-    initial_sidebar_state="collapsed",
-)
+st.set_page_config(page_title="KURGIN MVP", page_icon="💎", layout="centered", initial_sidebar_state="collapsed")
 
-# --- Basic mobile-first state ---
 if "page" not in st.session_state:
-    st.session_state.page = "kurgin"
+    st.session_state.page = "catalog"
 
+PAGES = {"kurgin":"О KURGIN","tools":"Инструменты","catalog":"Каталог","favorites":"Избранное","cart":"Корзина","profile":"Профиль"}
+TABS = [("kurgin","♢","KURGIN"),("tools","♢","Инстр."),("catalog","◇","Каталог"),("favorites","♡","Избр."),("cart","◠","Корзина"),("profile","○","Профиль")]
 
-def go(page: str) -> None:
-    st.session_state.page = page
+st.markdown("""
+<style>
+header[data-testid="stHeader"], div[data-testid="stToolbar"]{display:none}.block-container{max-width:430px;padding:0 0 8.8rem 0}h1,h2,h3,.stCaption{display:none}
+.catalog-header{display:flex;align-items:center;gap:1rem;padding:1rem 1.4rem .85rem;border-bottom:1px solid #d6d6d6;box-shadow:0 2px 8px rgba(0,0,0,.12);background:#fff}.logo-mark{width:72px;height:44px;border:1.3px solid #111;border-radius:50%;position:relative}.logo-mark:after{content:"";position:absolute;width:72px;height:44px;border:1.3px solid #111;border-radius:50%;left:32px;top:-1px}.logo-title{font-family:serif;font-size:1.18rem;letter-spacing:.08em;color:#111}.logo-sub{margin-top:.3rem;color:#777;font-size:.58rem;letter-spacing:.08em}.catalog-top{display:grid;grid-template-columns:2fr 1fr;gap:.55rem;padding:.7rem 1.4rem .5rem}.catalog-select,.catalog-pick{border:1px solid #999;border-radius:10px;min-height:62px;display:flex;align-items:center;justify-content:center;background:#fff}.catalog-select{justify-content:space-between;padding:0 .8rem}.select-title{font-weight:700;font-size:.82rem;color:#111}.select-sub{color:#777;font-size:.72rem;margin-top:.25rem}.catalog-pick{color:#222;font-size:.78rem;line-height:1.35;text-align:center}.catalog-cols{display:grid;grid-template-columns:1.12fr .85fr .7fr .95fr .82fr 1.2fr;color:#999;font-size:.57rem;padding:.45rem 1.75rem .45rem;gap:.18rem}.stone-card{margin:0 1.4rem .65rem;border:1px solid #d0d0d0;border-radius:13px;padding:.85rem .85rem .65rem;background:#fff}.stone-main{display:grid;grid-template-columns:1.12fr .85fr .7fr .95fr .82fr 1.2fr;gap:.18rem;align-items:start;font-size:.88rem;color:#111}.price{font-weight:700;text-align:right;font-size:.88rem;line-height:1.25}.rub{font-size:.78rem}.stone-line{border-top:1px solid #e3e3e3;margin:.85rem 0 .55rem}.stone-meta{display:flex;justify-content:space-between;align-items:center;color:#333;font-size:.66rem;gap:.45rem}.tags{display:flex;gap:.3rem;flex-wrap:wrap;justify-content:flex-end}.tag{border:1px solid #f0b16d;color:#e56c17;border-radius:4px;padding:.1rem .38rem;font-size:.55rem}.tag-blue{border-color:#8bd7e8;color:#198fbe}.tag-gray{border-color:#ccc;color:#555}.actions{display:grid;grid-template-columns:repeat(6,1fr);color:#888;font-size:1.1rem;padding-top:.7rem;text-align:center}.filter-sort{position:fixed;left:0;right:0;bottom:4.25rem;z-index:999998;background:#fff;border-top:1px solid #ddd;padding:.45rem .75rem}.filter-inner{max-width:430px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:.55rem}.filter-box{border:1px solid #bbb;border-radius:13px;padding:.48rem .7rem;min-height:45px;background:#fff}.filter-label{color:#aaa;font-size:.62rem;letter-spacing:.04em}.filter-value{font-weight:700;font-size:.82rem;color:#111;margin-top:.08rem}.filter-sheet{position:fixed;left:0;right:0;bottom:0;z-index:1000000;max-width:430px;margin:0 auto;background:#fff;border:1px solid #999;border-bottom:0;border-radius:26px 26px 0 0;padding:1.4rem 1.35rem 1.2rem;box-shadow:0 -6px 22px rgba(0,0,0,.18)}.sheet-handle{width:42px;height:4px;border-radius:4px;background:#c9c9c9;margin:0 auto 1rem}.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem}.sheet-title{font-weight:700;font-size:1.15rem;color:#111}.reset{font-size:.78rem;color:#222}.filter-group{margin:.85rem 0 1.05rem}.filter-name{font-size:.76rem;font-weight:600;color:#111;margin-bottom:.55rem}.chips{display:flex;gap:.55rem;flex-wrap:wrap}.chip{border:1px solid #aaa;border-radius:18px;padding:.45rem .82rem;font-size:.67rem;color:#111;background:#fff}.chip-on{background:#000;color:#fff;border-color:#000}.chip-note{font-size:.58rem;color:#222;align-self:center}.kurgin-bottom-nav{position:fixed;left:0;right:0;bottom:0;width:100%;z-index:999999;background:#fff;border-top:1px solid rgba(49,51,63,.18);padding:.25rem .25rem calc(.45rem + env(safe-area-inset-bottom))}.kurgin-nav-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.2rem;max-width:430px;margin:0 auto}.kurgin-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;border-radius:12px;color:#888!important;text-decoration:none!important;font-size:.68rem;line-height:1.1;white-space:nowrap}.kurgin-tab-active{background:#f2f5f8;color:#111!important;border:1px solid #cfd5dc}.kurgin-icon{font-size:1.15rem;line-height:1;margin-bottom:.15rem}.page-pad{padding:1rem}
+</style>
+""", unsafe_allow_html=True)
 
-
-PAGES = {
-    "kurgin": "О KURGIN",
-    "tools": "Инструменты",
-    "catalog": "Каталог",
-    "favorites": "Избранное",
-    "cart": "Корзина",
-    "profile": "Профиль",
-}
-
-TABS = [
-    ("kurgin", "💎", "KURGIN"),
-    ("tools", "🛠", "Инстр."),
-    ("catalog", "🔍", "Каталог"),
-    ("favorites", "🤍", "Избр."),
-    ("cart", "🛒", "Корзина"),
-    ("profile", "👤", "Профиль"),
-]
-
-
-# --- Temporary mobile CSS for functional skeleton ---
-st.markdown(
-    """
-    <style>
-    header[data-testid="stHeader"] {
-        display: none;
-    }
-    div[data-testid="stToolbar"] {
-        display: none;
-    }
-    .block-container {
-        max-width: 430px;
-        padding-top: 1rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
-        padding-bottom: 7rem;
-    }
-    .kurgin-bottom-nav {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100%;
-        z-index: 999999;
-        background: white;
-        border-top: 1px solid rgba(49, 51, 63, 0.18);
-        padding: 0.25rem 0.25rem calc(0.45rem + env(safe-area-inset-bottom));
-        box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.08);
-    }
-    .kurgin-nav-grid {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 0.2rem;
-        max-width: 430px;
-        margin: 0 auto;
-    }
-    .kurgin-tab {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 48px;
-        border-radius: 12px;
-        border: 1px solid rgba(49, 51, 63, 0.18);
-        background: #ffffff;
-        color: #31333f !important;
-        text-decoration: none !important;
-        font-size: 0.68rem;
-        line-height: 1.1;
-        white-space: nowrap;
-    }
-    .kurgin-tab-active {
-        background: #ff4b4b;
-        border-color: #ff4b4b;
-        color: #ffffff !important;
-    }
-    .kurgin-icon {
-        font-size: 1rem;
-        line-height: 1;
-        margin-bottom: 0.15rem;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-# --- Navigation from query param ---
-query_params = st.query_params
-requested_page = query_params.get("page")
-if requested_page in PAGES and requested_page != st.session_state.page:
+requested_page = st.query_params.get("page")
+if requested_page in PAGES:
     st.session_state.page = requested_page
-    st.rerun()
-
-
-# --- Page content ---
-st.title("KURGIN")
-st.caption("Черновой mobile-first MVP без финального дизайна")
-
 current_page = st.session_state.page
-st.subheader(PAGES[current_page])
-st.divider()
 
-if current_page == "kurgin":
-    st.write("Публичная витрина KURGIN: лабораторные бриллианты, инструменты анализа, индекс цен и доверительная информация.")
+if current_page == "catalog":
+    st.markdown("""
+<div class="catalog-header"><div class="logo-mark"></div><div><div class="logo-title">KURGIN DIAMONDS</div><div class="logo-sub">ЛАБОРАТОРНЫЕ БРИЛЛИАНТЫ</div></div></div>
+<div class="catalog-top"><div class="catalog-select"><div><div class="select-title">Основной каталог</div><div class="select-sub">1.00–2.99 ct</div></div><div>⌄</div></div><div class="catalog-pick">Индив.<br>подбор</div></div>
+<div class="catalog-cols"><div>ФОРМА</div><div>КАРАТ</div><div>ЦВЕТ</div><div>ЧИСТОТА</div><div>SCORE</div><div>ЦЕНА</div></div>
+<div class="stone-card"><div class="stone-main"><div>Круг</div><div>1.05</div><div>G</div><div>VVS1</div><div>95</div><div class="price">32 200 ₽</div></div><div class="stone-line"></div><div class="stone-meta"><div>6.5 мм · ex ex vg · none</div><div class="tags"><span class="tag">огонь</span><span class="tag tag-blue">блеск</span></div></div></div>
+<div class="filter-sheet"><div class="sheet-handle"></div><div class="sheet-head"><div class="sheet-title">Фильтры</div><div class="reset">Сбросить</div></div><div class="filter-group"><div class="filter-name">1. Форма / огранка</div><div class="chips"><span class="chip chip-on">Round</span><span class="chip">Oval</span><span class="chip">Pear</span><span class="chip">Cushion</span></div></div><div class="filter-group"><div class="filter-name">2. Вес</div><div class="chips"><span class="chip chip-on">1–1.49</span><span class="chip">1.5–1.99</span><span class="chip">2–2.49</span><span class="chip">2.5–2.99</span></div></div><div class="filter-group"><div class="filter-name">3. Цвет</div><div class="chips"><span class="chip chip-on">D</span><span class="chip chip-on">E</span><span class="chip chip-on">F</span><span class="chip">G</span><span class="chip">H</span></div></div><div class="filter-group"><div class="filter-name">4. Чистота</div><div class="chips"><span class="chip">IF</span><span class="chip chip-on">VVS1</span><span class="chip">VVS2</span><span class="chip chip-on">VS1</span><span class="chip">VS2</span></div></div><div class="filter-group"><div class="filter-name">5. Karo Score</div><div class="chips"><span class="chip">0–49</span><span class="chip">50–79</span><span class="chip chip-on">80–89</span><span class="chip">90–94.9</span><span class="chip">95–98</span><span class="chip">99+</span><span class="chip-note">качество / индекс-коэф.</span></div></div><div class="filter-group"><div class="filter-name">6. Флюоресценция</div><div class="chips"><span class="chip chip-on">None</span><span class="chip">Faint</span><span class="chip">Medium</span><span class="chip">Strong</span></div></div><div class="filter-group"><div class="filter-name">7. Качество отделки</div><div class="chips"><span class="chip chip-on">Ex/Ex/Ex+</span><span class="chip">2Ex/1VG+</span></div></div></div>
+""", unsafe_allow_html=True)
+else:
+    st.markdown(f'<div class="page-pad"><h3>{PAGES[current_page]}</h3></div>', unsafe_allow_html=True)
 
-elif current_page == "tools":
-    st.write("Здесь будут инструменты KURGIN.")
-    st.button("KURGIN Score Analyzer", use_container_width=True)
-    st.button("Сравнение камней", use_container_width=True)
-    st.button("Индекс цен", use_container_width=True)
-
-elif current_page == "catalog":
-    st.write("Каталог лабораторных бриллиантов. На первом этапе — фильтры и карточки-заглушки.")
-    with st.expander("Фильтры"):
-        st.selectbox("Форма", ["Round", "Oval", "Emerald", "Princess", "Cushion"])
-        st.slider("Карат", 0.3, 5.0, (1.0, 2.0))
-        st.selectbox("Цвет", ["D", "E", "F", "G", "H", "I"])
-    for i in range(1, 4):
-        st.container(border=True).write(f"Камень #{i} · Round · 1.{i} ct · IGI · добавить в избранное / корзину")
-
-elif current_page == "favorites":
-    st.write("Избранные камни пользователя. Пока пусто.")
-
-elif current_page == "cart":
-    st.write("Корзина / резерв. Пока пусто.")
-
-elif current_page == "profile":
-    st.write("Профиль, вход, регистрация и выбор роли.")
-    st.selectbox("Роль", ["Гость", "Покупатель", "Ювелир", "Геммолог", "Партнёр"])
-
-
-# --- Fixed bottom navigation as real HTML links ---
-nav_items = []
-for page_key, icon, label in TABS:
-    active_class = " kurgin-tab-active" if page_key == current_page else ""
-    nav_items.append(
-        f'<a class="kurgin-tab{active_class}" href="?page={page_key}" target="_self">'
-        f'<span class="kurgin-icon">{icon}</span><span>{label}</span></a>'
-    )
-
-st.markdown(
-    '<nav class="kurgin-bottom-nav"><div class="kurgin-nav-grid">'
-    + "".join(nav_items)
-    + '</div></nav>',
-    unsafe_allow_html=True,
-)
+nav_items=[]
+for page_key,icon,label in TABS:
+    active_class=" kurgin-tab-active" if page_key==current_page else ""
+    nav_items.append(f'<a class="kurgin-tab{active_class}" href="?page={page_key}" target="_self"><span class="kurgin-icon">{icon}</span><span>{label}</span></a>')
+st.markdown('<nav class="kurgin-bottom-nav"><div class="kurgin-nav-grid">'+''.join(nav_items)+'</div></nav>', unsafe_allow_html=True)
