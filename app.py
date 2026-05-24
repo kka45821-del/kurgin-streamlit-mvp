@@ -143,11 +143,66 @@ CATALOG_TEMPLATE = r"""
 html, body { margin: 0; padding: 0; background: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111; overflow: hidden; }
 .app { width: 100%; max-width: 430px; height: 100dvh; min-height: 100svh; margin: 0 auto; position: relative; overflow: hidden; background: #fff; }
 .content { position: absolute; inset: 0 0 calc(126px + env(safe-area-inset-bottom)) 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
-.catalog-header { display:flex; align-items:center; gap:.75rem; padding:1.05rem 1rem .9rem; border-bottom:1px solid #ddd; box-shadow:0 2px 8px rgba(0,0,0,.12); background:#fff; }
-.logo-svg { width:72px; min-width:72px; height:40px; display:flex; align-items:center; overflow:hidden; }
-.logo-svg svg { width:72px; height:auto; display:block; }
-.logo-title { font-family:serif; font-size:1.2rem; letter-spacing:.08em; color:#111; white-space:nowrap; }
-.logo-sub { margin-top:.28rem; color:#8b8b8b; font-size:.62rem; letter-spacing:.08em; }
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&display=swap');
+.catalog-header {
+  display:flex;
+  align-items:center;
+  gap:.78rem;
+  padding:1rem 1rem .88rem;
+  border-bottom:1px solid rgba(17,17,17,.10);
+  background:linear-gradient(180deg,#fff 0%,#fbfbfb 100%);
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+.logo-svg {
+  width:78px;
+  min-width:78px;
+  height:43px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  position:relative;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.12));
+}
+.logo-svg svg {
+  width:76px;
+  height:auto;
+  display:block;
+  transition:transform .28s ease, filter .28s ease;
+}
+.logo-svg:hover svg {
+  transform:scale(1.055);
+  filter:contrast(1.08);
+}
+.logo-svg::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.22) 50%,transparent 62%);
+  transform:translateX(-120%);
+  transition:transform .75s ease;
+  pointer-events:none;
+}
+.logo-svg:hover::after {
+  transform:translateX(120%);
+}
+.logo-title {
+  font-family:'Cinzel','Times New Roman',serif;
+  font-size:1.08rem;
+  font-weight:500;
+  letter-spacing:.055em;
+  line-height:1.05;
+  color:#111;
+  white-space:nowrap;
+  text-rendering:geometricPrecision;
+}
+.logo-sub {
+  margin-top:.28rem;
+  color:#8b8b8b;
+  font-size:.58rem;
+  letter-spacing:.095em;
+  text-transform:uppercase;
+}
 .catalog-top { display:grid; grid-template-columns:2fr 1fr; gap:.65rem; padding:1.35rem 1rem .8rem; }
 .catalog-select, .catalog-pick { border:1px solid #aaa; border-radius:14px; min-height:70px; display:flex; align-items:center; justify-content:center; background:#fff; }
 .catalog-select { justify-content:space-between; padding:0 1rem; }
@@ -197,7 +252,7 @@ html, body { margin: 0; padding: 0; background: #fff; font-family: -apple-system
 <body>
 <div class="app" id="app">
   <div class="content" id="content">
-    <div class="catalog-header"><div class="logo-svg">__LOGO__</div><div><div class="logo-title">KURGIN DIAMONDS</div><div class="logo-sub">ЛАБОРАТОРНЫЕ БРИЛЛИАНТЫ</div></div></div>
+    <div class="catalog-header"><div class="logo-svg">__LOGO__</div><div><div class="logo-title">KURGIN Diamonds</div><div class="logo-sub">лабораторные бриллианты</div></div></div>
     <div class="catalog-top"><div class="catalog-select"><div><div class="select-title">Основной каталог</div><div class="select-sub">1.00–2.99 ct</div></div><div>⌄</div></div><div class="catalog-pick">Индив.<br>подбор</div></div>
     <div class="catalog-cols"><div>ФОРМА</div><div>КАРАТ</div><div>ЦВЕТ</div><div>ЧИСТОТА</div><div>KARO SCORE</div><div>ЦЕНА</div></div>
     __CARDS__
