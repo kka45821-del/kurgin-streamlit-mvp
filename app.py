@@ -1,4 +1,7 @@
+from urllib.parse import quote
+
 import streamlit as st
+import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="KURGIN MVP",
@@ -25,6 +28,16 @@ TABS = [
     ("profile", "○", "Профиль"),
 ]
 
+FILTER_GROUPS = {
+    "shape": ["Round", "Oval", "Pear", "Cushion"],
+    "weight": ["1–1.49", "1.5–1.99", "2–2.49", "2.5–2.99"],
+    "color": ["D", "E", "F", "G", "H"],
+    "clarity": ["IF", "VVS1", "VVS2", "VS1", "VS2"],
+    "score": ["0–49", "50–79", "80–89", "90–94.9", "95–98", "99+"],
+    "fluorescence": ["None", "Faint", "Medium", "Strong"],
+    "finish": ["Ex/Ex/Ex+", "2Ex/1VG+"],
+}
+
 DEFAULT_FILTERS = {
     "shape": {"Round"},
     "weight": {"1–1.49"},
@@ -45,10 +58,25 @@ if requested_page in PAGES:
     st.session_state.page = requested_page
 
 if st.query_params.get("reset") == "1":
-    st.session_state.selected_filters = {k: set(v) for k, v in DEFAULT_FILTERS.items()}
+    st.session_state.selected_filters = {k: set() for k in FILTER_GROUPS}
     st.query_params.clear()
     st.query_params["page"] = "catalog"
     st.query_params["filters"] = "1"
+    st.rerun()
+
+toggle_value = st.query_params.get("toggle")
+if toggle_value and ":" in toggle_value:
+    group, value = toggle_value.split(":", 1)
+    if group in FILTER_GROUPS and value in FILTER_GROUPS[group]:
+        selected = st.session_state.selected_filters.setdefault(group, set())
+        if value in selected:
+            selected.remove(value)
+        else:
+            selected.add(value)
+    st.query_params.clear()
+    st.query_params["page"] = "catalog"
+    st.query_params["filters"] = "1"
+    st.rerun()
 
 current_page = st.session_state.page
 filters_open = current_page == "catalog" and st.query_params.get("filters") == "1"
@@ -57,6 +85,17 @@ filters_open = current_page == "catalog" and st.query_params.get("filters") == "
 def open_filters() -> None:
     st.query_params["page"] = "catalog"
     st.query_params["filters"] = "1"
+
+
+def chip(group: str, value: str) -> str:
+    selected = value in st.session_state.selected_filters.get(group, set())
+    cls = "chip chip-on" if selected else "chip"
+    payload = quote(f"{group}:{value}", safe="")
+    return f'<a class="{cls}" href="?page=catalog&filters=1&toggle={payload}" target="_self">{value}</a>'
+
+
+def chips_html(group: str) -> str:
+    return "".join(chip(group, value) for value in FILTER_GROUPS[group])
 
 
 st.markdown(
@@ -136,8 +175,13 @@ h1, h2, h3, .stCaption { display: none; }
 .filter-group { margin: .85rem 0 1.05rem; }
 .filter-name { font-size: .76rem; font-weight: 600; color: #111; margin-bottom: .55rem; }
 .chips { display: flex; gap: .55rem; flex-wrap: wrap; }
-.chip { border: 1px solid #aaa; border-radius: 18px; padding: .45rem .82rem; font-size: .67rem; color: #111; background: #fff; }
-.chip-on { background: #000; color: #fff; border-color: #000; }
+.chip {
+    border: 1px solid #aaa; border-radius: 18px; padding: .45rem .82rem;
+    font-size: .67rem; color: #111!important; background: #fff;
+    text-decoration: none!important; display: inline-flex; align-items: center; min-height: 34px;
+    -webkit-tap-highlight-color: transparent;
+}
+.chip-on { background: #000; color: #fff!important; border-color: #000; }
 .chip-note { font-size: .58rem; color: #222; align-self: center; }
 
 .kurgin-bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; width: 100%; z-index: 999999; background: #fff; border-top: 1px solid rgba(49,51,63,.18); padding: .25rem .25rem calc(.45rem + env(safe-area-inset-bottom)); }
@@ -169,21 +213,65 @@ if current_page == "catalog":
 
     if filters_open:
         st.markdown(
-            """
-<div class="filter-overlay"></div>
+            f"""
+<a class="filter-overlay" href="?page=catalog" target="_self"></a>
 <div class="filter-sheet">
   <a class="sheet-handle" href="?page=catalog" target="_self"></a>
   <div class="sheet-head"><div class="sheet-title">Фильтры</div><a class="reset-link" href="?page=catalog&filters=1&reset=1" target="_self">Сбросить</a></div>
-  <div class="filter-group"><div class="filter-name">1. Форма / огранка</div><div class="chips"><span class="chip chip-on">Round</span><span class="chip">Oval</span><span class="chip">Pear</span><span class="chip">Cushion</span></div></div>
-  <div class="filter-group"><div class="filter-name">2. Вес</div><div class="chips"><span class="chip chip-on">1–1.49</span><span class="chip">1.5–1.99</span><span class="chip">2–2.49</span><span class="chip">2.5–2.99</span></div></div>
-  <div class="filter-group"><div class="filter-name">3. Цвет</div><div class="chips"><span class="chip chip-on">D</span><span class="chip chip-on">E</span><span class="chip chip-on">F</span><span class="chip">G</span><span class="chip">H</span></div></div>
-  <div class="filter-group"><div class="filter-name">4. Чистота</div><div class="chips"><span class="chip">IF</span><span class="chip chip-on">VVS1</span><span class="chip">VVS2</span><span class="chip chip-on">VS1</span><span class="chip">VS2</span></div></div>
-  <div class="filter-group"><div class="filter-name">5. Karo Score</div><div class="chips"><span class="chip">0–49</span><span class="chip">50–79</span><span class="chip chip-on">80–89</span><span class="chip">90–94.9</span><span class="chip">95–98</span><span class="chip">99+</span><span class="chip-note">качество / индекс-коэф.</span></div></div>
-  <div class="filter-group"><div class="filter-name">6. Флюоресценция</div><div class="chips"><span class="chip chip-on">None</span><span class="chip">Faint</span><span class="chip">Medium</span><span class="chip">Strong</span></div></div>
-  <div class="filter-group"><div class="filter-name">7. Качество отделки</div><div class="chips"><span class="chip chip-on">Ex/Ex/Ex+</span><span class="chip">2Ex/1VG+</span></div></div>
+  <div class="filter-group"><div class="filter-name">1. Форма / огранка</div><div class="chips">{chips_html('shape')}</div></div>
+  <div class="filter-group"><div class="filter-name">2. Вес</div><div class="chips">{chips_html('weight')}</div></div>
+  <div class="filter-group"><div class="filter-name">3. Цвет</div><div class="chips">{chips_html('color')}</div></div>
+  <div class="filter-group"><div class="filter-name">4. Чистота</div><div class="chips">{chips_html('clarity')}</div></div>
+  <div class="filter-group"><div class="filter-name">5. Karo Score</div><div class="chips">{chips_html('score')}<span class="chip-note">качество / индекс-коэф.</span></div></div>
+  <div class="filter-group"><div class="filter-name">6. Флюоресценция</div><div class="chips">{chips_html('fluorescence')}</div></div>
+  <div class="filter-group"><div class="filter-name">7. Качество отделки</div><div class="chips">{chips_html('finish')}</div></div>
 </div>
 """,
             unsafe_allow_html=True,
+        )
+        components.html(
+            """
+<script>
+(function () {
+  const closeUrl = new URL(window.parent.location.href);
+  closeUrl.searchParams.set('page', 'catalog');
+  closeUrl.searchParams.delete('filters');
+  closeUrl.searchParams.delete('toggle');
+  closeUrl.searchParams.delete('reset');
+
+  function attachSwipeClose() {
+    try {
+      const sheet = window.parent.document.querySelector('.filter-sheet');
+      if (!sheet || sheet.dataset.swipeReady === '1') return;
+      sheet.dataset.swipeReady = '1';
+      let startY = null;
+      let startX = null;
+      sheet.addEventListener('touchstart', function (event) {
+        if (!event.touches || event.touches.length === 0) return;
+        startY = event.touches[0].clientY;
+        startX = event.touches[0].clientX;
+      }, { passive: true });
+      sheet.addEventListener('touchend', function (event) {
+        if (startY === null || !event.changedTouches || event.changedTouches.length === 0) return;
+        const endY = event.changedTouches[0].clientY;
+        const endX = event.changedTouches[0].clientX;
+        const dy = endY - startY;
+        const dx = Math.abs(endX - startX);
+        if (dy > 85 && dx < 90) {
+          window.parent.location.href = closeUrl.toString();
+        }
+        startY = null;
+        startX = null;
+      }, { passive: true });
+    } catch (e) {}
+  }
+
+  setTimeout(attachSwipeClose, 100);
+  setTimeout(attachSwipeClose, 500);
+})();
+</script>
+""",
+            height=0,
         )
 else:
     st.markdown(f'<div class="page-pad"><h3>{PAGES[current_page]}</h3></div>', unsafe_allow_html=True)
