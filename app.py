@@ -40,6 +40,7 @@ current_page = st.session_state.page
 st.markdown(
     """
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&display=swap');
 header[data-testid="stHeader"], div[data-testid="stToolbar"] { display: none; }
 .block-container { max-width: 430px; padding: 0 !important; }
 div[data-testid="stElementContainer"] { margin: 0 !important; }
@@ -143,7 +144,6 @@ CATALOG_TEMPLATE = r"""
 html, body { margin: 0; padding: 0; background: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111; overflow: hidden; }
 .app { width: 100%; max-width: 430px; height: 100dvh; min-height: 100svh; margin: 0 auto; position: relative; overflow: hidden; background: #fff; }
 .content { position: absolute; inset: 0 0 calc(126px + env(safe-area-inset-bottom)) 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&display=swap');
 .catalog-header {
   display:flex;
   align-items:center;
@@ -187,7 +187,7 @@ html, body { margin: 0; padding: 0; background: #fff; font-family: -apple-system
   transform:translateX(120%);
 }
 .logo-title {
-  font-family:'Cinzel','Times New Roman',serif;
+  font-family:'Cinzel','Times New Roman',serif !important;
   font-size:1.08rem;
   font-weight:500;
   letter-spacing:.055em;
