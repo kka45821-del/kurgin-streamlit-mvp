@@ -85,12 +85,21 @@ h1, h2, h3, .stCaption { display: none; }
 .select-sub { color: #777; font-size: .92rem; margin-top: .25rem; }
 .catalog-pick { color: #555; font-size: .98rem; line-height: 1.35; text-align: center; }
 
-.catalog-cols, .stone-main { display: grid; grid-template-columns: 1fr .82fr .62fr .92fr .78fr 1.25fr; gap: .2rem; }
-.catalog-cols { color: #aaa; font-size: .65rem; padding: .45rem 1.95rem .6rem; }
+.catalog-cols, .stone-main {
+    display: grid;
+    grid-template-columns: .92fr .78fr .62fr .95fr 1.12fr 1.25fr;
+    gap: .18rem;
+}
+.catalog-cols {
+    color: #aaa;
+    font-size: .57rem;
+    line-height: 1.05;
+    padding: .45rem 1.85rem .6rem;
+    text-transform: uppercase;
+}
 .stone-card { margin: 0 1rem 1rem; border: 1px solid #d0d0d0; border-radius: 18px; padding: 1.05rem 1rem .75rem; background: #fff; }
-.stone-main { align-items: start; font-size: 1rem; color: #111; }
-.price { font-weight: 700; text-align: right; font-size: 1.03rem; line-height: 1.25; }
-.rub { font-size: .92rem; }
+.stone-main { align-items: start; font-size: .98rem; color: #111; }
+.price { font-weight: 700; text-align: right; font-size: .98rem; line-height: 1.25; white-space: nowrap; }
 .stone-line { border-top: 1px solid #e6e6e6; margin: 1.05rem 0 .7rem; }
 .stone-meta { display: flex; justify-content: space-between; align-items: center; color: #666; font-size: .86rem; gap: .5rem; }
 .tags { display: flex; gap: .35rem; flex-wrap: wrap; justify-content: flex-end; }
@@ -147,10 +156,10 @@ if current_page == "catalog":
         """
 <div class="catalog-header"><div class="logo-mark"></div><div><div class="logo-title">KURGIN DIAMONDS</div><div class="logo-sub">ЛАБОРАТОРНЫЕ БРИЛЛИАНТЫ</div></div></div>
 <div class="catalog-top"><div class="catalog-select"><div><div class="select-title">Основной каталог</div><div class="select-sub">1.00–2.99 ct</div></div><div>⌄</div></div><div class="catalog-pick">Индив.<br>подбор</div></div>
-<div class="catalog-cols"><div>ФОРМ.</div><div>КАРАТ</div><div>ЦВЕ</div><div>ЧИСТОТ</div><div>SCORE</div><div>ЦЕНА</div></div>
-<div class="stone-card"><div class="stone-main"><div>Круг</div><div>1.05</div><div>G</div><div>VVS1</div><div>95</div><div class="price">32 200<br><span class="rub">₽</span></div></div><div class="stone-line"></div><div class="stone-meta"><div>6.5 мм · ex ex vg · none</div><div class="tags"><span class="tag">огонь</span><span class="tag tag-blue">блеск</span></div></div><div class="actions"><div>♡</div><div>▣</div><div>ⓘ</div><div>♡</div><div>⌞</div><div>⌯</div></div></div>
-<div class="stone-card"><div class="stone-main"><div>Круг</div><div>1.51</div><div>E</div><div>VS1</div><div>86</div><div class="price">58 500<br><span class="rub">₽</span></div></div><div class="stone-line"></div><div class="stone-meta"><div>7.4 мм · ex ex vg · none</div><div class="tags"><span class="tag tag-gray">контраст</span><span class="tag">огонь</span></div></div><div class="actions"><div>♡</div><div>▣</div><div>ⓘ</div><div>♡</div><div>⌞</div><div>⌯</div></div></div>
-<div class="stone-card"><div class="stone-main"><div>Круг</div><div>1</div><div>F</div><div>VS2</div><div>77</div><div class="price">34 900<br><span class="rub">₽</span></div></div><div class="stone-line"></div><div class="stone-meta"><div>6.4 мм · ex ex vg · none</div><div class="tags"><span class="tag">БАЛАНС</span></div></div></div>
+<div class="catalog-cols"><div>ФОРМА</div><div>КАРАТ</div><div>ЦВЕТ</div><div>ЧИСТОТА</div><div>KARO SCORE</div><div>ЦЕНА</div></div>
+<div class="stone-card"><div class="stone-main"><div>Круг</div><div>1.05</div><div>G</div><div>VVS1</div><div>95</div><div class="price">32 200 ₽</div></div><div class="stone-line"></div><div class="stone-meta"><div>6.5 мм · ex ex vg · none</div><div class="tags"><span class="tag">огонь</span><span class="tag tag-blue">блеск</span></div></div><div class="actions"><div>♡</div><div>▣</div><div>ⓘ</div><div>♡</div><div>⌞</div><div>⌯</div></div></div>
+<div class="stone-card"><div class="stone-main"><div>Круг</div><div>1.51</div><div>E</div><div>VS1</div><div>86</div><div class="price">58 500 ₽</div></div><div class="stone-line"></div><div class="stone-meta"><div>7.4 мм · ex ex vg · none</div><div class="tags"><span class="tag tag-gray">контраст</span><span class="tag">огонь</span></div></div><div class="actions"><div>♡</div><div>▣</div><div>ⓘ</div><div>♡</div><div>⌞</div><div>⌯</div></div></div>
+<div class="stone-card"><div class="stone-main"><div>Круг</div><div>1</div><div>F</div><div>VS2</div><div>77</div><div class="price">34 900 ₽</div></div><div class="stone-line"></div><div class="stone-meta"><div>6.4 мм · ex ex vg · none</div><div class="tags"><span class="tag">БАЛАНС</span></div></div></div>
 """,
         unsafe_allow_html=True,
     )
