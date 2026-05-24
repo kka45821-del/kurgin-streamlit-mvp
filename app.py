@@ -69,8 +69,6 @@ st.divider()
 
 if current_page == "kurgin":
     st.write("Публичная витрина KURGIN: лабораторные бриллианты, инструменты анализа, индекс цен и доверительная информация.")
-    st.button("Перейти в каталог", use_container_width=True, on_click=go, args=("catalog",))
-    st.button("Открыть инструменты", use_container_width=True, on_click=go, args=("tools",))
 
 elif current_page == "tools":
     st.write("Здесь будут инструменты KURGIN.")
