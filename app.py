@@ -42,15 +42,28 @@ st.markdown(
     .block-container {
         max-width: 430px;
         padding-top: 1rem;
-        padding-bottom: 6rem;
+        padding-bottom: 7rem;
     }
-    div[data-testid="stHorizontalBlock"] {
+    .kurgin-bottom-nav {
+        position: fixed;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 430px;
+        z-index: 999999;
+        background: white;
+        border-top: 1px solid rgba(49, 51, 63, 0.2);
+        padding: 0.35rem 0.35rem 0.55rem 0.35rem;
+        box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.08);
+    }
+    .kurgin-bottom-nav div[data-testid="stHorizontalBlock"] {
         gap: 0.25rem;
     }
-    .stButton > button {
+    .kurgin-bottom-nav .stButton > button {
         min-height: 48px;
         padding: 0.25rem 0.1rem;
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         border-radius: 12px;
     }
     </style>
@@ -96,8 +109,8 @@ elif current_page == "profile":
     st.selectbox("Роль", ["Гость", "Покупатель", "Ювелир", "Геммолог", "Партнёр"])
 
 
-# --- Bottom navigation ---
-st.divider()
+# --- Fixed bottom navigation ---
+st.markdown('<div class="kurgin-bottom-nav">', unsafe_allow_html=True)
 cols = st.columns(6)
 
 for col, (page_key, icon, label) in zip(cols, TABS):
@@ -107,3 +120,5 @@ for col, (page_key, icon, label) in zip(cols, TABS):
         if st.button(button_label, use_container_width=True, type="primary" if active else "secondary"):
             go(page_key)
             st.rerun()
+
+st.markdown('</div>', unsafe_allow_html=True)
