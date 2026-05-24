@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(page_title='KURGIN MVP', page_icon='💎', layout='centered', initial_sidebar_state='collapsed')
+st.set_page_config(page_title='KURGIN скоро открытие MVP', page_icon='favicon.png', layout='centered', initial_sidebar_state='collapsed')
 
 PAGES={'kurgin':'О KURGIN','tools':'Инструменты','catalog':'Каталог','favorites':'Избранное','cart':'Корзина','profile':'Профиль'}
 TABS=[('kurgin','♢','KURGIN'),('tools','✦','Инстр.'),('catalog','◇','Каталог'),('favorites','♡','Избр.'),('cart','◠','Корзина'),('profile','○','Профиль')]
