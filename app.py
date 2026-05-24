@@ -25,26 +25,38 @@ TABS = [
     ("profile", "○", "Профиль"),
 ]
 
+DEFAULT_FILTERS = {
+    "shape": {"Round"},
+    "weight": {"1–1.49"},
+    "color": {"D", "E", "F"},
+    "clarity": {"VVS1", "VS1"},
+    "score": {"80–89"},
+    "fluorescence": {"None"},
+    "finish": {"Ex/Ex/Ex+"},
+}
+
 if "page" not in st.session_state:
     st.session_state.page = "catalog"
-if "filters_open" not in st.session_state:
-    st.session_state.filters_open = False
+if "selected_filters" not in st.session_state:
+    st.session_state.selected_filters = {k: set(v) for k, v in DEFAULT_FILTERS.items()}
 
 requested_page = st.query_params.get("page")
 if requested_page in PAGES:
     st.session_state.page = requested_page
 
+if st.query_params.get("reset") == "1":
+    st.session_state.selected_filters = {k: set(v) for k, v in DEFAULT_FILTERS.items()}
+    st.query_params.clear()
+    st.query_params["page"] = "catalog"
+    st.query_params["filters"] = "1"
+
 current_page = st.session_state.page
-if current_page != "catalog":
-    st.session_state.filters_open = False
+filters_open = current_page == "catalog" and st.query_params.get("filters") == "1"
 
 
 def open_filters() -> None:
-    st.session_state.filters_open = True
-
-
-def close_filters() -> None:
-    st.session_state.filters_open = False
+    st.query_params["page"] = "catalog"
+    st.query_params["filters"] = "1"
 
 
 st.markdown(
@@ -106,12 +118,12 @@ h1, h2, h3, .stCaption { display: none; }
     margin: 0 auto; background: #fff; border: 1px solid #999; border-bottom: 0;
     border-radius: 26px 26px 0 0; padding: 1.4rem 1.35rem 1.2rem;
     box-shadow: 0 -6px 22px rgba(0,0,0,.18);
+    touch-action: pan-y;
 }
-.sheet-handle { width: 42px; height: 4px; border-radius: 4px; background: #c9c9c9; margin: 0 auto 1rem; }
+.sheet-handle { display: block; width: 42px; height: 4px; border-radius: 4px; background: #c9c9c9; margin: 0 auto 1rem; }
 .sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .7rem; }
 .sheet-title { font-weight: 700; font-size: 1.15rem; color: #111; }
-.st-key-close_filters_button { position: fixed; right: max(1.25rem, calc(50vw - 190px)); bottom: min(calc(100vh - 128px), 36.2rem); z-index: 1000002; }
-.st-key-close_filters_button button { border: 0; background: transparent; color: #222; padding: 0; font-size: .78rem; }
+.reset-link { font-size: .78rem; color: #222!important; text-decoration: none!important; }
 .filter-group { margin: .85rem 0 1.05rem; }
 .filter-name { font-size: .76rem; font-weight: 600; color: #111; margin-bottom: .55rem; }
 .chips { display: flex; gap: .55rem; flex-wrap: wrap; }
@@ -146,14 +158,13 @@ if current_page == "catalog":
     st.button("по Karo Score ↓", key="sort_button")
     st.button("☷ Параметры", key="filter_button", on_click=open_filters)
 
-    if st.session_state.filters_open:
-        st.markdown('<div class="filter-overlay"></div>', unsafe_allow_html=True)
-        st.button("Сбросить", key="close_filters_button", on_click=close_filters)
+    if filters_open:
         st.markdown(
             """
+<div class="filter-overlay"></div>
 <div class="filter-sheet">
-  <div class="sheet-handle"></div>
-  <div class="sheet-head"><div class="sheet-title">Фильтры</div></div>
+  <a class="sheet-handle" href="?page=catalog" target="_self"></a>
+  <div class="sheet-head"><div class="sheet-title">Фильтры</div><a class="reset-link" href="?page=catalog&filters=1&reset=1" target="_self">Сбросить</a></div>
   <div class="filter-group"><div class="filter-name">1. Форма / огранка</div><div class="chips"><span class="chip chip-on">Round</span><span class="chip">Oval</span><span class="chip">Pear</span><span class="chip">Cushion</span></div></div>
   <div class="filter-group"><div class="filter-name">2. Вес</div><div class="chips"><span class="chip chip-on">1–1.49</span><span class="chip">1.5–1.99</span><span class="chip">2–2.49</span><span class="chip">2.5–2.99</span></div></div>
   <div class="filter-group"><div class="filter-name">3. Цвет</div><div class="chips"><span class="chip chip-on">D</span><span class="chip chip-on">E</span><span class="chip chip-on">F</span><span class="chip">G</span><span class="chip">H</span></div></div>
