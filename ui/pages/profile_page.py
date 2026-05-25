@@ -6,29 +6,35 @@ def render_profile_page() -> str:
     <div class="system-text">Вы пока не вошли. Регистрация и вход показаны как скелет интерфейса; backend, SMS/email и хранение профиля подключим позже.</div>
   </div>
 
-  <div class="section-title profile-section-title">Тип профиля</div>
-  <div class="roleGrid">
-    <button class="roleCard selected" type="button">
-      <div class="roleHeader">Покупатель</div>
-      <div class="roleMeta">Каталог, избранное, корзина, запрос подбора.</div>
-      <div class="roleStatus">MVP</div>
-    </button>
-    <button class="roleCard" type="button">
-      <div class="roleHeader">Специалист / ювелир</div>
-      <div class="roleMeta">Подбор под клиента, сравнение, будущие профессиональные возможности.</div>
-      <div class="roleStatus">после верификации</div>
-    </button>
-    <button class="roleCard disabled" type="button" disabled>
-      <div class="roleHeader">Поставщик / партнёр</div>
-      <div class="roleMeta">Закрытый операционный сценарий. Не публичный продавец и не публикация камней.</div>
-      <div class="roleStatus">позже</div>
-    </button>
-  </div>
-
   <div class="profileGrid profileAuthGrid">
     <div class="profileCard">
       <div class="profileTitle">Регистрация</div>
-      <div class="muted">Создание профиля покупателя или специалиста. Пока без сохранения данных.</div>
+      <div class="muted">Выберите тип профиля. По умолчанию выбран покупатель.</div>
+
+      <div class="roleSwitch" data-role-switch>
+        <button class="roleOption selected" type="button" data-role="customer">
+          <div class="roleName">Покупатель</div>
+          <div class="roleHint">каталог, избранное, корзина</div>
+        </button>
+        <button class="roleOption" type="button" data-role="specialist">
+          <div class="roleName">Специалист</div>
+          <div class="roleHint">ювелир / консультант</div>
+        </button>
+      </div>
+
+      <div class="roleExplanation">
+        <div class="rolePanel active" data-role-panel="customer">
+          <div class="rolePanelTitle">Покупатель</div>
+          <div class="rolePanelText">Базовый профиль для просмотра каталога, сохранения камней, корзины и запроса индивидуального подбора.</div>
+        </div>
+        <div class="rolePanel" data-role-panel="specialist">
+          <div class="rolePanelTitle">Специалист / ювелир</div>
+          <div class="rolePanelText">Профессиональный сценарий для подбора под клиента, сравнения камней и будущих рабочих инструментов. Доступ будет требовать верификацию.</div>
+        </div>
+      </div>
+
+      <div class="roleLater">Поставщик / партнёр — отдельный закрытый сценарий. Добавим позже, не как публичную регистрацию.</div>
+
       <div class="inputFake">Имя</div>
       <div class="inputFake">Телефон / email</div>
       <button class="btn">Зарегистрироваться</button>
