@@ -3,13 +3,17 @@ SYSTEM_CSS = r'''
 .system-title,.empty-title{font-weight:700;margin-bottom:.35rem}
 .system-text{color:#666;font-size:.86rem;line-height:1.45}
 .profile-section-title{padding:0 0 .5rem;margin-top:.25rem}
-.roleGrid{display:grid;gap:.65rem;margin-bottom:1rem}
-.roleCard{width:100%;border:1px solid #d7d7d7;border-radius:16px;background:#fff;padding:.9rem;text-align:left;font:inherit;color:#111}
-.roleCard.selected{border-color:#111;background:#fafafa}
-.roleCard.disabled{opacity:.55}
-.roleHeader{font-weight:700;margin-bottom:.25rem}
-.roleMeta{font-size:.84rem;color:#666;line-height:1.35}
-.roleStatus{display:inline-block;margin-top:.55rem;border:1px solid #ddd;border-radius:999px;padding:.2rem .45rem;font-size:.64rem;color:#666;text-transform:uppercase;letter-spacing:.04em}
+.roleSwitch{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.75rem 0}
+.roleOption{border:1px solid #d7d7d7;border-radius:14px;background:#fff;padding:.75rem;text-align:left;font:inherit;color:#111}
+.roleOption.selected{border-color:#111;background:#fafafa}
+.roleName{font-weight:700;font-size:.9rem}
+.roleHint{font-size:.72rem;color:#777;margin-top:.25rem;line-height:1.3}
+.roleExplanation{border:1px solid #e0e0e0;border-radius:14px;background:#fff;padding:.85rem;margin:.55rem 0 .8rem}
+.rolePanel{display:none}
+.rolePanel.active{display:block}
+.rolePanelTitle{font-weight:700;margin-bottom:.25rem}
+.rolePanelText{font-size:.84rem;color:#666;line-height:1.4}
+.roleLater{border:1px dashed #ddd;border-radius:14px;padding:.75rem;color:#777;font-size:.82rem;line-height:1.35;margin-bottom:1rem}
 .profileAuthGrid{margin-top:.75rem}
 .catalog-state{margin:1rem}
 .catalog-loading{display:block}
