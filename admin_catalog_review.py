@@ -58,7 +58,8 @@ def template_bytes() -> bytes:
 
 
 def clean_cell(value):
-    if pd.isna(value): return None
+    if pd.isna(value):
+        return None
     if isinstance(value, str):
         value = value.strip()
         return value or None
@@ -68,13 +69,36 @@ def clean_cell(value):
 def coerce_value(key, value):
     value = clean_cell(value)
     if key in NUMERIC_FIELDS and value is not None:
-        try: return float(str(value).replace(" ", "").replace(",", "."))
-        except (TypeError, ValueError): return value
+        try:
+            return float(str(value).replace(" ", "").replace(",", "."))
+        except (TypeError, ValueError):
+            return value
     return value
 
 
 def normalize_header(value):
     return " ".join(str(value).strip().upper().split()) if value not in (None, "") and not pd.isna(value) else ""
+
+
+def resolve_column(column) -> str:
+    raw_col = str(column).strip()
+    return COLUMN_MAP.get(raw_col) or COLUMN_MAP.get(normalize_header(raw_col)) or raw_col
+
+
+def column_mapping_report(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    rows = []
+    for column in df.columns:
+        raw_col = str(column).strip()
+        normalized_col = normalize_header(raw_col)
+        mapped = COLUMN_MAP.get(raw_col) or COLUMN_MAP.get(normalized_col)
+        rows.append({
+            "Excel column": raw_col,
+            "Normalized": normalized_col,
+            "Mapped field": mapped or "",
+            "Recognized": bool(mapped),
+        })
+    report = pd.DataFrame(rows)
+    return report[report["Recognized"]].copy(), report[~report["Recognized"]].copy()
 
 
 def detect_header_row(df: pd.DataFrame) -> int | None:
@@ -103,8 +127,7 @@ def dataframe_to_raw_stones(df: pd.DataFrame) -> list[dict]:
     for _, row in df.iterrows():
         item = {}
         for col in df.columns:
-            raw_col = str(col).strip()
-            target = COLUMN_MAP.get(raw_col) or COLUMN_MAP.get(normalize_header(raw_col)) or raw_col
+            target = resolve_column(col)
             item[target] = coerce_value(target, row.get(col))
         if any(v not in (None, "") for v in item.values()) and not str(item.get("source_row", "")).lower().startswith("total"):
             rows.append(item)
@@ -117,34 +140,38 @@ def review_normalize(raw: dict) -> dict:
     warnings = list(s.get("warnings", []))
     if "price_required" in errors:
         errors.remove("price_required")
-        if "price_warning" not in warnings: warnings.insert(0, "price_warning")
+        if "price_warning" not in warnings:
+            warnings.insert(0, "price_warning")
     s["blocking_errors"] = errors
     s["warnings"] = warnings
     s["publication_status"] = "blocked" if errors else "warning" if warnings else "ready"
     return s
 
 
-def labels(keys): return ", ".join(RULE_LABELS.get(k, k) for k in keys)
+def labels(keys):
+    return ", ".join(RULE_LABELS.get(k, k) for k in keys)
 
 
 def review_table(raw_stones):
     data = []
     for raw in raw_stones:
         s = review_normalize(raw)
-        data.append({"ID": s.get("id"), "Раздел": s.get("section"), "Статус": s.get("publication_status"), "Форма": s.get("shape"), "Карат": s.get("carat"), "Цвет": s.get("color"), "Чистота": s.get("clarity"), "Цена": s.get("price"), "Karo Score": s.get("score"), "Report": s.get("report"), "Meta": s.get("meta"), "Блокирующие ошибки": labels(s.get("blocking_errors", [])), "Предупреждения": labels(s.get("warnings", []))})
+        data.append({"ID": s.get("id"), "Раздел": s.get("section"), "Статус": s.get("publication_status"), "Форма": s.get("shape"), "Карат": s.get("carat"), "Цвет": s.get("color"), "Чистота": s.get("clarity"), "Цена": s.get("price"), "KURGIN Score": s.get("score"), "Report": s.get("report"), "Meta": s.get("meta"), "Блокирующие ошибки": labels(s.get("blocking_errors", [])), "Предупреждения": labels(s.get("warnings", []))})
     return pd.DataFrame(data)
 
 
 def diagnostics_from_review(df: pd.DataFrame):
-    summary = {"total": len(df), "ready": int((df["Статус"] == "ready").sum()), "warning": int((df["Статус"] == "warning").sum()), "blocked": int((df["Статус"] == "blocked").sum())}
-    return summary
+    return {"total": len(df), "ready": int((df["Статус"] == "ready").sum()), "warning": int((df["Статус"] == "warning").sum()), "blocked": int((df["Статус"] == "blocked").sum())}
 
 
 def filtered_review(df, status, section, query):
     view = df.copy()
-    if status == "problem": view = view[view["Статус"].isin(["blocked", "warning"])]
-    elif status != "all": view = view[view["Статус"] == status]
-    if section != "Все разделы": view = view[view["Раздел"] == section]
+    if status == "problem":
+        view = view[view["Статус"].isin(["blocked", "warning"])]
+    elif status != "all":
+        view = view[view["Статус"] == status]
+    if section != "Все разделы":
+        view = view[view["Раздел"] == section]
     query = (query or "").strip().lower()
     if query:
         text = view.fillna("").astype(str).agg(" ".join, axis=1).str.lower()
@@ -165,14 +192,19 @@ with st.expander("Правила публикации по разделам", ex
         st.markdown(f"### {section}")
         left, right = st.columns(2)
         left.write("Блокирующие правила")
-        for rule in rules["blocking"]: left.write(f"- {rule['label']}")
+        for rule in rules["blocking"]:
+            left.write(f"- {rule['label']}")
         right.write("Предупреждения")
-        for rule in rules["warnings"]: right.write(f"- {rule['label']}")
+        for rule in rules["warnings"]:
+            right.write(f"- {rule['label']}")
 
 uploaded = st.file_uploader("Загрузите Excel или JSON каталога", type=["xlsx", "xls", "json"])
 if not uploaded:
     st.info("Загрузите файл, чтобы увидеть готовые к публикации камни, ошибки и предупреждения.")
     st.stop()
+
+recognized_columns = pd.DataFrame()
+unrecognized_columns = pd.DataFrame()
 
 try:
     if uploaded.name.lower().endswith(".json"):
@@ -181,7 +213,9 @@ try:
     else:
         xls = pd.ExcelFile(uploaded)
         sheet = st.selectbox("Лист Excel", xls.sheet_names, index=min(1, len(xls.sheet_names)-1))
-        raw_stones = dataframe_to_raw_stones(read_excel_smart(uploaded, sheet))
+        source_df = read_excel_smart(uploaded, sheet)
+        recognized_columns, unrecognized_columns = column_mapping_report(source_df)
+        raw_stones = dataframe_to_raw_stones(source_df)
 except Exception as exc:
     st.error(f"Не удалось прочитать файл: {exc}")
     st.stop()
@@ -190,18 +224,34 @@ if not raw_stones:
     st.warning("В файле не найдено строк камней.")
     st.stop()
 
+if not recognized_columns.empty or not unrecognized_columns.empty:
+    with st.expander("Контроль колонок импорта", expanded=True):
+        c1, c2 = st.columns(2)
+        c1.metric("Распознано колонок", len(recognized_columns))
+        c2.metric("Не распознано колонок", len(unrecognized_columns))
+        if not unrecognized_columns.empty:
+            st.warning("Есть нераспознанные колонки. Проверь, не потерялись ли важные данные поставщика.")
+            st.dataframe(unrecognized_columns[["Excel column", "Normalized"]], use_container_width=True)
+        with st.expander("Распознанные колонки", expanded=False):
+            st.dataframe(recognized_columns[["Excel column", "Mapped field"]], use_container_width=True)
+
 df = review_table(raw_stones)
 public_stones = public_review_stones(raw_stones)
 summary = diagnostics_from_review(df)
 section_df = df.groupby("Раздел")["Статус"].value_counts().unstack(fill_value=0).reset_index()
 for col in ["ready", "warning", "blocked"]:
-    if col not in section_df.columns: section_df[col] = 0
+    if col not in section_df.columns:
+        section_df[col] = 0
 section_df["total"] = section_df[["ready", "warning", "blocked"]].sum(axis=1)
 
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Всего строк", summary["total"]); c2.metric("Готово", summary["ready"]); c3.metric("С предупреждениями", summary["warning"]); c4.metric("Заблокировано", summary["blocked"])
+c1.metric("Всего строк", summary["total"])
+c2.metric("Готово", summary["ready"])
+c3.metric("С предупреждениями", summary["warning"])
+c4.metric("Заблокировано", summary["blocked"])
 
-st.subheader("По разделам"); st.dataframe(section_df[["Раздел", "total", "ready", "warning", "blocked"]], use_container_width=True)
+st.subheader("По разделам")
+st.dataframe(section_df[["Раздел", "total", "ready", "warning", "blocked"]], use_container_width=True)
 st.subheader("Проверка камней")
 f1, f2, f3 = st.columns([1.2, 1.2, 2])
 status_label = f1.selectbox("Статус", list(STATUS_OPTIONS.keys()), index=1)
@@ -219,5 +269,7 @@ ready.dataframe(df[df["Статус"] == "ready"], use_container_width=True)
 catalog_payload = {"source": "KURGIN Admin Review", "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "count": len(public_stones), "stones": public_stones}
 st.download_button("Скачать catalog.json для публикации", data=json.dumps(catalog_payload, ensure_ascii=False, indent=2).encode("utf-8"), file_name="catalog.json", mime="application/json", disabled=not public_stones)
 
-if summary["blocked"]: st.warning("Есть заблокированные строки. В скачиваемый catalog.json они не попадут.")
-else: st.success("Блокирующих ошибок нет. Каталог можно публиковать.")
+if summary["blocked"]:
+    st.warning("Есть заблокированные строки. В скачиваемый catalog.json они не попадут.")
+else:
+    st.success("Блокирующих ошибок нет. Каталог можно публиковать.")
