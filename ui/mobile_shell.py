@@ -57,6 +57,24 @@ if(currentPage === 'catalog') renderCards();
 """
 
 
+def _public_score_label_script() -> str:
+    return r"""
+function applyPublicScoreLabel(){
+  var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  var nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(function(node){
+    if (!node.nodeValue) return;
+    node.nodeValue = node.nodeValue
+      .replace(/KARO SCORE/g, 'KURGIN SCORE')
+      .replace(/Karo Score/g, 'KURGIN Score');
+  });
+}
+applyPublicScoreLabel();
+document.addEventListener('click', function(){ setTimeout(applyPublicScoreLabel, 0); }, true);
+"""
+
+
 def build_mobile_shell(page: str, stones_json: str) -> str:
     initial_page = page if page in PAGE_TITLES else "catalog"
     pages_json = json.dumps(_page_templates(), ensure_ascii=False)
@@ -112,6 +130,7 @@ def build_mobile_shell(page: str, stones_json: str) -> str:
 <script>
 {catalog_script(stones_json, initial_page, pages_json, titles_json, subtitles_json, LOGO_URL)}
 {_catalog_section_fix_script()}
+{_public_score_label_script()}
 </script>
 </body>
 </html>
