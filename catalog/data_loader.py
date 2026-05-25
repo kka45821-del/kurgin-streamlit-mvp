@@ -5,6 +5,7 @@ import re
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
+from catalog.sections import resolve_catalog_section
 from catalog.stones import STONES as LOCAL_STONES
 
 DEFAULT_CATALOG_URLS = [
@@ -38,6 +39,9 @@ TAG_LABELS = {
 }
 
 HIDDEN_STATUSES = {"hidden", "draft", "deleted", "sold", "unavailable", "reserved_hidden"}
+ROUND_SHAPES = {"round", "круг"}
+REPORT_REQUIRED_SECTIONS = {"main", "large"}
+SCORE_REQUIRED_SECTIONS = {"main", "large"}
 
 
 def _load_json_url(url: str):
@@ -87,6 +91,14 @@ def _safe_int(value, default=0):
         return default
 
 
+def _safe_bool(value, default=False) -> bool:
+    if value in (None, ""):
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes", "y", "да"}
+
+
 def _clean_text(value) -> str:
     if value in (None, ""):
         return ""
@@ -94,6 +106,18 @@ def _clean_text(value) -> str:
     if text.lower() in {"nan", "none", "null"}:
         return ""
     return text
+
+
+def _is_round(shape: str) -> bool:
+    return _clean_text(shape).lower() in ROUND_SHAPES
+
+
+def _score_required(section: str, shape: str) -> bool:
+    return section in SCORE_REQUIRED_SECTIONS and _is_round(shape)
+
+
+def _report_required(section: str) -> bool:
+    return section in REPORT_REQUIRED_SECTIONS
 
 
 def _display_tags(stone: dict) -> str:
@@ -194,6 +218,10 @@ def _normalize_stone(stone: dict) -> dict:
     if not stone_id:
         stone_id = report
 
+    raw_section = _first(normalized, "section", "catalog_section", "category", default="")
+    is_colored = _safe_bool(_first(normalized, "is_colored", "colored", default=False))
+    section = resolve_catalog_section(carat=carat, section=raw_section, is_colored=is_colored)
+
     price_text = normalized.get("priceText") or f"{price:,}".replace(",", " ")
 
     normalized["id"] = stone_id
@@ -210,26 +238,32 @@ def _normalize_stone(stone: dict) -> dict:
     normalized["report"] = report
     normalized["meta"] = _meta(normalized)
     normalized["tags"] = _display_tags(normalized)
-    normalized.setdefault("availability", _clean_text(_first(normalized, "status", "availability", default="available")) or "available")
-    normalized.setdefault("section", _section_by_carat(carat))
+    normalized["availability"] = _clean_text(_first(normalized, "status", "current_status", "availability", default="available")) or "available"
+    normalized["section"] = section
     normalized["weight"] = _weight_band(carat)
     normalized["scoreBand"] = _score_band(score)
+    normalized["scoreRequired"] = _score_required(section, normalized["shape"])
+    normalized["reportRequired"] = _report_required(section)
     return normalized
 
 
 def _is_public_stone(stone: dict) -> bool:
-    status = _clean_text(_first(stone, "status", "availability", default="available")).lower()
+    status = _clean_text(_first(stone, "status", "current_status", "availability", default="available")).lower()
     if status in HIDDEN_STATUSES:
+        return False
+    if stone.get("show_in_catalog") is False:
         return False
     if _safe_float(stone.get("carat")) <= 0:
         return False
     if _safe_int(stone.get("price")) <= 0:
         return False
-    if _safe_float(stone.get("score")) <= 0:
+    if _score_required(stone.get("section", ""), stone.get("shape", "")) and _safe_float(stone.get("score")) <= 0:
         return False
     if not _clean_text(stone.get("color")):
         return False
     if not _clean_text(stone.get("clarity")):
+        return False
+    if _report_required(stone.get("section", "")) and not _clean_text(stone.get("report")):
         return False
     if not (_clean_text(stone.get("id")) or _clean_text(stone.get("report"))):
         return False
@@ -241,16 +275,6 @@ def _normalize_public_stones(items) -> list[dict]:
     return [stone for stone in stones if _is_public_stone(stone)]
 
 
-def _section_by_carat(carat: float) -> str:
-    if carat < 0.30:
-        return "small"
-    if carat < 1.00:
-        return "medium"
-    if carat < 3.00:
-        return "main"
-    return "large"
-
-
 def _weight_band(carat: float) -> str:
     if 1.0 <= carat < 1.5:
         return "1–1.49"
@@ -260,6 +284,8 @@ def _weight_band(carat: float) -> str:
         return "2–2.49"
     if 2.5 <= carat < 3.0:
         return "2.5–2.99"
+    if carat >= 3.0:
+        return "3+"
     return ""
 
 
