@@ -3,7 +3,7 @@ def render_profile_page() -> str:
 <div class="pageBody">
   <div class="system-state profile-guest">
     <div class="system-title">Гость</div>
-    <div class="system-text">Вы пока не вошли. Регистрация и вход показаны как скелет интерфейса; backend, SMS/email и хранение профиля подключим позже.</div>
+    <div class="system-text">Вы пока не вошли. В профиле будут доступны сохранённые камни, корзина и персональные сценарии подбора.</div>
   </div>
 
   <div class="profileCard authCard">
@@ -16,7 +16,7 @@ def render_profile_page() -> str:
     </div>
 
     <div class="authPanel registerPanel">
-      <div class="muted">Базовая регистрация. По умолчанию создаётся стандартный профиль; тип профиля можно уточнить ниже.</div>
+      <div class="muted">Создайте стандартный профиль или выберите сценарий для специалистов ниже.</div>
 
       <div class="inputFake">Имя</div>
       <div class="inputFake">Телефон / email</div>
@@ -56,12 +56,12 @@ def render_profile_page() -> str:
           </div>
         </div>
 
-        <div class="roleLater">Поставщик / партнёр — отдельный закрытый сценарий. Добавим позже, не как публичную регистрацию.</div>
+        <div class="roleLater">Партнёрский доступ будет оформляться отдельно.</div>
       </div>
     </div>
 
     <div class="authPanel loginPanel">
-      <div class="muted">Вход в личный кабинет. На следующем backend-этапе лучше использовать код на email/телефон или magic-link без постоянного пароля.</div>
+      <div class="muted">Для входа будет использоваться код или ссылка, отправленные на телефон / email.</div>
       <div class="inputFake">Телефон / email</div>
       <button class="btn light">Получить код / ссылку входа</button>
     </div>
