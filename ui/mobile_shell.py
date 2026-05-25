@@ -1,8 +1,9 @@
 import json
 
+from ui.pages.cart_page import render_cart_page
+from ui.pages.favorites_page import render_favorites_page
 from ui.pages.kurgin_page import render_kurgin_page
 from ui.pages.profile_page import render_profile_page
-from ui.pages.simple_pages import render_placeholder_page
 from ui.pages.tools_page import render_tools_page
 from ui.scripts import catalog_script
 from ui.styles import BASE_CSS
@@ -32,8 +33,8 @@ def _page_templates() -> dict[str, str]:
     return {
         "kurgin": render_kurgin_page(LOGO_URL),
         "tools": render_tools_page(),
-        "favorites": render_placeholder_page(),
-        "cart": render_placeholder_page(),
+        "favorites": render_favorites_page(),
+        "cart": render_cart_page(),
         "profile": render_profile_page(),
     }
 
