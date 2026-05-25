@@ -16,7 +16,6 @@ def render_profile_page() -> str:
     </div>
 
     <div class="authPanel registerPanel">
-      <div class="profileTitle">Регистрация</div>
       <div class="muted">Базовая регистрация. По умолчанию создаётся стандартный профиль; тип профиля можно уточнить ниже.</div>
 
       <div class="inputFake">Имя</div>
@@ -62,7 +61,6 @@ def render_profile_page() -> str:
     </div>
 
     <div class="authPanel loginPanel">
-      <div class="profileTitle">Войти</div>
       <div class="muted">Вход в личный кабинет. На следующем backend-этапе лучше использовать код на email/телефон или magic-link без постоянного пароля.</div>
       <div class="inputFake">Телефон / email</div>
       <button class="btn light">Получить код / ссылку входа</button>
