@@ -40,6 +40,23 @@ def _page_templates() -> dict[str, str]:
     }
 
 
+def _catalog_section_fix_script() -> str:
+    return r"""
+// Section correction: main catalog must show only 1.00–2.99 ct.
+// Stones from 3.00 ct and above belong to the large section.
+function source(){
+  let a = stones.filter(x => x.section === activeSection);
+  if(sort === 'new') return a;
+  let [k, d] = sort.split('_');
+  return [...a].sort((x, y) => {
+    let xv = Number(x[k] || 0), yv = Number(y[k] || 0);
+    return d === 'asc' ? xv - yv : yv - xv;
+  });
+}
+if(currentPage === 'catalog') renderCards();
+"""
+
+
 def build_mobile_shell(page: str, stones_json: str) -> str:
     initial_page = page if page in PAGE_TITLES else "catalog"
     pages_json = json.dumps(_page_templates(), ensure_ascii=False)
@@ -94,6 +111,7 @@ def build_mobile_shell(page: str, stones_json: str) -> str:
 
 <script>
 {catalog_script(stones_json, initial_page, pages_json, titles_json, subtitles_json, LOGO_URL)}
+{_catalog_section_fix_script()}
 </script>
 </body>
 </html>
