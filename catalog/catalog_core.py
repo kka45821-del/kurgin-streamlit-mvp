@@ -28,6 +28,8 @@ HIDDEN_STATUSES = {"hidden", "draft", "deleted", "sold", "unavailable", "reserve
 ROUND_SHAPES = {"round", "круг"}
 REPORT_REQUIRED_SECTIONS = {"main", "large"}
 SCORE_REQUIRED_SECTIONS = {"main", "large"}
+INDEX_SECTIONS = {"main", "large"}
+INDEX_AVAILABILITY = "available"
 MANUAL_SECTIONS = {"colored", "side", "pairs", "exclusive"}
 
 SECTION_ALIASES = {
@@ -259,12 +261,48 @@ def score_band(score: float) -> str:
     return "0–49"
 
 
+def index_bucket(stone: dict) -> str:
+    if not index_eligible(stone):
+        return ""
+    shape = "round"
+    carat_group = stone.get("weight") or weight_band(stone.get("carat", 0))
+    color = clean_text(stone.get("color")).upper()
+    clarity = clean_text(stone.get("clarity")).upper()
+    score_group = stone.get("scoreBand") or score_band(safe_float(stone.get("score")))
+    return f"{shape}|{carat_group}|{color}|{clarity}|{score_group}"
+
+
+def index_exclusion_reason(stone: dict) -> str:
+    availability = clean_text(stone.get("availability")).lower()
+    if availability != INDEX_AVAILABILITY:
+        return "not_available"
+    if stone.get("section") not in INDEX_SECTIONS:
+        return "wrong_section"
+    if not is_round(stone.get("shape")):
+        return "not_round"
+    if safe_float(stone.get("carat")) <= 0:
+        return "missing_carat"
+    if safe_int(stone.get("price")) <= 0:
+        return "missing_public_price"
+    if not clean_text(stone.get("color")):
+        return "missing_color"
+    if not clean_text(stone.get("clarity")):
+        return "missing_clarity"
+    if safe_float(stone.get("score")) <= 0:
+        return "missing_karo_score"
+    return ""
+
+
+def index_eligible(stone: dict) -> bool:
+    return index_exclusion_reason(stone) == ""
+
+
 def normalize_stone(stone: dict) -> dict:
     normalized = dict(stone)
 
     carat = safe_float(first(normalized, "carat", "weight", "Weight", default=0))
     score = safe_float(first(normalized, "score", "karo_score", "Karo Score", default=0))
-    price = safe_int(first(normalized, "price", "price_rub", "Price", "Price RUB", default=0))
+    price = safe_int(first(normalized, "price", "price_rub", "public_price_rub", "Price", "Price RUB", default=0))
 
     report = clean_text(first(normalized, "report", "report_number", "Report #", "certificate", "certificate_number", default=""))
     stone_id = clean_text(first(normalized, "id", "stone_id", "stock_number", "stock", "Stock #", default=""))
@@ -276,6 +314,7 @@ def normalize_stone(stone: dict) -> dict:
     section = resolve_catalog_section(carat=carat, section=raw_section, is_colored=is_colored)
 
     price_text = normalized.get("priceText") or f"{price:,}".replace(",", " ")
+    price_per_ct = round(price / carat, 2) if price > 0 and carat > 0 else 0
 
     normalized["id"] = stone_id
     normalized["shape"] = clean_text(first(normalized, "shape", "Shape", default="Круг")) or "Круг"
@@ -284,6 +323,11 @@ def normalize_stone(stone: dict) -> dict:
     normalized["clarity"] = clean_text(first(normalized, "clarity", "Clarity", default=""))
     normalized["score"] = score
     normalized["price"] = price
+    normalized["public_price_rub"] = price
+    normalized["currency"] = clean_text(first(normalized, "currency", default="RUB")) or "RUB"
+    normalized["price_date"] = clean_text(first(normalized, "price_date", "upload_date", "updated_at", default=""))
+    normalized["price_source"] = clean_text(first(normalized, "price_source", "source", "supplier_name", default="admin_upload")) or "admin_upload"
+    normalized["price_per_ct"] = price_per_ct
     normalized["priceText"] = price_text
     normalized["diameter"] = diameter_text(normalized)
     normalized["fluor"] = fluor_text(normalized)
@@ -297,6 +341,9 @@ def normalize_stone(stone: dict) -> dict:
     normalized["scoreBand"] = score_band(score)
     normalized["scoreRequired"] = score_required(section, normalized["shape"])
     normalized["reportRequired"] = report_required(section)
+    normalized["index_eligible"] = index_eligible(normalized)
+    normalized["index_exclusion_reason"] = index_exclusion_reason(normalized)
+    normalized["index_bucket"] = index_bucket(normalized)
     return normalized
 
 
