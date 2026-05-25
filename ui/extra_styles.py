@@ -22,6 +22,9 @@ SYSTEM_CSS = r'''
 #role-customer:checked ~ .roleExplanation .customerPanel,#role-specialist:checked ~ .roleExplanation .specialistPanel{display:block}
 .rolePanelTitle{font-weight:700;margin-bottom:.25rem}
 .rolePanelText{font-size:.84rem;color:#666;line-height:1.4}
+.specialistRolesTitle{font-weight:700;font-size:.82rem;margin-top:.8rem;margin-bottom:.35rem}
+.specialistRoleList{margin:.25rem 0 0;padding-left:1.1rem;color:#666;font-size:.82rem;line-height:1.45}
+.specialistRoleList li{margin:.18rem 0}
 .roleLater{border:1px dashed #ddd;border-radius:14px;padding:.75rem;color:#777;font-size:.82rem;line-height:1.35;margin-bottom:0}
 .profileAuthGrid{margin-top:.75rem}
 .catalog-state{margin:1rem}
