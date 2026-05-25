@@ -3,7 +3,13 @@ def render_cart_page() -> str:
 <div class="pageBody">
   <div class="placeholder empty-state">
     <div class="empty-title">Корзина пока пуста</div>
-    <div class="muted">Здесь будут выбранные камни. Позже подключим добавление из каталога, проверку доступности, статусы резерва и переход к оформлению.</div>
+    <div class="muted">Добавляйте камни из каталога, чтобы позже проверить доступность, запросить резерв или перейти к оформлению.</div>
+    <button class="btn light" type="button" data-nav-page="catalog">Перейти в каталог</button>
+  </div>
+
+  <div class="placeholder empty-state-info">
+    <div class="empty-title">Что будет здесь</div>
+    <div class="muted">Позже появятся выбранные камни, количество, предварительная сумма, статус доступности, резерв и оформление заявки.</div>
   </div>
 </div>
 """
