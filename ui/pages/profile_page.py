@@ -47,6 +47,15 @@ def render_profile_page() -> str:
           <div class="rolePanel specialistPanel">
             <div class="rolePanelTitle">Специалист / ювелир</div>
             <div class="rolePanelText">Профессиональный сценарий для подбора под клиента, сравнения камней и будущих рабочих инструментов. Доступ будет требовать верификацию.</div>
+            <div class="specialistRolesTitle">Возможные роли специалиста</div>
+            <ul class="specialistRoleList">
+              <li>Ювелир</li>
+              <li>Ювелирная мастерская</li>
+              <li>Геммолог / эксперт</li>
+              <li>Консультант по подбору</li>
+              <li>Дизайнер украшений</li>
+              <li>Закупщик / байер</li>
+            </ul>
           </div>
         </div>
 
