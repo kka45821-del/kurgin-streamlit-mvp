@@ -1,5 +1,6 @@
 import json
 
+from ui.extra_styles import SYSTEM_CSS
 from ui.pages.cart_page import render_cart_page
 from ui.pages.favorites_page import render_favorites_page
 from ui.pages.kurgin_page import render_kurgin_page
@@ -56,6 +57,7 @@ def build_mobile_shell(page: str, stones_json: str) -> str:
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 {BASE_CSS}
+{SYSTEM_CSS}
 </style>
 </head>
 <body>
