@@ -17,7 +17,7 @@ def render_profile_page() -> str:
 
     <div class="authPanel registerPanel">
       <div class="profileTitle">Регистрация</div>
-      <div class="muted">Базовая регистрация. По умолчанию создаётся профиль пользователя; тип профиля можно уточнить ниже.</div>
+      <div class="muted">Базовая регистрация. По умолчанию создаётся стандартный профиль; тип профиля можно уточнить ниже.</div>
 
       <div class="inputFake">Имя</div>
       <div class="inputFake">Телефон / email</div>
@@ -30,20 +30,20 @@ def render_profile_page() -> str:
         <div class="muted roleIntro">Тип профиля</div>
         <div class="roleSwitch compactRoleSwitch">
           <label class="roleOption compactRoleOption roleCustomerLabel" for="role-customer">
-            <div class="roleName">Пользователь</div>
+            <div class="roleName">Стандартный</div>
           </label>
           <label class="roleOption compactRoleOption roleSpecialistLabel" for="role-specialist">
-            <div class="roleName">Специалист</div>
+            <div class="roleName">Для специалистов</div>
           </label>
         </div>
 
         <div class="roleExplanation">
           <div class="rolePanel customerPanel">
-            <div class="rolePanelTitle">Пользователь</div>
-            <div class="rolePanelText">Базовый профиль для просмотра каталога, сохранения камней, корзины и запроса индивидуального подбора.</div>
+            <div class="rolePanelTitle">Стандартный профиль</div>
+            <div class="rolePanelText">Базовый сценарий для просмотра каталога, сохранения камней, корзины и запроса индивидуального подбора.</div>
           </div>
           <div class="rolePanel specialistPanel">
-            <div class="rolePanelTitle">Специалист / ювелир</div>
+            <div class="rolePanelTitle">Профиль для специалистов</div>
             <div class="rolePanelText">Профессиональный сценарий для подбора под клиента, сравнения камней и будущих рабочих инструментов. Доступ будет требовать верификацию.</div>
             <div class="specialistRolesTitle">Возможные роли специалиста</div>
             <ul class="specialistRoleList">
