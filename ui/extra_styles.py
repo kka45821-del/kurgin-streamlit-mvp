@@ -2,12 +2,12 @@ SYSTEM_CSS = r'''
 .system-state{border:1px solid #d7d7d7;border-radius:18px;background:#fff;padding:1rem;margin-bottom:1rem;box-shadow:0 10px 24px rgba(0,0,0,.04)}
 .system-title,.empty-title{font-weight:700;margin-bottom:.35rem}
 .system-text{color:#666;font-size:.86rem;line-height:1.45}
-.authCard{margin-top:.75rem}
+.authCard{margin-top:.75rem;border:0;background:transparent;box-shadow:none;padding:0}
 .authRadio,.roleRadio{position:absolute;opacity:0;pointer-events:none}
-.authSwitch{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem}
-.authOption{border:1px solid #d7d7d7;border-radius:14px;background:#fff;padding:.75rem;text-align:center;font-weight:700;font-size:.9rem;cursor:pointer}
-#auth-register:checked ~ .authSwitch .authRegisterLabel,#auth-login:checked ~ .authSwitch .authLoginLabel{border-color:#111;background:#fafafa}
-.authPanel{display:none}
+.authSwitch{display:flex;align-items:flex-end;gap:.22rem;margin:0 0 -1px 0;padding:0 .15rem;position:relative;z-index:2}
+.authOption{border:1px solid #d7d7d7;border-bottom:1px solid #d7d7d7;border-radius:12px 12px 0 0;background:#f7f7f7;padding:.62rem .9rem;text-align:center;font-weight:700;font-size:.88rem;cursor:pointer;min-width:0;flex:1;color:#666}
+#auth-register:checked ~ .authSwitch .authRegisterLabel,#auth-login:checked ~ .authSwitch .authLoginLabel{border-color:#111;border-bottom-color:#fff;background:#fff;color:#111;position:relative;z-index:3}
+.authPanel{display:none;border:1px solid #111;background:#fff;border-radius:0 16px 16px 16px;padding:1rem;box-shadow:0 10px 24px rgba(0,0,0,.04)}
 #auth-register:checked ~ .registerPanel,#auth-login:checked ~ .loginPanel{display:block}
 .profile-section-title{padding:0 0 .5rem;margin-top:.25rem}
 .profileRoleAfterButton{margin-top:1rem;border-top:1px solid #eee;padding-top:.9rem}
