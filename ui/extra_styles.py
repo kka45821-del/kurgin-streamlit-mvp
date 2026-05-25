@@ -14,6 +14,9 @@ SYSTEM_CSS = r'''
 .roleIntro{margin-bottom:.35rem}
 .roleSwitch{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.55rem 0}
 .roleOption{border:1px solid #d7d7d7;border-radius:14px;background:#fff;padding:.75rem;text-align:left;font:inherit;color:#111;display:block;cursor:pointer}
+.compactRoleSwitch{gap:.4rem;margin:.45rem 0 .55rem}
+.compactRoleOption{padding:.55rem .65rem;text-align:center;border-radius:12px}
+.compactRoleOption .roleName{font-size:.82rem}
 #role-customer:checked ~ .roleSwitch .roleCustomerLabel,#role-specialist:checked ~ .roleSwitch .roleSpecialistLabel{border-color:#111;background:#fafafa}
 .roleName{font-weight:700;font-size:.9rem}
 .roleHint{font-size:.72rem;color:#777;margin-top:.25rem;line-height:1.3}
