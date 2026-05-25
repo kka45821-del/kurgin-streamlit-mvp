@@ -1,8 +1,9 @@
 import html
 import json
 import os
+import re
+from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
-from urllib.error import URLError, HTTPError
 
 from catalog.stones import STONES as LOCAL_STONES
 
@@ -36,6 +37,8 @@ TAG_LABELS = {
     "review": "ПРОВЕРКА",
 }
 
+HIDDEN_STATUSES = {"hidden", "draft", "deleted", "sold", "unavailable", "reserved_hidden"}
+
 
 def _load_json_url(url: str):
     with urlopen(url, timeout=5) as response:
@@ -54,10 +57,20 @@ def _extract_stones(payload):
     return []
 
 
+def _first(stone: dict, *keys, default=""):
+    for key in keys:
+        value = stone.get(key)
+        if value not in (None, ""):
+            return value
+    return default
+
+
 def _safe_float(value, default=0.0):
     try:
         if value in (None, ""):
             return default
+        if isinstance(value, str):
+            value = value.strip().replace(" ", "").replace(",", ".")
         return float(value)
     except (TypeError, ValueError):
         return default
@@ -67,9 +80,20 @@ def _safe_int(value, default=0):
     try:
         if value in (None, ""):
             return default
+        if isinstance(value, str):
+            value = value.strip().replace(" ", "").replace(",", ".")
         return int(float(value))
     except (TypeError, ValueError):
         return default
+
+
+def _clean_text(value) -> str:
+    if value in (None, ""):
+        return ""
+    text = str(value).strip()
+    if text.lower() in {"nan", "none", "null"}:
+        return ""
+    return text
 
 
 def _display_tags(stone: dict) -> str:
@@ -93,46 +117,128 @@ def _display_tags(stone: dict) -> str:
     return "".join(parts)
 
 
+def _format_decimal_ru(value, digits=2) -> str:
+    number = _safe_float(value, None)
+    if number is None or number <= 0:
+        return ""
+    text = f"{number:.{digits}f}".rstrip("0").rstrip(".")
+    return text.replace(".", ",")
+
+
+def _diameter_text(stone: dict) -> str:
+    direct = _first(stone, "diameter", "diameter_mm", "Diameter", "DiameterMM", default="")
+    direct_text = _clean_text(direct)
+    if direct_text:
+        if "мм" in direct_text.lower() or "mm" in direct_text.lower():
+            return direct_text.replace("mm", "мм").replace("MM", "мм")
+        number = _format_decimal_ru(direct_text)
+        return f"{number} мм" if number else direct_text
+
+    measurements = _first(stone, "measurements", "Measurements", "measurement", "Measurement", default="")
+    measurements_text = _clean_text(measurements)
+    if not measurements_text:
+        return ""
+
+    # Common formats: 6.55x6.58x4.04, 6.55 - 6.58 x 4.04, 6.55*6.58*4.04
+    numbers = re.findall(r"\d+(?:[\.,]\d+)?", measurements_text)
+    if not numbers:
+        return measurements_text
+
+    if len(numbers) >= 2:
+        a = _safe_float(numbers[0])
+        b = _safe_float(numbers[1])
+        avg = (a + b) / 2 if a > 0 and b > 0 else a
+        formatted = _format_decimal_ru(avg)
+        return f"{formatted} мм" if formatted else measurements_text
+
+    formatted = _format_decimal_ru(numbers[0])
+    return f"{formatted} мм" if formatted else measurements_text
+
+
+def _finish_text(stone: dict) -> str:
+    cut = _clean_text(_first(stone, "cut", "Cut", default=""))
+    polish = _clean_text(_first(stone, "polish", "Polish", default=""))
+    symmetry = _clean_text(_first(stone, "symmetry", "Symmetry", default=""))
+    existing = _clean_text(_first(stone, "finish", "finish_grade", default=""))
+
+    parts = [x.upper() for x in (cut, polish, symmetry) if x]
+    if parts:
+        return " ".join(parts)
+    return existing.upper() if existing else ""
+
+
+def _fluor_text(stone: dict) -> str:
+    fluor = _first(stone, "fluor", "fluorescence", "Fluorescence", "fluorescence_intensity", default="")
+    fluor_text = _clean_text(fluor)
+    return fluor_text.lower() if fluor_text else ""
+
+
 def _meta(stone: dict) -> str:
-    if stone.get("meta"):
-        return stone["meta"]
-    measurements = stone.get("measurements") or stone.get("Measurements") or ""
-    cut = stone.get("cut") or stone.get("Cut") or ""
-    polish = stone.get("polish") or stone.get("Polish") or ""
-    symmetry = stone.get("symmetry") or stone.get("Symmetry") or ""
-    fluor = stone.get("fluor") or stone.get("fluorescence") or ""
-    finish = " ".join(str(x).lower() for x in (cut, polish, symmetry) if x not in (None, ""))
-    chunks = [str(x) for x in (measurements, finish, fluor) if x not in (None, "")]
-    return " · ".join(chunks)
+    existing = _clean_text(stone.get("meta"))
+    if existing:
+        return existing
+
+    chunks = [_diameter_text(stone), _finish_text(stone), _fluor_text(stone)]
+    return " · ".join(chunk for chunk in chunks if chunk)
 
 
 def _normalize_stone(stone: dict) -> dict:
     normalized = dict(stone)
 
-    carat = _safe_float(normalized.get("carat", normalized.get("weight", normalized.get("Weight", 0))))
-    score = _safe_float(normalized.get("score", normalized.get("karo_score", 0)))
-    price = _safe_int(normalized.get("price", normalized.get("price_rub", 0)))
+    carat = _safe_float(_first(normalized, "carat", "weight", "Weight", default=0))
+    score = _safe_float(_first(normalized, "score", "karo_score", "Karo Score", default=0))
+    price = _safe_int(_first(normalized, "price", "price_rub", "Price", "Price RUB", default=0))
+
+    report = _clean_text(_first(normalized, "report", "report_number", "Report #", "certificate", "certificate_number", default=""))
+    stone_id = _clean_text(_first(normalized, "id", "stone_id", "stock_number", "stock", "Stock #", default=""))
+    if not stone_id:
+        stone_id = report
 
     price_text = normalized.get("priceText") or f"{price:,}".replace(",", " ")
 
-    normalized.setdefault("id", normalized.get("stone_id") or normalized.get("stock_number") or normalized.get("stock") or normalized.get("Stock #") or normalized.get("report_number") or "")
-    normalized.setdefault("shape", normalized.get("Shape", "Круг"))
+    normalized["id"] = stone_id
+    normalized["shape"] = _clean_text(_first(normalized, "shape", "Shape", default="Круг")) or "Круг"
     normalized["carat"] = carat
-    normalized.setdefault("color", normalized.get("Color", ""))
-    normalized.setdefault("clarity", normalized.get("Clarity", ""))
+    normalized["color"] = _clean_text(_first(normalized, "color", "Color", default=""))
+    normalized["clarity"] = _clean_text(_first(normalized, "clarity", "Clarity", default=""))
     normalized["score"] = score
     normalized["price"] = price
     normalized["priceText"] = price_text
-    normalized.setdefault("diameter", normalized.get("diameter_mm", ""))
+    normalized["diameter"] = _diameter_text(normalized)
+    normalized["fluor"] = _fluor_text(normalized)
+    normalized["finish"] = _finish_text(normalized)
+    normalized["report"] = report
     normalized["meta"] = _meta(normalized)
-    normalized.setdefault("fluor", normalized.get("fluorescence", normalized.get("Fluorescence", "")))
-    normalized.setdefault("finish", normalized.get("finish_grade", ""))
-    normalized.setdefault("report", normalized.get("report_number", normalized.get("Report #", "")))
     normalized["tags"] = _display_tags(normalized)
+    normalized.setdefault("availability", _clean_text(_first(normalized, "status", "availability", default="available")) or "available")
     normalized.setdefault("section", _section_by_carat(carat))
     normalized["weight"] = _weight_band(carat)
     normalized["scoreBand"] = _score_band(score)
     return normalized
+
+
+def _is_public_stone(stone: dict) -> bool:
+    status = _clean_text(_first(stone, "status", "availability", default="available")).lower()
+    if status in HIDDEN_STATUSES:
+        return False
+    if _safe_float(stone.get("carat")) <= 0:
+        return False
+    if _safe_int(stone.get("price")) <= 0:
+        return False
+    if _safe_float(stone.get("score")) <= 0:
+        return False
+    if not _clean_text(stone.get("color")):
+        return False
+    if not _clean_text(stone.get("clarity")):
+        return False
+    if not (_clean_text(stone.get("id")) or _clean_text(stone.get("report"))):
+        return False
+    return True
+
+
+def _normalize_public_stones(items) -> list[dict]:
+    stones = [_normalize_stone(item) for item in items if isinstance(item, dict)]
+    return [stone for stone in stones if _is_public_stone(stone)]
 
 
 def _section_by_carat(carat: float) -> str:
@@ -181,10 +287,10 @@ def load_catalog_stones():
     for url in urls:
         try:
             payload = _load_json_url(url)
-            stones = [_normalize_stone(item) for item in _extract_stones(payload) if isinstance(item, dict)]
+            stones = _normalize_public_stones(_extract_stones(payload))
             if stones:
                 return stones
         except (URLError, HTTPError, TimeoutError, json.JSONDecodeError, OSError):
             continue
 
-    return [_normalize_stone(item) for item in LOCAL_STONES]
+    return _normalize_public_stones(LOCAL_STONES)
