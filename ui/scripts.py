@@ -35,6 +35,16 @@ function renderNav(){
   navGrid.innerHTML=items.map(i=>`<a class='${i[0]===currentPage?'active':''}' href='?page=${i[0]}' data-nav-page='${i[0]}'><span class='ico'>${icon(i[1])}</span></a>`).join('');
 }
 
+function initProfilePage(){
+  document.querySelectorAll('.roleOption[data-role]').forEach(button=>{
+    button.onclick = () => {
+      const role = button.dataset.role;
+      document.querySelectorAll('.roleOption[data-role]').forEach(x=>x.classList.toggle('selected', x.dataset.role === role));
+      document.querySelectorAll('.rolePanel[data-role-panel]').forEach(x=>x.classList.toggle('active', x.dataset.rolePanel === role));
+    };
+  });
+}
+
 function setPage(page){
   if(!pageTemplates[page] && page !== 'catalog') page='catalog';
   currentPage = page;
@@ -46,6 +56,7 @@ function setPage(page){
     renderCatalogPage();
   } else {
     content.innerHTML = pageHeader(pageTitles[page] || 'KURGIN', pageSubtitles[page] || '') + pageTemplates[page];
+    if(page === 'profile') initProfilePage();
     content.scrollTop = 0;
   }
 
