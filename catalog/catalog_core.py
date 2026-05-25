@@ -2,26 +2,16 @@ import html
 import re
 
 TAG_LABELS = {
-    "огонь": "О",
-    "fire": "О",
-    "блеск": "Б",
-    "brilliance": "Б",
-    "контраст": "К",
-    "contrast": "К",
-    "баланс": "БАЛАНС",
-    "balance": "БАЛАНС",
-    "цена": "ЦЕНА",
-    "price": "ЦЕНА",
-    "крупный": "КРУПНЫЙ",
-    "large": "КРУПНЫЙ",
-    "овал": "ОВАЛ",
-    "oval": "ОВАЛ",
-    "капля": "PEAR",
-    "pear": "PEAR",
-    "кушон": "CUSHION",
-    "cushion": "CUSHION",
-    "проверка": "ПРОВЕРКА",
-    "review": "ПРОВЕРКА",
+    "огонь": "О", "fire": "О",
+    "блеск": "Б", "brilliance": "Б",
+    "контраст": "К", "contrast": "К",
+    "баланс": "БАЛАНС", "balance": "БАЛАНС",
+    "цена": "ЦЕНА", "price": "ЦЕНА",
+    "крупный": "КРУПНЫЙ", "large": "КРУПНЫЙ",
+    "овал": "ОВАЛ", "oval": "ОВАЛ",
+    "капля": "PEAR", "pear": "PEAR",
+    "кушон": "CUSHION", "cushion": "CUSHION",
+    "проверка": "ПРОВЕРКА", "review": "ПРОВЕРКА",
 }
 
 HIDDEN_STATUSES = {"hidden", "draft", "deleted", "sold", "unavailable", "reserved_hidden"}
@@ -33,23 +23,21 @@ INDEX_AVAILABILITY = "available"
 MANUAL_SECTIONS = {"colored", "side", "pairs", "exclusive"}
 
 SECTION_ALIASES = {
-    "мелкие": "small",
-    "small": "small",
-    "средние": "medium",
-    "medium": "medium",
-    "основной": "main",
-    "основной каталог": "main",
-    "main": "main",
-    "крупные": "large",
-    "large": "large",
-    "цветные": "colored",
-    "colored": "colored",
-    "боковые": "side",
-    "side": "side",
-    "парные": "pairs",
-    "pairs": "pairs",
-    "эксклюзив": "exclusive",
-    "exclusive": "exclusive",
+    "мелкие": "small", "small": "small",
+    "средние": "medium", "medium": "medium",
+    "основной": "main", "основной каталог": "main", "main": "main",
+    "крупные": "large", "large": "large",
+    "цветные": "colored", "colored": "colored",
+    "боковые": "side", "side": "side",
+    "парные": "pairs", "pairs": "pairs",
+    "эксклюзив": "exclusive", "exclusive": "exclusive",
+}
+
+SHAPE_ALIASES = {
+    "round": "Round", "round brilliant": "Round", "round brilliant cut": "Round", "rbc": "Round", "круг": "Round",
+    "oval": "Oval", "овал": "Oval",
+    "pear": "Pear", "pear shape": "Pear", "капля": "Pear",
+    "cushion": "Cushion", "кушон": "Cushion",
 }
 
 RULE_LIBRARY = {
@@ -57,6 +45,7 @@ RULE_LIBRARY = {
     "not_hidden_status": "Статус не скрывает камень",
     "id_required": "ID / stock number обязателен",
     "availability_required": "Статус наличия обязателен",
+    "price_warning": "Цена не заполнена",
     "price_required": "Цена обязательна",
     "carat_required": "Карат обязателен",
     "size_or_carat_required": "Размер в мм или карат обязателен",
@@ -64,7 +53,7 @@ RULE_LIBRARY = {
     "color_required": "Цвет обязателен",
     "clarity_required": "Чистота обязательна",
     "report_required": "Report / сертификат обязателен",
-    "karo_score_required_round": "Karo Score обязателен для Round / Круг",
+    "karo_score_required_round": "KURGIN Score обязателен для Round / Круг",
     "color_type_required": "Описание цветного камня обязательно",
     "pair_id_required": "ID пары обязателен",
     "side_type_required": "Тип бокового камня обязателен",
@@ -72,49 +61,44 @@ RULE_LIBRARY = {
     "finish_warning": "Желательно заполнить Cut / Polish / Symmetry",
     "fluorescence_warning": "Желательно заполнить fluorescence",
     "report_warning": "Желательно заполнить report / сертификат",
-    "karo_score_warning": "Karo Score отсутствует или ещё не применим",
+    "karo_score_warning": "KURGIN Score отсутствует или ещё не применим",
 }
 
-COMMON_BLOCKING_RULES = [
-    "show_in_catalog",
-    "not_hidden_status",
-    "id_required",
-    "availability_required",
-    "price_required",
-]
+COMMON_BLOCKING_RULES = ["show_in_catalog", "not_hidden_status", "id_required", "availability_required"]
+COMMON_WARNINGS = ["price_warning"]
 
 SECTION_RULE_MATRIX = {
     "main": {
         "blocking": COMMON_BLOCKING_RULES + ["carat_required", "color_required", "clarity_required", "report_required", "karo_score_required_round"],
-        "warnings": ["measurements_warning", "finish_warning", "fluorescence_warning"],
+        "warnings": COMMON_WARNINGS + ["measurements_warning", "finish_warning", "fluorescence_warning"],
     },
     "large": {
         "blocking": COMMON_BLOCKING_RULES + ["carat_required", "color_required", "clarity_required", "report_required", "karo_score_required_round"],
-        "warnings": ["measurements_warning", "finish_warning", "fluorescence_warning"],
+        "warnings": COMMON_WARNINGS + ["measurements_warning", "finish_warning", "fluorescence_warning"],
     },
     "medium": {
         "blocking": COMMON_BLOCKING_RULES + ["carat_required", "color_required", "clarity_required"],
-        "warnings": ["report_warning", "karo_score_warning", "measurements_warning", "fluorescence_warning"],
+        "warnings": COMMON_WARNINGS + ["report_warning", "karo_score_warning", "measurements_warning", "fluorescence_warning"],
     },
     "small": {
         "blocking": COMMON_BLOCKING_RULES + ["size_or_carat_required", "quantity_required"],
-        "warnings": ["report_warning", "karo_score_warning"],
+        "warnings": COMMON_WARNINGS + ["report_warning", "karo_score_warning"],
     },
     "colored": {
         "blocking": COMMON_BLOCKING_RULES + ["size_or_carat_required", "color_type_required"],
-        "warnings": ["report_warning", "karo_score_warning", "measurements_warning"],
+        "warnings": COMMON_WARNINGS + ["report_warning", "karo_score_warning", "measurements_warning"],
     },
     "side": {
         "blocking": COMMON_BLOCKING_RULES + ["size_or_carat_required", "quantity_required", "side_type_required"],
-        "warnings": ["report_warning", "karo_score_warning"],
+        "warnings": COMMON_WARNINGS + ["report_warning", "karo_score_warning"],
     },
     "pairs": {
         "blocking": COMMON_BLOCKING_RULES + ["size_or_carat_required", "quantity_required", "pair_id_required"],
-        "warnings": ["report_warning", "karo_score_warning"],
+        "warnings": COMMON_WARNINGS + ["report_warning", "karo_score_warning"],
     },
     "exclusive": {
         "blocking": COMMON_BLOCKING_RULES + ["size_or_carat_required"],
-        "warnings": ["report_warning", "karo_score_warning", "measurements_warning"],
+        "warnings": COMMON_WARNINGS + ["report_warning", "karo_score_warning", "measurements_warning"],
     },
 }
 
@@ -164,6 +148,13 @@ def safe_float(value, default=0.0):
             value = value.strip().replace(" ", "").replace(",", ".")
         return float(value)
     except (TypeError, ValueError):
+        if isinstance(value, str):
+            match = re.search(r"\d+(?:[\.,]\d+)?", value)
+            if match:
+                try:
+                    return float(match.group(0).replace(",", "."))
+                except ValueError:
+                    pass
         return default
 
 
@@ -175,6 +166,13 @@ def safe_int(value, default=0):
             value = value.strip().replace(" ", "").replace(",", ".")
         return int(float(value))
     except (TypeError, ValueError):
+        if isinstance(value, str):
+            match = re.search(r"\d+", value)
+            if match:
+                try:
+                    return int(match.group(0))
+                except ValueError:
+                    pass
         return default
 
 
@@ -186,8 +184,16 @@ def safe_bool(value, default=False) -> bool:
     return str(value).strip().lower() in {"1", "true", "yes", "y", "да"}
 
 
+def normalize_shape(value: str) -> str:
+    raw = clean_text(value)
+    if not raw:
+        return "Круг"
+    key = raw.lower().strip()
+    return SHAPE_ALIASES.get(key, raw.title() if raw.isupper() else raw)
+
+
 def is_round(shape: str) -> bool:
-    return clean_text(shape).lower() in ROUND_SHAPES
+    return normalize_shape(shape).lower() == "round"
 
 
 def score_required(section: str, shape: str) -> bool:
@@ -227,7 +233,6 @@ def display_tags(stone: dict) -> str:
     existing = stone.get("tags")
     if existing:
         return existing
-
     parts = []
     for key in ("tag1", "tag2", "tag3", "tag4", "tag5", "tag6"):
         raw = stone.get(key)
@@ -236,7 +241,6 @@ def display_tags(stone: dict) -> str:
         raw_text = str(raw).strip()
         mapped = TAG_LABELS.get(raw_text.lower(), raw_text.upper())
         if mapped in ("ЭЛИТ", "ELITE"):
-            # ELITE is displayed automatically by Karo Score >= 98.5.
             continue
         label = html.escape(mapped)
         css_class = "tag blue" if label == "Б" else "tag gray" if label == "К" else "tag"
@@ -286,7 +290,6 @@ def finish_text(stone: dict) -> str:
     polish = clean_text(first(stone, "polish", "Polish", default=""))
     symmetry = clean_text(first(stone, "symmetry", "Symmetry", default=""))
     existing = clean_text(first(stone, "finish", "finish_grade", default=""))
-
     parts = [x.upper() for x in (cut, polish, symmetry) if x]
     if parts:
         return " ".join(parts)
@@ -303,7 +306,6 @@ def meta_text(stone: dict) -> str:
     existing = clean_text(stone.get("meta"))
     if existing:
         return existing
-
     chunks = [diameter_text(stone), finish_text(stone), fluor_text(stone)]
     return " · ".join(chunk for chunk in chunks if chunk)
 
@@ -341,7 +343,7 @@ def has_size_or_carat(stone: dict) -> bool:
 
 
 def quantity_value(stone: dict) -> int:
-    return safe_int(first(stone, "quantity", "qty", "count", "pcs", "pieces", "шт", default=0))
+    return safe_int(first(stone, "quantity", "qty", "count", "pcs", "pieces", "PCS/CTS", "шт", default=0))
 
 
 def color_type_value(stone: dict) -> str:
@@ -358,13 +360,13 @@ def pair_id_value(stone: dict) -> str:
 
 def rule_failed(rule_key: str, stone: dict) -> bool:
     status = clean_text(first(stone, "status", "current_status", "availability", default=stone.get("availability") or "available")).lower()
-
     checks = {
         "show_in_catalog": lambda: stone.get("show_in_catalog") is False,
         "not_hidden_status": lambda: status in HIDDEN_STATUSES,
         "id_required": lambda: not (clean_text(stone.get("id")) or clean_text(stone.get("report"))),
         "availability_required": lambda: not clean_text(stone.get("availability")),
         "price_required": lambda: safe_int(stone.get("price")) <= 0,
+        "price_warning": lambda: safe_int(stone.get("price")) <= 0,
         "carat_required": lambda: safe_float(stone.get("carat")) <= 0,
         "size_or_carat_required": lambda: not has_size_or_carat(stone),
         "quantity_required": lambda: quantity_value(stone) <= 0,
@@ -416,17 +418,6 @@ def publication_status(stone: dict) -> str:
     return "ready"
 
 
-def index_bucket(stone: dict) -> str:
-    if not index_eligible(stone):
-        return ""
-    shape = "round"
-    carat_group = stone.get("weight") or weight_band(stone.get("carat", 0))
-    color = clean_text(stone.get("color")).upper()
-    clarity = clean_text(stone.get("clarity")).upper()
-    score_group = stone.get("scoreBand") or score_band(safe_float(stone.get("score")))
-    return f"{shape}|{carat_group}|{color}|{clarity}|{score_group}"
-
-
 def index_exclusion_reason(stone: dict) -> str:
     availability = clean_text(stone.get("availability")).lower()
     if availability != INDEX_AVAILABILITY:
@@ -452,52 +443,60 @@ def index_eligible(stone: dict) -> bool:
     return index_exclusion_reason(stone) == ""
 
 
+def index_bucket(stone: dict) -> str:
+    if not index_eligible(stone):
+        return ""
+    shape = "round"
+    carat_group = stone.get("weight") or weight_band(stone.get("carat", 0))
+    color = clean_text(stone.get("color")).upper()
+    clarity = clean_text(stone.get("clarity")).upper()
+    score_group = stone.get("scoreBand") or score_band(safe_float(stone.get("score")))
+    return f"{shape}|{carat_group}|{color}|{clarity}|{score_group}"
+
+
 def normalize_stone(stone: dict) -> dict:
     normalized = dict(stone)
-
     carat = safe_float(first(normalized, "carat", "weight", "Weight", default=0))
-    score = safe_float(first(normalized, "score", "karo_score", "Karo Score", default=0))
+    score = safe_float(first(normalized, "score", "karo_score", "kurgin_score", "Karo Score", "KURGIN Score", "KURGIN SCORE", default=0))
     price = safe_int(first(normalized, "price", "price_rub", "public_price_rub", "Price", "Price RUB", default=0))
-
     report = clean_text(first(normalized, "report", "report_number", "Report #", "certificate", "certificate_number", default=""))
-    stone_id = clean_text(first(normalized, "id", "stone_id", "stock_number", "stock", "Stock #", default=""))
-    if not stone_id:
-        stone_id = report
-
+    stone_id = clean_text(first(normalized, "id", "stone_id", "stock_number", "stock", "Stock #", default="")) or report
     raw_section = first(normalized, "section", "catalog_section", "category", default="")
     is_colored = safe_bool(first(normalized, "is_colored", "colored", default=False))
     section = resolve_catalog_section(carat=carat, section=raw_section, is_colored=is_colored)
-
+    shape = normalize_shape(first(normalized, "shape", "Shape", "description", "DESCRIPTION", default="Круг"))
     price_text = normalized.get("priceText") or f"{price:,}".replace(",", " ")
     price_per_ct = round(price / carat, 2) if price > 0 and carat > 0 else 0
 
-    normalized["id"] = stone_id
-    normalized["shape"] = clean_text(first(normalized, "shape", "Shape", default="Круг")) or "Круг"
-    normalized["carat"] = carat
-    normalized["color"] = clean_text(first(normalized, "color", "Color", default=""))
-    normalized["clarity"] = clean_text(first(normalized, "clarity", "Clarity", default=""))
-    normalized["score"] = score
-    normalized["price"] = price
-    normalized["public_price_rub"] = price
-    normalized["currency"] = clean_text(first(normalized, "currency", default="RUB")) or "RUB"
-    normalized["price_date"] = clean_text(first(normalized, "price_date", "upload_date", "updated_at", default=""))
-    normalized["price_source"] = clean_text(first(normalized, "price_source", "source", "supplier_name", default="admin_upload")) or "admin_upload"
-    normalized["price_per_ct"] = price_per_ct
-    normalized["priceText"] = price_text
-    normalized["diameter"] = diameter_text(normalized)
-    normalized["fluor"] = fluor_text(normalized)
-    normalized["finish"] = finish_text(normalized)
-    normalized["report"] = report
-    normalized["meta"] = meta_text(normalized)
-    normalized["tags"] = display_tags(normalized)
-    normalized["availability"] = clean_text(first(normalized, "status", "current_status", "availability", default="available")) or "available"
-    normalized["section"] = section
-    normalized["quantity"] = quantity_value(normalized)
-    normalized["color_type"] = color_type_value(normalized)
-    normalized["pair_id"] = pair_id_value(normalized)
-    normalized["side_type"] = side_type_value(normalized)
-    normalized["weight"] = weight_band(carat)
-    normalized["scoreBand"] = score_band(score)
+    normalized.update({
+        "id": stone_id,
+        "shape": shape,
+        "carat": carat,
+        "color": clean_text(first(normalized, "color", "Color", default="")),
+        "clarity": clean_text(first(normalized, "clarity", "Clarity", default="")),
+        "score": score,
+        "price": price,
+        "public_price_rub": price,
+        "currency": clean_text(first(normalized, "currency", default="RUB")) or "RUB",
+        "price_date": clean_text(first(normalized, "price_date", "upload_date", "updated_at", default="")),
+        "price_source": clean_text(first(normalized, "price_source", "source", "supplier_name", default="admin_upload")) or "admin_upload",
+        "price_per_ct": price_per_ct,
+        "priceText": price_text,
+        "diameter": diameter_text(normalized),
+        "fluor": fluor_text(normalized),
+        "finish": finish_text(normalized),
+        "report": report,
+        "meta": meta_text(normalized),
+        "tags": display_tags(normalized),
+        "availability": clean_text(first(normalized, "status", "current_status", "availability", default="available")) or "available",
+        "section": section,
+        "quantity": quantity_value(normalized),
+        "color_type": color_type_value(normalized),
+        "pair_id": pair_id_value(normalized),
+        "side_type": side_type_value(normalized),
+        "weight": weight_band(carat),
+        "scoreBand": score_band(score),
+    })
     normalized["scoreRequired"] = score_required(section, normalized["shape"])
     normalized["reportRequired"] = report_required(section)
     normalized["blocking_errors"] = validation_errors(normalized)
@@ -520,17 +519,7 @@ def normalize_public_stones(items) -> list[dict]:
 
 def import_diagnostics(items) -> dict:
     normalized = [normalize_stone(item) for item in items if isinstance(item, dict)]
-    summary = {
-        "total": len(normalized),
-        "ready": 0,
-        "warning": 0,
-        "blocked": 0,
-        "by_section": {},
-        "blocking_rules": {},
-        "warning_rules": {},
-        "stones": [],
-    }
-
+    summary = {"total": len(normalized), "ready": 0, "warning": 0, "blocked": 0, "by_section": {}, "blocking_rules": {}, "warning_rules": {}, "stones": []}
     for stone in normalized:
         status = stone.get("publication_status")
         section = stone.get("section") or "unknown"
@@ -538,19 +527,9 @@ def import_diagnostics(items) -> dict:
         summary["by_section"].setdefault(section, {"total": 0, "ready": 0, "warning": 0, "blocked": 0})
         summary["by_section"][section]["total"] += 1
         summary["by_section"][section][status] += 1
-
         for rule in stone.get("blocking_errors", []):
             summary["blocking_rules"][rule] = summary["blocking_rules"].get(rule, 0) + 1
         for rule in stone.get("warnings", []):
             summary["warning_rules"][rule] = summary["warning_rules"].get(rule, 0) + 1
-
-        summary["stones"].append({
-            "id": stone.get("id"),
-            "title": stone.get("title", ""),
-            "section": section,
-            "status": status,
-            "blocking_errors": stone.get("blocking_errors", []),
-            "warnings": stone.get("warnings", []),
-        })
-
+        summary["stones"].append({"id": stone.get("id"), "title": stone.get("title", ""), "section": section, "status": status, "blocking_errors": stone.get("blocking_errors", []), "warnings": stone.get("warnings", [])})
     return summary
