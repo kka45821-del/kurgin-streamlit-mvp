@@ -17,7 +17,7 @@ def render_profile_page() -> str:
 
     <div class="authPanel registerPanel">
       <div class="profileTitle">Регистрация</div>
-      <div class="muted">Базовая регистрация. По умолчанию создаётся профиль покупателя; тип профиля можно уточнить ниже.</div>
+      <div class="muted">Базовая регистрация. По умолчанию создаётся профиль пользователя; тип профиля можно уточнить ниже.</div>
 
       <div class="inputFake">Имя</div>
       <div class="inputFake">Телефон / email</div>
@@ -28,20 +28,18 @@ def render_profile_page() -> str:
         <input class="roleRadio" type="radio" name="profile-role" id="role-specialist">
 
         <div class="muted roleIntro">Тип профиля</div>
-        <div class="roleSwitch">
-          <label class="roleOption roleCustomerLabel" for="role-customer">
-            <div class="roleName">Покупатель</div>
-            <div class="roleHint">каталог, избранное, корзина</div>
+        <div class="roleSwitch compactRoleSwitch">
+          <label class="roleOption compactRoleOption roleCustomerLabel" for="role-customer">
+            <div class="roleName">Пользователь</div>
           </label>
-          <label class="roleOption roleSpecialistLabel" for="role-specialist">
+          <label class="roleOption compactRoleOption roleSpecialistLabel" for="role-specialist">
             <div class="roleName">Специалист</div>
-            <div class="roleHint">ювелир / консультант</div>
           </label>
         </div>
 
         <div class="roleExplanation">
           <div class="rolePanel customerPanel">
-            <div class="rolePanelTitle">Покупатель</div>
+            <div class="rolePanelTitle">Пользователь</div>
             <div class="rolePanelText">Базовый профиль для просмотра каталога, сохранения камней, корзины и запроса индивидуального подбора.</div>
           </div>
           <div class="rolePanel specialistPanel">
@@ -65,9 +63,9 @@ def render_profile_page() -> str:
 
     <div class="authPanel loginPanel">
       <div class="profileTitle">Войти</div>
-      <div class="muted">Вход в личный кабинет. Авторизация будет подключена отдельным backend-этапом.</div>
+      <div class="muted">Вход в личный кабинет. На следующем backend-этапе лучше использовать код на email/телефон или magic-link без постоянного пароля.</div>
       <div class="inputFake">Телефон / email</div>
-      <button class="btn light">Войти</button>
+      <button class="btn light">Получить код / ссылку входа</button>
     </div>
   </div>
 </div>
