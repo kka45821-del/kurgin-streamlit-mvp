@@ -10,6 +10,10 @@ from ui.scripts import catalog_script
 from ui.styles import BASE_CSS
 
 LOGO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/Vectorr.svg?v=16"
+REQUEST_CONTACT_PHONE = "+79688543140"
+REQUEST_MAX_URL = "https://max.ru/u/f9LHodD0cOJeu7y7ABrIrsd118RD3qDsz7o5qmv7eDmW1Gi80MkpYFBCAhU"
+REQUEST_TELEGRAM_URL = "https://t.me/cvdlab"
+REQUEST_WHATSAPP_URL = "https://wa.me/79688543140"
 
 PAGE_TITLES = {
     "kurgin": "KURGIN",
@@ -47,6 +51,13 @@ def _catalog_section_fix_script() -> str:
 // - keep professional sections available;
 // - show section counts so the user does not confuse total catalog count with one section.
 (function(){
+  const requestContact = {
+    phone: '+79688543140',
+    maxUrl: 'https://max.ru/u/f9LHodD0cOJeu7y7ABrIrsd118RD3qDsz7o5qmv7eDmW1Gi80MkpYFBCAhU',
+    telegramUrl: 'https://t.me/cvdlab',
+    whatsappUrl: 'https://wa.me/79688543140'
+  };
+
   if(!document.getElementById('catalogStatsStyle')){
     const style = document.createElement('style');
     style.id = 'catalogStatsStyle';
@@ -58,6 +69,13 @@ def _catalog_section_fix_script() -> str:
       .price.request{font-size:.72rem;line-height:1.1;color:#666;white-space:normal;text-align:right;font-weight:600}
       .detailPrice.request{font-size:.9rem;color:#666;white-space:normal;text-align:right;line-height:1.25}
       .act.disabled,.detailBtn.disabled{opacity:.38;pointer-events:none;filter:grayscale(1)}
+      .requestBox{margin:1rem 0 .75rem;border:1px solid #e4e0d8;border-radius:18px;background:#fff;padding:.85rem;box-shadow:0 10px 24px rgba(0,0,0,.045)}
+      .requestTitle{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#111;margin-bottom:.35rem}
+      .requestHint{font-size:.72rem;line-height:1.35;color:#666;margin-bottom:.75rem}
+      .requestChannels{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:.45rem}
+      .requestBtn{display:flex;align-items:center;justify-content:center;min-height:38px;border:1px solid #d9d4ca;border-radius:13px;background:#fff;color:#111;text-decoration:none;font-size:.76rem;font-weight:700}
+      .requestBtn.primary{background:#111;color:#fff;border-color:#111}
+      .requestBtn.disabled{opacity:.45;pointer-events:none;color:#777;background:#f4f3f1}
     `;
     document.head.appendChild(style);
   }
@@ -92,6 +110,42 @@ def _catalog_section_fix_script() -> str:
     const price = Number(stone.price || stone.price_rub || stone.public_price_rub || 0);
     const priceText = (stone.priceText && stone.priceText !== '0') ? stone.priceText : String(price);
     return detail ? `<div class=detailPrice>${priceText} ₽</div>` : `<div class=price>${priceText} ₽</div>`;
+  }
+
+  function requestMessage(stone, requestType){
+    const parts = [
+      'Здравствуйте. Хочу уточнить информацию по камню KURGIN.',
+      `Тип заявки: ${requestType || 'request_price'}`,
+      `ID: ${stone.id || stone.stone_id || ''}`,
+      `Камень: ${stone.shape || ''} ${stone.carat || ''} ct / ${stone.color || ''} / ${stone.clarity || ''}`,
+      `KURGIN Score: ${stone.score || stone.karo_score || ''}`,
+      `Статус цены: ${stone.price_status || 'request_price'}`,
+      '',
+      'Понимаю, что это не заказ, не резерв и не фиксация цены.'
+    ];
+    return parts.join('\n');
+  }
+
+  function channelLink(channel, stone){
+    const message = encodeURIComponent(requestMessage(stone, 'request_price'));
+    if(channel === 'max') return requestContact.maxUrl || '';
+    if(channel === 'telegram'){
+      if(!requestContact.telegramUrl) return '';
+      return requestContact.telegramUrl + (requestContact.telegramUrl.includes('?') ? '&' : '?') + 'text=' + message;
+    }
+    if(channel === 'whatsapp') return requestContact.whatsappUrl ? `${requestContact.whatsappUrl}?text=${message}` : '';
+    return '';
+  }
+
+  function requestButton(channel, label, stone, primary=false){
+    const href = channelLink(channel, stone);
+    const cls = `requestBtn${primary ? ' primary' : ''}${href ? '' : ' disabled'}`;
+    if(!href) return `<span class='${cls}'>${label}</span>`;
+    return `<a class='${cls}' href='${href}' target='_blank' rel='noopener noreferrer'>${label}</a>`;
+  }
+
+  function requestChannelsHtml(stone){
+    return `<div class='requestBox'><div class='requestTitle'>Запросить цену</div><div class='requestHint'>Заявка не является заказом, резервом, оплатой или фиксацией цены. Менеджер уточнит наличие и условия. Контакт: ${requestContact.phone}</div><div class='requestChannels'>${requestButton('max','MAX',stone,true)}${requestButton('telegram','Telegram',stone,false)}${requestButton('whatsapp','WhatsApp',stone,false)}</div></div>`;
   }
 
   function actionHtml(stone){
@@ -145,9 +199,11 @@ def _catalog_section_fix_script() -> str:
 
   window.openDetail = function openDetail(i){
     let s=stones[i];
-    const cartClass = isRequestPrice(s) ? 'detailBtn dark disabled' : 'detailBtn dark';
-    const cartLabel = isRequestPrice(s) ? 'Запросить цену' : 'В корзину';
-    detailContent.innerHTML=`<div class=detailTop><div><div class=detailName>${s.shape||''} ${Number(s.carat||0).toFixed(2).replace('.00','')} ct</div><div class=tags style='justify-content:flex-start;margin-top:.55rem'>${mkTags(s.score,s.tags)}</div></div>${priceHtml(s,true)}</div><div class=detailGrid><div class=detailCell><div class=detailLabel>Цвет</div><div class=detailValue>${s.color||''}</div></div><div class=detailCell><div class=detailLabel>Чистота</div><div class=detailValue>${s.clarity||''}</div></div><div class=detailCell><div class=detailLabel>KURGIN Score</div><div class='detailValue scoreBold'>${s.score||''}</div></div><div class=detailCell><div class=detailLabel>Диаметр</div><div class=detailValue>${s.diameter||''} мм</div></div><div class=detailCell><div class=detailLabel>Флюоресценция</div><div class=detailValue>${s.fluor||s.fluorescence||''}</div></div><div class=detailCell><div class=detailLabel>Отделка</div><div class=detailValue>${s.finish||''}</div></div></div><div class=detailNote>Сертификат: ${s.report||''}<br>${s.meta||''}<br>Подробная профессиональная карточка будет расширяться: параметры, пропорции, световое поведение и условия резерва.</div><div class=detailActions><button class='${cartClass}'>${cartLabel}</button><button class=detailBtn>В избранное</button></div>`;
+    const request = isRequestPrice(s);
+    const cartClass = request ? 'detailBtn dark disabled' : 'detailBtn dark';
+    const cartLabel = request ? 'Запросить цену' : 'В корзину';
+    const requestBlock = request ? requestChannelsHtml(s) : '';
+    detailContent.innerHTML=`<div class=detailTop><div><div class=detailName>${s.shape||''} ${Number(s.carat||0).toFixed(2).replace('.00','')} ct</div><div class=tags style='justify-content:flex-start;margin-top:.55rem'>${mkTags(s.score,s.tags)}</div></div>${priceHtml(s,true)}</div>${requestBlock}<div class=detailGrid><div class=detailCell><div class=detailLabel>Цвет</div><div class=detailValue>${s.color||''}</div></div><div class=detailCell><div class=detailLabel>Чистота</div><div class=detailValue>${s.clarity||''}</div></div><div class=detailCell><div class=detailLabel>KURGIN Score</div><div class='detailValue scoreBold'>${s.score||''}</div></div><div class=detailCell><div class=detailLabel>Диаметр</div><div class=detailValue>${s.diameter||''} мм</div></div><div class=detailCell><div class=detailLabel>Флюоресценция</div><div class=detailValue>${s.fluor||s.fluorescence||''}</div></div><div class=detailCell><div class=detailLabel>Отделка</div><div class=detailValue>${s.finish||''}</div></div></div><div class=detailNote>Сертификат: ${s.report||''}<br>${s.meta||''}<br>Подробная профессиональная карточка будет расширяться: параметры, пропорции, световое поведение и условия резерва.</div><div class=detailActions><button class='${cartClass}'>${cartLabel}</button><button class=detailBtn>В избранное</button></div>`;
     open('detail');
   };
 
