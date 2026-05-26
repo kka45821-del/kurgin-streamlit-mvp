@@ -55,6 +55,7 @@ def _catalog_section_fix_script() -> str:
     telegramUrl: requestContactConfig.telegram_url || '',
     whatsappUrl: requestContactConfig.whatsapp_url || ''
   };
+  const favoritesStorageKey = 'kurginFavoritesV01';
 
   if(!document.getElementById('catalogStatsStyle')){
     const style = document.createElement('style');
@@ -67,6 +68,10 @@ def _catalog_section_fix_script() -> str:
       .price.request{font-size:.72rem;line-height:1.1;color:#666;white-space:normal;text-align:right;font-weight:600}
       .detailPrice.request{font-size:.9rem;color:#666;white-space:normal;text-align:right;line-height:1.25}
       .act.disabled,.detailBtn.disabled{opacity:.38;pointer-events:none;filter:grayscale(1)}
+      .act.favoriteToggle.on{color:#111;border-color:#111;background:#f7f4ee}
+      .detailBtn.favoriteOn{border-color:#111;background:#f7f4ee;color:#111}
+      .nav a{position:relative}
+      .favBadge{position:absolute;top:.12rem;right:.22rem;min-width:15px;height:15px;border-radius:999px;background:#111;color:#fff;font-size:.55rem;line-height:15px;text-align:center;font-weight:700}
       .requestBox{margin:1rem 0 .75rem;border:1px solid #e4e0d8;border-radius:18px;background:#fff;padding:.85rem;box-shadow:0 10px 24px rgba(0,0,0,.045)}
       .requestTitle{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#111;margin-bottom:.35rem}
       .requestHint{font-size:.72rem;line-height:1.35;color:#666;margin-bottom:.75rem}
@@ -74,6 +79,13 @@ def _catalog_section_fix_script() -> str:
       .requestBtn{display:flex;align-items:center;justify-content:center;min-height:38px;border:1px solid #d9d4ca;border-radius:13px;background:#fff;color:#111;text-decoration:none;font-size:.76rem;font-weight:700}
       .requestBtn.primary{background:#111;color:#fff;border-color:#111}
       .requestBtn.disabled{opacity:.45;pointer-events:none;color:#777;background:#f4f3f1}
+      .favoritesInfo{margin:0 1rem .75rem;padding:.8rem;border:1px solid #e5e0d8;border-radius:16px;background:#fff;font-size:.75rem;line-height:1.35;color:#666}
+      .favoriteList{display:grid;gap:.7rem;padding:0 1rem 1rem}
+      .favoriteCard{border:1px solid #ddd8ce;border-radius:18px;background:#fff;padding:.85rem;box-shadow:0 10px 24px rgba(0,0,0,.035)}
+      .favoriteTop{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start}
+      .favoriteName{font-size:.95rem;font-weight:700;color:#111}.favoriteMeta{font-size:.72rem;color:#666;margin-top:.3rem;line-height:1.35}
+      .favoritePrice{font-size:.78rem;font-weight:700;text-align:right;color:#111}.favoriteUnavailable{margin-top:.65rem;font-size:.72rem;line-height:1.35;color:#8a5b00;background:#fff7df;border-radius:12px;padding:.55rem}
+      .favoriteActions{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-top:.75rem}.favoriteBtn{border:1px solid #d9d4ca;border-radius:13px;background:#fff;color:#111;font-size:.75rem;font-weight:700;min-height:36px}.favoriteBtn.dark{background:#111;color:#fff;border-color:#111}.favoriteBtn.danger{color:#8a1c1c}
     `;
     document.head.appendChild(style);
   }
@@ -92,6 +104,73 @@ def _catalog_section_fix_script() -> str:
     return section;
   }
 
+  function stoneKey(stone){
+    return String((stone && (stone.id || stone.stone_id || stone.report)) || '');
+  }
+
+  function getFavorites(){
+    try{
+      const raw = window.localStorage.getItem(favoritesStorageKey);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    }catch(e){ return []; }
+  }
+
+  function saveFavorites(items){
+    const safeItems = Array.isArray(items) ? items : [];
+    window.localStorage.setItem(favoritesStorageKey, JSON.stringify(safeItems));
+  }
+
+  function favoriteSnapshot(stone){
+    return {
+      shape: stone.shape || '',
+      carat: stone.carat || '',
+      color: stone.color || '',
+      clarity: stone.clarity || '',
+      score: stone.score || stone.karo_score || '',
+      priceText: stone.priceText || stone.priceDisplay || (isRequestPrice(stone) ? 'по запросу' : ''),
+      public_action: stone.public_action || 'request_price'
+    };
+  }
+
+  function addFavorite(stone){
+    const id = stoneKey(stone);
+    if(!id) return;
+    const items = getFavorites().filter(x => String(x.stone_id) !== id);
+    items.unshift({stone_id:id, added_at:new Date().toISOString(), snapshot:favoriteSnapshot(stone)});
+    saveFavorites(items);
+  }
+
+  function removeFavorite(stoneId){
+    const id = String(stoneId || '');
+    saveFavorites(getFavorites().filter(x => String(x.stone_id) !== id));
+  }
+
+  function isFavorite(stoneOrId){
+    const id = typeof stoneOrId === 'object' ? stoneKey(stoneOrId) : String(stoneOrId || '');
+    return !!id && getFavorites().some(x => String(x.stone_id) === id);
+  }
+
+  function toggleFavorite(stone){
+    const id = stoneKey(stone);
+    if(!id) return false;
+    if(isFavorite(id)){
+      removeFavorite(id);
+      return false;
+    }
+    addFavorite(stone);
+    return true;
+  }
+
+  window.getFavorites = getFavorites;
+  window.saveFavorites = saveFavorites;
+  window.addFavorite = addFavorite;
+  window.removeFavorite = removeFavorite;
+  window.isFavorite = isFavorite;
+  window.toggleFavorite = toggleFavorite;
+
+  function favoritesCount(){ return getFavorites().length; }
+
   function isRequestPrice(stone){
     const price = Number(stone.price || stone.price_rub || stone.public_price_rub || 0);
     const status = String(stone.price_status || '').toLowerCase();
@@ -108,6 +187,14 @@ def _catalog_section_fix_script() -> str:
     const price = Number(stone.price || stone.price_rub || stone.public_price_rub || 0);
     const priceText = (stone.priceText && stone.priceText !== '0') ? stone.priceText : String(price);
     return detail ? `<div class=detailPrice>${priceText} ₽</div>` : `<div class=price>${priceText} ₽</div>`;
+  }
+
+  function displayPriceText(stone){
+    if(!stone) return 'по запросу';
+    if(isRequestPrice(stone)) return 'по запросу';
+    const price = Number(stone.price || stone.price_rub || stone.public_price_rub || 0);
+    const priceText = (stone.priceText && stone.priceText !== '0') ? stone.priceText : String(price || '');
+    return priceText ? `${priceText} ₽` : 'по запросу';
   }
 
   function requestMessage(stone, requestType){
@@ -148,8 +235,15 @@ def _catalog_section_fix_script() -> str:
 
   function actionHtml(stone){
     const cartClass = isRequestPrice(stone) ? 'act disabled' : 'act';
-    return `<button class=act data-stop=1>${icon('message')}</button><button class=act data-stop=1>${icon('reserve')}</button><button class='act infoBtn'>${icon('info')}</button><button class=act data-stop=1>${icon('heart')}</button><button class='${cartClass}' data-stop=1>${icon('shopping')}</button><button class=act data-stop=1>${icon('share')}</button>`;
+    const favClass = isFavorite(stone) ? 'act favoriteToggle on' : 'act favoriteToggle';
+    return `<button class=act data-stop=1>${icon('message')}</button><button class=act data-stop=1>${icon('reserve')}</button><button class='act infoBtn'>${icon('info')}</button><button class='${favClass}' data-stop=1 data-favorite-id='${stoneKey(stone)}'>${icon('heart')}</button><button class='${cartClass}' data-stop=1>${icon('shopping')}</button><button class=act data-stop=1>${icon('share')}</button>`;
   }
+
+  window.renderNav = function renderNav(){
+    const items=[['kurgin','menu'],['tools','tools'],['catalog','catalog'],['favorites','favorites'],['cart','cart'],['profile','profile']];
+    const count = favoritesCount();
+    navGrid.innerHTML=items.map(i=>`<a class='${i[0]===currentPage?'active':''}' href='?page=${i[0]}' data-nav-page='${i[0]}'><span class='ico'>${icon(i[1])}</span>${i[0]==='favorites'&&count>0?`<span class='favBadge'>${count}</span>`:''}</a>`).join('');
+  };
 
   window.source = function source(){
     let a = activeSection === 'all' ? stones : stones.filter(x => x.section === activeSection);
@@ -192,8 +286,30 @@ def _catalog_section_fix_script() -> str:
     document.querySelectorAll('.sort').forEach(b=>b.classList.toggle('on',b.dataset.sort===sort));
     cards.innerHTML=source().map(s=>`<div class=card data-idx='${stones.indexOf(s)}' data-shape='${shapeKey(s)}' data-weight='${s.weight||''}' data-color='${s.color||''}' data-clarity='${s.clarity||''}' data-score='${s.scoreBand||''}' data-fluorescence='${s.fluor||s.fluorescence||''}' data-finish='${s.finish||''}'><div class=main><div>${s.shape||''}</div><div>${Number(s.carat||0).toFixed(2).replace('.00','')}</div><div>${s.color||''}</div><div>${s.clarity||''}</div><div class=scoreValue>${s.score||''}</div>${priceHtml(s)}</div><div class=line></div><div class=meta><div>${s.meta||''}</div><div class=tags>${mkTags(s.score,s.tags)}</div></div><div class=actions>${actionHtml(s)}</div></div>`).join('');
     wireCards();
+    wireFavoriteButtons();
     filter();
   };
+
+  function wireFavoriteButtons(){
+    document.querySelectorAll('.favoriteToggle').forEach(button=>{
+      button.onclick = event => {
+        event.stopPropagation();
+        const card = button.closest('.card');
+        const stone = card ? stones[Number(card.dataset.idx)] : stones.find(x => stoneKey(x) === button.dataset.favoriteId);
+        if(!stone) return;
+        toggleFavorite(stone);
+        syncFavoriteUI();
+      };
+    });
+  }
+
+  function syncFavoriteUI(){
+    document.querySelectorAll('.favoriteToggle').forEach(button=>{
+      button.classList.toggle('on', isFavorite(button.dataset.favoriteId));
+    });
+    renderNav();
+    if(currentPage === 'favorites') renderFavoritesPage();
+  }
 
   window.openDetail = function openDetail(i){
     let s=stones[i];
@@ -201,14 +317,99 @@ def _catalog_section_fix_script() -> str:
     const cartClass = request ? 'detailBtn dark disabled' : 'detailBtn dark';
     const cartLabel = request ? 'Запросить цену' : 'В корзину';
     const requestBlock = request ? requestChannelsHtml(s) : '';
-    detailContent.innerHTML=`<div class=detailTop><div><div class=detailName>${s.shape||''} ${Number(s.carat||0).toFixed(2).replace('.00','')} ct</div><div class=tags style='justify-content:flex-start;margin-top:.55rem'>${mkTags(s.score,s.tags)}</div></div>${priceHtml(s,true)}</div>${requestBlock}<div class=detailGrid><div class=detailCell><div class=detailLabel>Цвет</div><div class=detailValue>${s.color||''}</div></div><div class=detailCell><div class=detailLabel>Чистота</div><div class=detailValue>${s.clarity||''}</div></div><div class=detailCell><div class=detailLabel>KURGIN Score</div><div class='detailValue scoreBold'>${s.score||''}</div></div><div class=detailCell><div class=detailLabel>Диаметр</div><div class=detailValue>${s.diameter||''} мм</div></div><div class=detailCell><div class=detailLabel>Флюоресценция</div><div class=detailValue>${s.fluor||s.fluorescence||''}</div></div><div class=detailCell><div class=detailLabel>Отделка</div><div class=detailValue>${s.finish||''}</div></div></div><div class=detailNote>Сертификат: ${s.report||''}<br>${s.meta||''}<br>Подробная профессиональная карточка будет расширяться: параметры, пропорции, световое поведение и условия резерва.</div><div class=detailActions><button class='${cartClass}'>${cartLabel}</button><button class=detailBtn>В избранное</button></div>`;
+    const favLabel = isFavorite(s) ? 'В избранном' : 'В избранное';
+    const favClass = isFavorite(s) ? 'detailBtn detailFavoriteBtn favoriteOn' : 'detailBtn detailFavoriteBtn';
+    detailContent.innerHTML=`<div class=detailTop><div><div class=detailName>${s.shape||''} ${Number(s.carat||0).toFixed(2).replace('.00','')} ct</div><div class=tags style='justify-content:flex-start;margin-top:.55rem'>${mkTags(s.score,s.tags)}</div></div>${priceHtml(s,true)}</div>${requestBlock}<div class=detailGrid><div class=detailCell><div class=detailLabel>Цвет</div><div class=detailValue>${s.color||''}</div></div><div class=detailCell><div class=detailLabel>Чистота</div><div class=detailValue>${s.clarity||''}</div></div><div class=detailCell><div class=detailLabel>KURGIN Score</div><div class='detailValue scoreBold'>${s.score||''}</div></div><div class=detailCell><div class=detailLabel>Диаметр</div><div class=detailValue>${s.diameter||''} мм</div></div><div class=detailCell><div class=detailLabel>Флюоресценция</div><div class=detailValue>${s.fluor||s.fluorescence||''}</div></div><div class=detailCell><div class=detailLabel>Отделка</div><div class=detailValue>${s.finish||''}</div></div></div><div class=detailNote>Сертификат: ${s.report||''}<br>${s.meta||''}<br>Подробная профессиональная карточка будет расширяться: параметры, пропорции, световое поведение и условия резерва.</div><div class=detailActions><button class='${cartClass}'>${cartLabel}</button><button class='${favClass}' data-favorite-id='${stoneKey(s)}'>${favLabel}</button></div>`;
+    const favoriteButton = detailContent.querySelector('.detailFavoriteBtn');
+    if(favoriteButton){
+      favoriteButton.onclick = () => {
+        toggleFavorite(s);
+        favoriteButton.textContent = isFavorite(s) ? 'В избранном' : 'В избранное';
+        favoriteButton.classList.toggle('favoriteOn', isFavorite(s));
+        syncFavoriteUI();
+      };
+    }
     open('detail');
+  };
+
+  function currentStoneById(stoneId){
+    return stones.find(stone => stoneKey(stone) === String(stoneId || ''));
+  }
+
+  function favoriteCardHtml(item){
+    const current = currentStoneById(item.stone_id);
+    const snapshot = item.snapshot || {};
+    const stone = current || {id:item.stone_id, stone_id:item.stone_id, shape:snapshot.shape, carat:snapshot.carat, color:snapshot.color, clarity:snapshot.clarity, score:snapshot.score, priceText:snapshot.priceText, public_action:snapshot.public_action};
+    const unavailable = !current;
+    const name = `${stone.shape || ''} ${stone.carat || ''} ct`.trim();
+    const meta = `${stone.color || ''} ${stone.clarity || ''} · KURGIN Score ${stone.score || ''}`;
+    const price = unavailable ? (snapshot.priceText && snapshot.priceText !== '0' ? snapshot.priceText : 'по запросу') : displayPriceText(stone);
+    const detailAction = current ? `<button class='favoriteBtn dark' data-open-favorite='${stoneKey(stone)}'>Открыть карточку</button>` : `<button class='favoriteBtn dark' data-nav-page='catalog'>В каталог</button>`;
+    return `<div class='favoriteCard'><div class='favoriteTop'><div><div class='favoriteName'>${name || item.stone_id}</div><div class='favoriteMeta'>${meta}</div></div><div class='favoritePrice'>${price}</div></div>${unavailable?`<div class='favoriteUnavailable'>Камень больше не доступен в текущем каталоге.</div>`:''}<div class='favoriteActions'>${detailAction}<button class='favoriteBtn danger' data-remove-favorite='${item.stone_id}'>Удалить</button></div></div>`;
+  }
+
+  window.renderFavoritesPage = function renderFavoritesPage(){
+    const favorites = getFavorites();
+    if(!favorites.length){
+      content.innerHTML = pageHeader(pageTitles.favorites, pageSubtitles.favorites) + `<div class='pageBody'><div class='placeholder empty-state'><div class='empty-title'>Вы пока не добавили камни в избранное.</div><div class='muted'>Сохраняйте интересные камни из каталога, чтобы вернуться к ним позже.</div><button class='btn light' type='button' data-nav-page='catalog'>Перейти в каталог</button></div><div class='favoritesInfo'>Избранное помогает сохранить интересные камни в этом браузере. Оно не резервирует камни и не фиксирует цену.</div></div>`;
+    } else {
+      content.innerHTML = pageHeader(pageTitles.favorites, pageSubtitles.favorites) + `<div class='favoritesInfo'>Избранное помогает сохранить интересные камни в этом браузере. Оно не резервирует камни и не фиксирует цену.</div><div class='favoriteList'>${favorites.map(favoriteCardHtml).join('')}</div>`;
+    }
+    content.scrollTop = 0;
+    wireFavoritePageActions();
+  };
+
+  function wireFavoritePageActions(){
+    document.querySelectorAll('[data-remove-favorite]').forEach(button=>{
+      button.onclick = event => {
+        event.stopPropagation();
+        removeFavorite(button.dataset.removeFavorite);
+        renderFavoritesPage();
+        renderNav();
+        if(document.getElementById('cards')) syncFavoriteUI();
+      };
+    });
+    document.querySelectorAll('[data-open-favorite]').forEach(button=>{
+      button.onclick = event => {
+        event.stopPropagation();
+        const stone = currentStoneById(button.dataset.openFavorite);
+        if(!stone) return;
+        openDetail(stones.indexOf(stone));
+      };
+    });
+  }
+
+  setPage = function(page){
+    if(!pageTemplates[page] && page !== 'catalog') page='catalog';
+    currentPage = page;
+    renderNav();
+    controls.classList.toggle('hidden', page !== 'catalog');
+    content.classList.toggle('catalog', page === 'catalog');
+
+    if(page === 'catalog'){
+      renderCatalogPage();
+    } else if(page === 'favorites'){
+      renderFavoritesPage();
+    } else {
+      content.innerHTML = pageHeader(pageTitles[page] || 'KURGIN', pageSubtitles[page] || '') + pageTemplates[page];
+      if(page === 'profile' && typeof initProfilePage === 'function') initProfilePage();
+      content.scrollTop = 0;
+    }
+
+    try {
+      const url = new URL(window.parent.location.href);
+      url.searchParams.set('page', page);
+      window.parent.history.replaceState(null, '', url.toString());
+    } catch(e) {}
   };
 
   if(currentPage === 'catalog'){
     activeSection = activeSection || 'all';
     renderCatalogPage();
+  } else if(currentPage === 'favorites'){
+    renderFavoritesPage();
   }
+  renderNav();
 })();
 """.replace("__REQUEST_CONTACTS_JSON__", json.dumps(REQUEST_CONTACTS, ensure_ascii=False))
 
