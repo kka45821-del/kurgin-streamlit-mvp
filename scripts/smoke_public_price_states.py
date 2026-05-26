@@ -6,6 +6,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from catalog.catalog_core import normalize_public_stones, normalize_stone
+from config.request_contacts import REQUEST_CONTACTS
 
 
 REQUEST_STONE = {
@@ -44,6 +45,12 @@ SELLABLE_STONE = {
 
 
 def run() -> None:
+    assert REQUEST_CONTACTS["phone"], REQUEST_CONTACTS
+    assert REQUEST_CONTACTS["max_url"].startswith("https://max.ru/"), REQUEST_CONTACTS
+    assert REQUEST_CONTACTS["telegram_url"].startswith("https://t.me/"), REQUEST_CONTACTS
+    assert REQUEST_CONTACTS["whatsapp_url"].startswith("https://wa.me/"), REQUEST_CONTACTS
+    print("OK: request contacts config")
+
     request_stone = normalize_stone(REQUEST_STONE)
     assert request_stone["priceText"] == "по запросу", request_stone
     assert request_stone["priceDisplay"] == "по запросу", request_stone
