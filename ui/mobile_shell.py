@@ -42,18 +42,104 @@ def _page_templates() -> dict[str, str]:
 
 def _catalog_section_fix_script() -> str:
     return r"""
-// Section correction: main catalog must show only 1.00–2.99 ct.
-// Stones from 3.00 ct and above belong to the large section.
-function source(){
-  let a = stones.filter(x => x.section === activeSection);
-  if(sort === 'new') return a;
-  let [k, d] = sort.split('_');
-  return [...a].sort((x, y) => {
-    let xv = Number(x[k] || 0), yv = Number(y[k] || 0);
-    return d === 'asc' ? xv - yv : yv - xv;
-  });
-}
-if(currentPage === 'catalog') renderCards();
+// Public catalog section UX:
+// - show all published stones by default;
+// - keep professional sections available;
+// - show section counts so the user does not confuse total catalog count with one section.
+(function(){
+  if(!document.getElementById('catalogStatsStyle')){
+    const style = document.createElement('style');
+    style.id = 'catalogStatsStyle';
+    style.textContent = `
+      .catalogStats{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;padding:0 1rem .65rem}
+      .catalogStat{border:1px solid #dedede;border-radius:13px;background:#fff;padding:.55rem .55rem;text-align:center;box-shadow:0 8px 18px rgba(0,0,0,.035)}
+      .catalogStat strong{display:block;font-size:.98rem;line-height:1;color:#111}
+      .catalogStat span{display:block;margin-top:.22rem;font-size:.58rem;letter-spacing:.04em;text-transform:uppercase;color:#777}
+      .price.request{font-size:.72rem;line-height:1.1;color:#666;white-space:normal;text-align:right;font-weight:600}
+      .detailPrice.request{font-size:.9rem;color:#666;white-space:normal;text-align:right;line-height:1.25}
+    `;
+    document.head.appendChild(style);
+  }
+
+  if(Array.isArray(sections) && !sections.find(x => x[0] === 'all')){
+    sections.unshift(['all', 'Все камни', 'все разделы']);
+  }
+
+  function sectionCount(id){
+    if(id === 'all') return stones.length;
+    return stones.filter(x => x.section === id).length;
+  }
+
+  function currentSectionLabel(){
+    const section = sections.find(x => x[0] === activeSection) || sections[0];
+    return section;
+  }
+
+  function priceHtml(stone, detail=false){
+    const price = Number(stone.price || stone.price_rub || 0);
+    const priceText = stone.priceText || '';
+    if(price <= 0 && !priceText){
+      return detail ? `<div class='detailPrice request'>Цена<br>по запросу</div>` : `<div class='price request'>по<br>запросу</div>`;
+    }
+    return detail ? `<div class=detailPrice>${priceText || price} ₽</div>` : `<div class=price>${priceText || price} ₽</div>`;
+  }
+
+  window.source = function source(){
+    let a = activeSection === 'all' ? stones : stones.filter(x => x.section === activeSection);
+    if(sort === 'new') return a;
+    let [k, d] = sort.split('_');
+    return [...a].sort((x, y) => {
+      let xv = Number(x[k] || 0), yv = Number(y[k] || 0);
+      return d === 'asc' ? xv - yv : yv - xv;
+    });
+  };
+
+  window.drawMenu = function drawMenu(){
+    catalogMenu.innerHTML=sections.map((s,i)=>`${i===5?'<div class=sep></div>':''}<button class='${s[0]===activeSection?'active':''}' data-id='${s[0]}'><div class=m-title>${s[1]}</div><div class=m-sub>${sectionCount(s[0])} камней${s[2]?` · ${s[2]}`:''}</div></button>`).join('');
+    catalogMenu.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      activeSection=b.dataset.id;
+      let s=currentSectionLabel();
+      sectionTitle.textContent=s[1];
+      sectionSub.textContent=`${sectionCount(s[0])} камней${s[2]?` · ${s[2]}`:''}`;
+      catalogBox.classList.remove('open');
+      drawMenu();
+      renderCards();
+    });
+  };
+
+  window.renderCatalogPage = function renderCatalogPage(){
+    if(!activeSection) activeSection='all';
+    let s=currentSectionLabel();
+    content.innerHTML = pageHeader(pageTitles.catalog, pageSubtitles.catalog) + `
+      <div class='top'><div class='catalogBox' id='catalogBox'><button class='select' id='catalogBtn'><div><div class='select-title' id='sectionTitle'>${s[1]}</div><div class='select-sub' id='sectionSub'>${sectionCount(s[0])} камней${s[2]?` · ${s[2]}`:''}</div></div><div class='chev'><svg viewBox='0 0 20 20'><path d='M5 8l5 5 5-5'/></svg></div></button><div class='menu' id='catalogMenu'></div></div><div class='pick'>Индив.<br>подбор</div></div>
+      <div class='catalogStats' id='catalogStats'><div class='catalogStat'><strong>${stones.length}</strong><span>всего</span></div><div class='catalogStat'><strong>${sectionCount('main')}</strong><span>основной</span></div><div class='catalogStat'><strong>${sectionCount('large')}</strong><span>крупные</span></div></div>
+      <div class='cols'><div>ФОРМА</div><div>КАРАТ</div><div>ЦВЕТ</div><div>ЧИСТОТА</div><div>KURGIN SCORE</div><div>ЦЕНА</div></div>
+      <div id='cards'></div><div class='empty' id='empty'>По выбранному разделу и фильтрам камни не найдены</div>`;
+    setupCatalog();
+    content.scrollTop = 0;
+  };
+
+  const oldRenderCards = renderCards;
+  window.renderCards = function renderCards(){
+    if(!document.getElementById('cards')) return;
+    sortLabel.textContent=sortLabels[sort];
+    document.querySelectorAll('.sort').forEach(b=>b.classList.toggle('on',b.dataset.sort===sort));
+    cards.innerHTML=source().map(s=>`<div class=card data-idx='${stones.indexOf(s)}' data-shape='${shapeKey(s)}' data-weight='${s.weight||''}' data-color='${s.color||''}' data-clarity='${s.clarity||''}' data-score='${s.scoreBand||''}' data-fluorescence='${s.fluor||s.fluorescence||''}' data-finish='${s.finish||''}'><div class=main><div>${s.shape||''}</div><div>${Number(s.carat||0).toFixed(2).replace('.00','')}</div><div>${s.color||''}</div><div>${s.clarity||''}</div><div class=scoreValue>${s.score||''}</div>${priceHtml(s)}</div><div class=line></div><div class=meta><div>${s.meta||''}</div><div class=tags>${mkTags(s.score,s.tags)}</div></div><div class=actions>${actions}</div></div>`).join('');
+    wireCards();
+    filter();
+  };
+
+  window.openDetail = function openDetail(i){
+    let s=stones[i];
+    detailContent.innerHTML=`<div class=detailTop><div><div class=detailName>${s.shape||''} ${Number(s.carat||0).toFixed(2).replace('.00','')} ct</div><div class=tags style='justify-content:flex-start;margin-top:.55rem'>${mkTags(s.score,s.tags)}</div></div>${priceHtml(s,true)}</div><div class=detailGrid><div class=detailCell><div class=detailLabel>Цвет</div><div class=detailValue>${s.color||''}</div></div><div class=detailCell><div class=detailLabel>Чистота</div><div class=detailValue>${s.clarity||''}</div></div><div class=detailCell><div class=detailLabel>KURGIN Score</div><div class='detailValue scoreBold'>${s.score||''}</div></div><div class=detailCell><div class=detailLabel>Диаметр</div><div class=detailValue>${s.diameter||''} мм</div></div><div class=detailCell><div class=detailLabel>Флюоресценция</div><div class=detailValue>${s.fluor||s.fluorescence||''}</div></div><div class=detailCell><div class=detailLabel>Отделка</div><div class=detailValue>${s.finish||''}</div></div></div><div class=detailNote>Сертификат: ${s.report||''}<br>${s.meta||''}<br>Подробная профессиональная карточка будет расширяться: параметры, пропорции, световое поведение и условия резерва.</div><div class=detailActions><button class='detailBtn dark'>В корзину</button><button class=detailBtn>В избранное</button></div>`;
+    open('detail');
+  };
+
+  if(currentPage === 'catalog'){
+    activeSection = activeSection || 'all';
+    renderCatalogPage();
+  }
+})();
 """
 
 
