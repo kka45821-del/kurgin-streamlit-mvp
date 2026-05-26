@@ -7,6 +7,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from catalog.catalog_core import normalize_public_stones, normalize_stone
 from config.request_contacts import REQUEST_CONTACTS
+from ui.mobile_shell import build_mobile_shell
 
 
 REQUEST_STONE = {
@@ -74,6 +75,21 @@ def run() -> None:
     assert by_id["REQ-1"]["priceText"] == "по запросу", by_id["REQ-1"]
     assert by_id["SELL-1"]["priceText"] != "по запросу", by_id["SELL-1"]
     print("OK: normalize_public_stones price states")
+
+    shell = build_mobile_shell(page="catalog", stones_json="[]")
+    assert "kurginFavoritesV01" in shell
+    assert "function getFavorites()" in shell
+    assert "function saveFavorites(items)" in shell
+    assert "function addFavorite(stone)" in shell
+    assert "function removeFavorite(stoneId)" in shell
+    assert "function isFavorite(stoneOrId)" in shell
+    assert "function toggleFavorite(stone)" in shell
+    assert "Избранное помогает сохранить интересные камни в этом браузере" in shell
+    assert "Оно не резервирует камни и не фиксирует цену" in shell
+    assert "checkout" in shell
+    assert "createOrder" not in shell
+    assert "payment" not in shell.lower()
+    print("OK: favorites localStorage helpers")
 
     print("SMOKE_PUBLIC_PRICE_STATES_OK")
 
