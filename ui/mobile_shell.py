@@ -1,5 +1,6 @@
 import json
 
+from config.request_contacts import REQUEST_CONTACTS
 from ui.extra_styles import SYSTEM_CSS
 from ui.pages.cart_page import render_cart_page
 from ui.pages.favorites_page import render_favorites_page
@@ -10,10 +11,6 @@ from ui.scripts import catalog_script
 from ui.styles import BASE_CSS
 
 LOGO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/Vectorr.svg?v=16"
-REQUEST_CONTACT_PHONE = "+79688543140"
-REQUEST_MAX_URL = "https://max.ru/u/f9LHodD0cOJeu7y7ABrIrsd118RD3qDsz7o5qmv7eDmW1Gi80MkpYFBCAhU"
-REQUEST_TELEGRAM_URL = "https://t.me/cvdlab"
-REQUEST_WHATSAPP_URL = "https://wa.me/79688543140"
 
 PAGE_TITLES = {
     "kurgin": "KURGIN",
@@ -51,11 +48,12 @@ def _catalog_section_fix_script() -> str:
 // - keep professional sections available;
 // - show section counts so the user does not confuse total catalog count with one section.
 (function(){
+  const requestContactConfig = __REQUEST_CONTACTS_JSON__;
   const requestContact = {
-    phone: '+79688543140',
-    maxUrl: 'https://max.ru/u/f9LHodD0cOJeu7y7ABrIrsd118RD3qDsz7o5qmv7eDmW1Gi80MkpYFBCAhU',
-    telegramUrl: 'https://t.me/cvdlab',
-    whatsappUrl: 'https://wa.me/79688543140'
+    phone: requestContactConfig.phone || '',
+    maxUrl: requestContactConfig.max_url || '',
+    telegramUrl: requestContactConfig.telegram_url || '',
+    whatsappUrl: requestContactConfig.whatsapp_url || ''
   };
 
   if(!document.getElementById('catalogStatsStyle')){
@@ -212,7 +210,7 @@ def _catalog_section_fix_script() -> str:
     renderCatalogPage();
   }
 })();
-"""
+""".replace("__REQUEST_CONTACTS_JSON__", json.dumps(REQUEST_CONTACTS, ensure_ascii=False))
 
 
 def _public_score_label_script() -> str:
