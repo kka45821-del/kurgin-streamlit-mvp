@@ -21,6 +21,7 @@ SCORE_REQUIRED_SECTIONS = {"main", "large"}
 INDEX_SECTIONS = {"main", "large"}
 INDEX_AVAILABILITY = "available"
 MANUAL_SECTIONS = {"colored", "side", "pairs", "exclusive"}
+REQUEST_PRICE_STATUSES = {"request_price", "missing", "score_required", "future_scope", "blocked", "needs_review", "index_pending", "index_suggested"}
 
 SECTION_ALIASES = {
     "мелкие": "small", "small": "small",
@@ -454,19 +455,35 @@ def index_bucket(stone: dict) -> str:
     return f"{shape}|{carat_group}|{color}|{clarity}|{score_group}"
 
 
+def is_request_price_state(stone: dict, price: int | None = None) -> bool:
+    current_price = safe_int(price if price is not None else first(stone, "price", "price_rub", "public_price_rub", default=0))
+    price_status = clean_text(first(stone, "price_status", "status_price", default="")).lower()
+    public_action = clean_text(first(stone, "public_action", default="")).lower()
+    checkout_enabled = safe_bool(first(stone, "checkout_enabled", default=False))
+    public_sellable = safe_bool(first(stone, "public_sellable", default=False))
+    return (
+        current_price <= 0
+        or price_status in REQUEST_PRICE_STATUSES
+        or public_action == "request_price"
+        or not checkout_enabled
+        or not public_sellable
+    )
+
+
 def normalize_stone(stone: dict) -> dict:
     normalized = dict(stone)
     carat = safe_float(first(normalized, "carat", "weight", "Weight", default=0))
     score = safe_float(first(normalized, "score", "karo_score", "kurgin_score", "Karo Score", "KURGIN Score", "KURGIN SCORE", default=0))
     price = safe_int(first(normalized, "price", "price_rub", "public_price_rub", "Price", "Price RUB", default=0))
+    request_price = is_request_price_state(normalized, price)
     report = clean_text(first(normalized, "report", "report_number", "Report #", "certificate", "certificate_number", default=""))
     stone_id = clean_text(first(normalized, "id", "stone_id", "stock_number", "stock", "Stock #", default="")) or report
     raw_section = first(normalized, "section", "catalog_section", "category", default="")
     is_colored = safe_bool(first(normalized, "is_colored", "colored", default=False))
     section = resolve_catalog_section(carat=carat, section=raw_section, is_colored=is_colored)
     shape = normalize_shape(first(normalized, "shape", "Shape", "description", "DESCRIPTION", default="Круг"))
-    price_text = normalized.get("priceText") or f"{price:,}".replace(",", " ")
-    price_per_ct = round(price / carat, 2) if price > 0 and carat > 0 else 0
+    price_text = "по запросу" if request_price else f"{price:,}".replace(",", " ")
+    price_per_ct = round(price / carat, 2) if not request_price and price > 0 and carat > 0 else 0
 
     normalized.update({
         "id": stone_id,
@@ -480,8 +497,14 @@ def normalize_stone(stone: dict) -> dict:
         "currency": clean_text(first(normalized, "currency", default="RUB")) or "RUB",
         "price_date": clean_text(first(normalized, "price_date", "upload_date", "updated_at", default="")),
         "price_source": clean_text(first(normalized, "price_source", "source", "supplier_name", default="admin_upload")) or "admin_upload",
+        "price_status": clean_text(first(normalized, "price_status", default="")),
+        "public_action": clean_text(first(normalized, "public_action", default="request_price" if request_price else "checkout")),
+        "checkout_enabled": False if request_price else safe_bool(first(normalized, "checkout_enabled", default=False)),
+        "public_sellable": False if request_price else safe_bool(first(normalized, "public_sellable", default=False)),
         "price_per_ct": price_per_ct,
         "priceText": price_text,
+        "priceDisplay": price_text,
+        "is_request_price": request_price,
         "diameter": diameter_text(normalized),
         "fluor": fluor_text(normalized),
         "finish": finish_text(normalized),
