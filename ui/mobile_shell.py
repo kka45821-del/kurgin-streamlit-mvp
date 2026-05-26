@@ -57,6 +57,7 @@ def _catalog_section_fix_script() -> str:
       .catalogStat span{display:block;margin-top:.22rem;font-size:.58rem;letter-spacing:.04em;text-transform:uppercase;color:#777}
       .price.request{font-size:.72rem;line-height:1.1;color:#666;white-space:normal;text-align:right;font-weight:600}
       .detailPrice.request{font-size:.9rem;color:#666;white-space:normal;text-align:right;line-height:1.25}
+      .act.disabled,.detailBtn.disabled{opacity:.38;pointer-events:none;filter:grayscale(1)}
     `;
     document.head.appendChild(style);
   }
@@ -75,13 +76,27 @@ def _catalog_section_fix_script() -> str:
     return section;
   }
 
+  function isRequestPrice(stone){
+    const price = Number(stone.price || stone.price_rub || stone.public_price_rub || 0);
+    const status = String(stone.price_status || '').toLowerCase();
+    const action = String(stone.public_action || '').toLowerCase();
+    const checkoutEnabled = stone.checkout_enabled === true || String(stone.checkout_enabled).toLowerCase() === 'true';
+    const publicSellable = stone.public_sellable === true || String(stone.public_sellable).toLowerCase() === 'true';
+    return price <= 0 || ['request_price','missing','score_required','future_scope','blocked','needs_review','index_pending','index_suggested'].includes(status) || action === 'request_price' || !checkoutEnabled || !publicSellable;
+  }
+
   function priceHtml(stone, detail=false){
-    const price = Number(stone.price || stone.price_rub || 0);
-    const priceText = stone.priceText || '';
-    if(price <= 0 && !priceText){
+    if(isRequestPrice(stone)){
       return detail ? `<div class='detailPrice request'>Цена<br>по запросу</div>` : `<div class='price request'>по<br>запросу</div>`;
     }
-    return detail ? `<div class=detailPrice>${priceText || price} ₽</div>` : `<div class=price>${priceText || price} ₽</div>`;
+    const price = Number(stone.price || stone.price_rub || stone.public_price_rub || 0);
+    const priceText = (stone.priceText && stone.priceText !== '0') ? stone.priceText : String(price);
+    return detail ? `<div class=detailPrice>${priceText} ₽</div>` : `<div class=price>${priceText} ₽</div>`;
+  }
+
+  function actionHtml(stone){
+    const cartClass = isRequestPrice(stone) ? 'act disabled' : 'act';
+    return `<button class=act data-stop=1>${icon('message')}</button><button class=act data-stop=1>${icon('reserve')}</button><button class='act infoBtn'>${icon('info')}</button><button class=act data-stop=1>${icon('heart')}</button><button class='${cartClass}' data-stop=1>${icon('shopping')}</button><button class=act data-stop=1>${icon('share')}</button>`;
   }
 
   window.source = function source(){
@@ -119,19 +134,20 @@ def _catalog_section_fix_script() -> str:
     content.scrollTop = 0;
   };
 
-  const oldRenderCards = renderCards;
   window.renderCards = function renderCards(){
     if(!document.getElementById('cards')) return;
     sortLabel.textContent=sortLabels[sort];
     document.querySelectorAll('.sort').forEach(b=>b.classList.toggle('on',b.dataset.sort===sort));
-    cards.innerHTML=source().map(s=>`<div class=card data-idx='${stones.indexOf(s)}' data-shape='${shapeKey(s)}' data-weight='${s.weight||''}' data-color='${s.color||''}' data-clarity='${s.clarity||''}' data-score='${s.scoreBand||''}' data-fluorescence='${s.fluor||s.fluorescence||''}' data-finish='${s.finish||''}'><div class=main><div>${s.shape||''}</div><div>${Number(s.carat||0).toFixed(2).replace('.00','')}</div><div>${s.color||''}</div><div>${s.clarity||''}</div><div class=scoreValue>${s.score||''}</div>${priceHtml(s)}</div><div class=line></div><div class=meta><div>${s.meta||''}</div><div class=tags>${mkTags(s.score,s.tags)}</div></div><div class=actions>${actions}</div></div>`).join('');
+    cards.innerHTML=source().map(s=>`<div class=card data-idx='${stones.indexOf(s)}' data-shape='${shapeKey(s)}' data-weight='${s.weight||''}' data-color='${s.color||''}' data-clarity='${s.clarity||''}' data-score='${s.scoreBand||''}' data-fluorescence='${s.fluor||s.fluorescence||''}' data-finish='${s.finish||''}'><div class=main><div>${s.shape||''}</div><div>${Number(s.carat||0).toFixed(2).replace('.00','')}</div><div>${s.color||''}</div><div>${s.clarity||''}</div><div class=scoreValue>${s.score||''}</div>${priceHtml(s)}</div><div class=line></div><div class=meta><div>${s.meta||''}</div><div class=tags>${mkTags(s.score,s.tags)}</div></div><div class=actions>${actionHtml(s)}</div></div>`).join('');
     wireCards();
     filter();
   };
 
   window.openDetail = function openDetail(i){
     let s=stones[i];
-    detailContent.innerHTML=`<div class=detailTop><div><div class=detailName>${s.shape||''} ${Number(s.carat||0).toFixed(2).replace('.00','')} ct</div><div class=tags style='justify-content:flex-start;margin-top:.55rem'>${mkTags(s.score,s.tags)}</div></div>${priceHtml(s,true)}</div><div class=detailGrid><div class=detailCell><div class=detailLabel>Цвет</div><div class=detailValue>${s.color||''}</div></div><div class=detailCell><div class=detailLabel>Чистота</div><div class=detailValue>${s.clarity||''}</div></div><div class=detailCell><div class=detailLabel>KURGIN Score</div><div class='detailValue scoreBold'>${s.score||''}</div></div><div class=detailCell><div class=detailLabel>Диаметр</div><div class=detailValue>${s.diameter||''} мм</div></div><div class=detailCell><div class=detailLabel>Флюоресценция</div><div class=detailValue>${s.fluor||s.fluorescence||''}</div></div><div class=detailCell><div class=detailLabel>Отделка</div><div class=detailValue>${s.finish||''}</div></div></div><div class=detailNote>Сертификат: ${s.report||''}<br>${s.meta||''}<br>Подробная профессиональная карточка будет расширяться: параметры, пропорции, световое поведение и условия резерва.</div><div class=detailActions><button class='detailBtn dark'>В корзину</button><button class=detailBtn>В избранное</button></div>`;
+    const cartClass = isRequestPrice(s) ? 'detailBtn dark disabled' : 'detailBtn dark';
+    const cartLabel = isRequestPrice(s) ? 'Запросить цену' : 'В корзину';
+    detailContent.innerHTML=`<div class=detailTop><div><div class=detailName>${s.shape||''} ${Number(s.carat||0).toFixed(2).replace('.00','')} ct</div><div class=tags style='justify-content:flex-start;margin-top:.55rem'>${mkTags(s.score,s.tags)}</div></div>${priceHtml(s,true)}</div><div class=detailGrid><div class=detailCell><div class=detailLabel>Цвет</div><div class=detailValue>${s.color||''}</div></div><div class=detailCell><div class=detailLabel>Чистота</div><div class=detailValue>${s.clarity||''}</div></div><div class=detailCell><div class=detailLabel>KURGIN Score</div><div class='detailValue scoreBold'>${s.score||''}</div></div><div class=detailCell><div class=detailLabel>Диаметр</div><div class=detailValue>${s.diameter||''} мм</div></div><div class=detailCell><div class=detailLabel>Флюоресценция</div><div class=detailValue>${s.fluor||s.fluorescence||''}</div></div><div class=detailCell><div class=detailLabel>Отделка</div><div class=detailValue>${s.finish||''}</div></div></div><div class=detailNote>Сертификат: ${s.report||''}<br>${s.meta||''}<br>Подробная профессиональная карточка будет расширяться: параметры, пропорции, световое поведение и условия резерва.</div><div class=detailActions><button class='${cartClass}'>${cartLabel}</button><button class=detailBtn>В избранное</button></div>`;
     open('detail');
   };
 
