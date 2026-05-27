@@ -45,23 +45,8 @@ iframe {display:block!important; width:100%!important; height:100dvh!important; 
     unsafe_allow_html=True,
 )
 
-shell_html = build_mobile_shell(page=page, stones_json=stones_json)
-shell_html = shell_html.replace(
-    """  if(currentPage === 'catalog'){
-    activeSection = activeSection || 'all';
-    renderCatalogPage();
-  } else if(currentPage === 'favorites'){
-    renderFavoritesPage();
-  }
-  renderNav();""",
-    """  if(currentPage === 'catalog'){
-    activeSection = activeSection || 'all';
-  }
-  setPage(currentPage);""",
-)
-
 components.html(
-    shell_html,
+    build_mobile_shell(page=page, stones_json=stones_json),
     height=900,
     scrolling=False,
 )
