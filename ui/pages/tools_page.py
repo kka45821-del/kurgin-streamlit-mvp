@@ -1,19 +1,19 @@
 def render_tools_page() -> str:
-    tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');const title=this.getAttribute('data-tool-title');const subtitle=this.getAttribute('data-tool-subtitle');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);const headerTitle=document.querySelector('.brand-title');const headerSub=document.querySelector('.brand-sub');if(headerTitle&&title)headerTitle.textContent=title;if(headerSub&&subtitle)headerSub.textContent=subtitle;"
+    tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);"
     mode_click = "const root=this.closest('.single-tool');const active=this.getAttribute('data-mode');root.querySelectorAll('[data-mode]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-mode-panel]').forEach(p=>p.hidden=p.getAttribute('data-mode-panel')!==active);"
     return f"""
 <div class="tools-page">
   <div class="tools-tabs" role="tablist" aria-label="Инструменты KURGIN">
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" data-tool-title="KURGIN Analyzer One" data-tool-subtitle="анализ одного камня" aria-selected="true" onclick="{tab_click}">Анализ</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_index" data-tool-title="KURGIN Index" data-tool-subtitle="рыночный ориентир" aria-selected="false" onclick="{tab_click}">Индекс</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="database_analysis" data-tool-title="KURGIN Verify" data-tool-subtitle="проверка данных" aria-selected="false" onclick="{tab_click}">Проверить</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="excel_analyzer" data-tool-title="KURGIN Analyzer Excel" data-tool-subtitle="массовый анализ" aria-selected="false" onclick="{tab_click}">Массовый</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_academy" data-tool-title="KURGIN Academy" data-tool-subtitle="обучение и база знаний" aria-selected="false" onclick="{tab_click}">Обучение</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" aria-selected="true" onclick="{tab_click}">KURGIN<br>Stone Analyzer</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_index" aria-selected="false" onclick="{tab_click}">KURGIN<br>Index</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="database_analysis" aria-selected="false" onclick="{tab_click}">KURGIN<br>Verify</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="excel_analyzer" aria-selected="false" onclick="{tab_click}">KURGIN<br>Mass Analyzer</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_academy" aria-selected="false" onclick="{tab_click}">KURGIN<br>Academy</button>
   </div>
 
   <div class="tools-tab-content" data-tool-panel="single_stone_analyzer">
     <div class="single-tool">
-      <div class="tool-section-title">Анализ одного камня</div>
+      <div class="tool-section-title">KURGIN Stone Analyzer</div>
       <div class="single-mode-tabs" role="tablist" aria-label="Способ ввода">
         <button type="button" class="single-mode-tab" data-mode="photo" aria-selected="false" onclick="{mode_click}"><strong>Фото</strong><span>камера</span></button>
         <button type="button" class="single-mode-tab" data-mode="upload" aria-selected="true" onclick="{mode_click}"><strong>Загрузка</strong><span>файл</span></button>
@@ -54,7 +54,7 @@ def render_tools_page() -> str:
   </div>
 
   <div class="tools-tab-content" data-tool-panel="excel_analyzer" hidden>
-    <section class="tool-card"><div class="tool-kicker">Excel</div><div class="tool-title">KURGIN Analyzer Excel</div><div class="tool-text">Сценарий анализа Excel-файла для пакетной обработки данных. Логика Excel Analyzer не изменялась.</div><div class="tool-meta"><span class="tool-pill">Excel</span><span class="tool-pill">batch</span></div><div class="tool-note">Preview-структура. Не публикация, не checkout и не изменение каталога.</div></section>
+    <section class="tool-card"><div class="tool-kicker">Mass Analyzer</div><div class="tool-title">KURGIN Mass Analyzer</div><div class="tool-text">Excel / batch / массовый анализ списка камней. Логика Excel Analyzer не изменялась.</div><div class="tool-meta"><span class="tool-pill">Excel</span><span class="tool-pill">batch</span><span class="tool-pill">массовый анализ</span></div><div class="tool-note">Preview-структура. Не публикация, не checkout и не изменение каталога.</div></section>
   </div>
 
   <div class="tools-tab-content" data-tool-panel="kurgin_academy" hidden>
