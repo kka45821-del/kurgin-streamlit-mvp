@@ -8,6 +8,7 @@ def render_tools_page() -> str:
     <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_index" aria-selected="false">KURGIN Index</button>
     <button type="button" class="tools-tab" role="tab" data-tool-tab="database_analysis" aria-selected="false">Анализ по базе</button>
     <button type="button" class="tools-tab" role="tab" data-tool-tab="excel_analyzer" aria-selected="false">Excel Analyzer</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_academy" aria-selected="false">KURGIN Academy</button>
   </div>
 
   <div class="tools-tab-content" data-tool-panel="single_stone_analyzer">
@@ -24,6 +25,10 @@ def render_tools_page() -> str:
 
   <div class="tools-tab-content" data-tool-panel="excel_analyzer" hidden>
     <section class="tool-card"><div class="tool-kicker">Excel</div><div class="tool-title">Excel Analyzer</div><div class="tool-text">Сценарий анализа Excel-файла для пакетной обработки данных. Логика Excel Analyzer не изменялась.</div><div class="tool-meta"><span class="tool-pill">Excel</span><span class="tool-pill">batch</span></div><div class="tool-note">Preview-структура. Не публикация, не checkout и не изменение каталога.</div></section>
+  </div>
+
+  <div class="tools-tab-content" data-tool-panel="kurgin_academy" hidden>
+    <section class="tool-card"><div class="tool-kicker">Academy</div><div class="tool-title">KURGIN Academy</div><div class="tool-text">Образовательный раздел KURGIN: базовые материалы о лабораторных бриллиантах, параметрах, анализе и интерпретации результатов.</div><div class="tool-meta"><span class="tool-pill">education</span><span class="tool-pill">guide</span></div><div class="tool-note">UX-скелет. Не публичная статья, не сертификат и не инвестиционная рекомендация.</div></section>
   </div>
 </div>
 
