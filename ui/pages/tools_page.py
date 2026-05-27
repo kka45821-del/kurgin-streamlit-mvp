@@ -3,6 +3,14 @@ def render_tools_page() -> str:
     mode_click = "const root=this.closest('.single-tool');const active=this.getAttribute('data-mode');root.querySelectorAll('[data-mode]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-mode-panel]').forEach(p=>p.hidden=p.getAttribute('data-mode-panel')!==active);"
     return f"""
 <div class="tools-page">
+  <div class="tools-tabs" role="tablist" aria-label="Инструменты KURGIN">
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" data-tool-title="KURGIN Analyzer One" data-tool-subtitle="анализ одного камня" aria-selected="false" onclick="{tab_click}">Анализ</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_index" data-tool-title="KURGIN Index" data-tool-subtitle="рыночный ориентир" aria-selected="false" onclick="{tab_click}">Индекс</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="database_analysis" data-tool-title="KURGIN Verify" data-tool-subtitle="проверка данных" aria-selected="false" onclick="{tab_click}">Проверить</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="excel_analyzer" data-tool-title="KURGIN Analyzer Excel" data-tool-subtitle="массовый анализ" aria-selected="false" onclick="{tab_click}">Массовый</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_academy" data-tool-title="KURGIN Academy" data-tool-subtitle="обучение и база знаний" aria-selected="false" onclick="{tab_click}">Обучение</button>
+  </div>
+
   <div class="tools-intro" data-tools-intro>
     <div>Выберите инструмент: анализ одного камня, индекс, проверка данных, массовый анализ или обучение.</div>
     <div class="tools-description-list">
@@ -12,14 +20,6 @@ def render_tools_page() -> str:
       <div><strong>Массовый</strong> — пакетная обработка списка камней через Excel.</div>
       <div><strong>Обучение</strong> — материалы KURGIN Academy для понимания параметров.</div>
     </div>
-  </div>
-
-  <div class="tools-tabs" role="tablist" aria-label="Инструменты KURGIN">
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" data-tool-title="KURGIN Analyzer One" data-tool-subtitle="анализ одного камня" aria-selected="false" onclick="{tab_click}">Анализ</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_index" data-tool-title="KURGIN Index" data-tool-subtitle="рыночный ориентир" aria-selected="false" onclick="{tab_click}">Индекс</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="database_analysis" data-tool-title="KURGIN Verify" data-tool-subtitle="проверка данных" aria-selected="false" onclick="{tab_click}">Проверить</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="excel_analyzer" data-tool-title="KURGIN Analyzer Excel" data-tool-subtitle="массовый анализ" aria-selected="false" onclick="{tab_click}">Массовый</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_academy" data-tool-title="KURGIN Academy" data-tool-subtitle="обучение и база знаний" aria-selected="false" onclick="{tab_click}">Обучение</button>
   </div>
 
   <div class="tools-tab-content" data-tool-panel="single_stone_analyzer" hidden>
