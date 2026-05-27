@@ -1,19 +1,48 @@
 def render_tools_page() -> str:
     tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);"
+    mode_click = "const root=this.closest('.single-tool');const active=this.getAttribute('data-mode');root.querySelectorAll('[data-mode]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-mode-panel]').forEach(p=>p.hidden=p.getAttribute('data-mode-panel')!==active);"
     return f"""
 <div class="tools-page">
-  <div class="tools-intro">Раздел «Инструменты» собирает аналитические и сервисные сценарии KURGIN. KURGIN Score здесь не отдельный инструмент: это коэффициент 0–100 внутри результата KURGIN Analyzer.</div>
-
   <div class="tools-tabs" role="tablist" aria-label="Инструменты KURGIN">
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" aria-selected="true" onclick="{tab_click}">Анализ одного камня</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_index" aria-selected="false" onclick="{tab_click}">KURGIN Index</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="database_analysis" aria-selected="false" onclick="{tab_click}">Анализ по базе</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="excel_analyzer" aria-selected="false" onclick="{tab_click}">Excel Analyzer</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_academy" aria-selected="false" onclick="{tab_click}">KURGIN Academy</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" aria-selected="true" onclick="{tab_click}">Один камень</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_index" aria-selected="false" onclick="{tab_click}">Index</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="database_analysis" aria-selected="false" onclick="{tab_click}">База</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="excel_analyzer" aria-selected="false" onclick="{tab_click}">Excel</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_academy" aria-selected="false" onclick="{tab_click}">Academy</button>
   </div>
 
   <div class="tools-tab-content" data-tool-panel="single_stone_analyzer">
-    <section class="tool-card"><div class="tool-kicker">Analyzer</div><div class="tool-title">KURGIN Analyzer</div><div class="tool-text">Полный анализ одного лабораторного бриллианта: KURGIN Score 0–100, теги, риски, сильные стороны, интерпретации и подробный анализ.</div><div class="tool-meta"><span class="tool-pill">один камень</span><span class="tool-pill">quality analysis</span><span class="tool-pill">KURGIN Score внутри</span></div><div class="tool-note">Не оценка цены, не сертификат, не инвестиционная рекомендация.</div></section>
+    <div class="single-tool">
+      <div class="tool-section-title">Анализ одного камня</div>
+      <div class="single-mode-tabs" role="tablist" aria-label="Способ ввода">
+        <button type="button" class="single-mode-tab" data-mode="photo" aria-selected="false" onclick="{mode_click}"><strong>Фото</strong><span>камера</span></button>
+        <button type="button" class="single-mode-tab" data-mode="upload" aria-selected="true" onclick="{mode_click}"><strong>Загрузка</strong><span>файл</span></button>
+        <button type="button" class="single-mode-tab" data-mode="manual" aria-selected="false" onclick="{mode_click}"><strong>Вручную</strong><span>форма</span></button>
+      </div>
+
+      <section class="single-workspace" data-mode-panel="upload">
+        <div class="workspace-title">Рабочая зона: Загрузка</div>
+        <div class="workspace-text">Загрузите PDF / JPG / PNG<br>документа или сертификата</div>
+        <button type="button" class="single-file-button">[ выбрать файл ]</button>
+      </section>
+
+      <section class="single-workspace" data-mode-panel="photo" hidden>
+        <div class="workspace-title">Рабочая зона: Фото</div>
+        <div class="workspace-text">Сделайте фото документа или сертификата.</div>
+        <button type="button" class="single-file-button">[ открыть камеру ]</button>
+      </section>
+
+      <section class="single-workspace" data-mode-panel="manual" hidden>
+        <div class="workspace-title">Рабочая зона: Вручную</div>
+        <div class="workspace-text">Введите параметры камня вручную.</div>
+        <button type="button" class="single-file-button">[ открыть форму ]</button>
+      </section>
+
+      <section class="single-next-box">
+        <div>Дальше: распознавание → проверка данных</div>
+        <div>→ Karo Score → PDF-отчёт KURGIN Analyzer</div>
+      </section>
+    </div>
   </div>
 
   <div class="tools-tab-content" data-tool-panel="kurgin_index" hidden>
