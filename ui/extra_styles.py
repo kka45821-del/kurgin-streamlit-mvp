@@ -38,6 +38,9 @@ SYSTEM_CSS = r'''
 .catalog-empty .catalog-empty-message,.catalog-error .catalog-error-message{display:block}
 .catalog-empty #cards,.catalog-error #cards{display:none}
 .catalog-empty .controls,.catalog-error .controls{display:none}
+.logo{width:72px!important;height:42px!important;filter:none!important;object-fit:contain!important;image-rendering:auto!important}
+.header{gap:.72rem!important}
+.logo-orb img{filter:none!important}
 .tools-current-title{font-family:'Cinzel','Times New Roman',serif;font-size:.95rem;letter-spacing:.055em;margin:0 0 .6rem;color:#111}
 .tools-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding:0;margin:0 0 1rem;border-bottom:1px solid #111}
 .tools-tab{border:1px solid #d7d7d7;border-bottom:0;background:#fff;border-radius:10px 10px 0 0;min-height:38px;padding:.35rem .15rem;font:inherit;font-size:.67rem;color:#111;white-space:nowrap;margin:0 0 -1px -1px}
