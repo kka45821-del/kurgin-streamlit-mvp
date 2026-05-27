@@ -405,11 +405,8 @@ def _catalog_section_fix_script() -> str:
 
   if(currentPage === 'catalog'){
     activeSection = activeSection || 'all';
-    renderCatalogPage();
-  } else if(currentPage === 'favorites'){
-    renderFavoritesPage();
   }
-  renderNav();
+  setPage(currentPage);
 })();
 """.replace("__REQUEST_CONTACTS_JSON__", json.dumps(REQUEST_CONTACTS, ensure_ascii=False))
 
