@@ -79,6 +79,10 @@ INDEX_BANDS = [
     ("1.50–1.99", "1.5–1.99"),
     ("2.00–2.49", "2–2.49"),
     ("2.50–2.99", "2.5–2.99"),
+    ("3.00–3.49", "3–3.49"),
+    ("3.50–3.99", "3.5–3.99"),
+    ("4.00–4.49", "4–4.49"),
+    ("4.50–4.99", "4.5–4.99"),
 ]
 
 
@@ -178,7 +182,7 @@ def render_tools_page() -> str:
       <div class="index-info-card">
         <div class="index-title">KURGIN Index v1.0</div>
         <div>Обновлено: текущий период</div>
-        <div>Основные камни: 1.00–2.99 ct</div>
+        <div>Основные камни: 1.00–4.99 ct</div>
       </div>
       <div class="index-score-card">
         <div class="index-subtitle">KURGIN Score range</div>
