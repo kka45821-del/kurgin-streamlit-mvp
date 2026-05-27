@@ -17,7 +17,7 @@ PAGE_TITLES = {
     "tools": "KURGIN Tools",
     "catalog": "KURGIN <span>Diamonds</span>",
     "favorites": "Избранное",
-    "cart": "Корзина",
+    "cart": "Заявки / Корзина",
     "profile": "Профиль",
 }
 
@@ -26,8 +26,8 @@ PAGE_SUBTITLES = {
     "tools": "инструменты анализа и подбора",
     "catalog": "лабораторные бриллианты",
     "favorites": "сохранённые камни",
-    "cart": "выбранные камни",
-    "profile": "регистрация и вход",
+    "cart": "будущий checkout не активен",
+    "profile": "аккаунт и профессиональный доступ позже",
 }
 
 
