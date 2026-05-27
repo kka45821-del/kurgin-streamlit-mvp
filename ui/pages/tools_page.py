@@ -72,26 +72,62 @@ PUBLIC_INDEX_ROWS = [
     ("G", "VS1", "3.00–3.49", 95),
 ]
 
+INDEX_COLORS = ["D", "E", "F", "G"]
+INDEX_CLARITIES = ["IF", "VVS1", "VVS2", "VS1", "VS2", "SI1"]
+INDEX_BANDS = [
+    ("1.00–1.49", "1–1.49"),
+    ("1.50–1.99", "1.5–1.99"),
+    ("2.00–2.49", "2–2.49"),
+    ("2.50–2.99", "2.5–2.99"),
+]
 
-def _index_rows_html() -> str:
-    rows = []
-    for color, clarity, carat_band, value in PUBLIC_INDEX_ROWS:
-        rows.append(
-            "<tr>"
-            f"<td>{carat_band}</td>"
-            f"<td>{color}</td>"
-            f"<td>{clarity}</td>"
-            f"<td>{value}</td>"
-            "<td>active</td>"
-            "</tr>"
+
+def _index_value_map() -> dict[tuple[str, str, str], int]:
+    return {(color, clarity, carat_band): int(value) for color, clarity, carat_band, value in PUBLIC_INDEX_ROWS if value > 0}
+
+
+def _index_cell_html(value: int | None) -> str:
+    if value:
+        return f"<div class='index-cell-main'>{value} $/ct</div><div class='index-cell-sub'>Δ%</div>"
+    return "<div class='index-cell-main muted'>request</div><div class='index-cell-sub'>—</div>"
+
+
+def _index_table_for_color(color: str) -> str:
+    values = _index_value_map()
+    header_cells = "".join(f"<th>{label}</th>" for _, label in INDEX_BANDS)
+    body_rows = []
+    for clarity in INDEX_CLARITIES:
+        cells = []
+        for band_key, _ in INDEX_BANDS:
+            cells.append(f"<td>{_index_cell_html(values.get((color, clarity, band_key)))}</td>")
+        body_rows.append(f"<tr><th>{clarity}</th>{''.join(cells)}</tr>")
+    return (
+        "<div class='index-matrix-wrap'>"
+        "<table class='index-matrix'>"
+        f"<thead><tr><th>Clarity</th>{header_cells}</tr></thead>"
+        f"<tbody>{''.join(body_rows)}</tbody>"
+        "</table>"
+        "</div>"
+    )
+
+
+def _index_sections_html() -> str:
+    sections = []
+    for color in INDEX_COLORS:
+        open_attr = " open" if color == "E" else ""
+        sections.append(
+            f"<details class='index-color-section'{open_attr}>"
+            f"<summary>Цвет {color}</summary>"
+            f"{_index_table_for_color(color)}"
+            "</details>"
         )
-    return "".join(rows)
+    return "".join(sections)
 
 
 def render_tools_page() -> str:
     tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);"
     mode_click = "const root=this.closest('.single-tool');const active=this.getAttribute('data-mode');root.querySelectorAll('[data-mode]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-mode-panel]').forEach(p=>p.hidden=p.getAttribute('data-mode-panel')!==active);"
-    index_rows = _index_rows_html()
+    index_sections = _index_sections_html()
     return f"""
 <div class="tools-page">
   <div class="tools-tabs" role="tablist" aria-label="Инструменты KURGIN">
@@ -138,18 +174,20 @@ def render_tools_page() -> str:
   </div>
 
   <div class="tools-tab-content" data-tool-panel="kurgin_index" hidden>
-    <section class="tool-card index-card">
-      <div class="tool-kicker">Index</div>
-      <div class="tool-title">KURGIN Index</div>
-      <div class="tool-text">Публичный индексный ориентир для сопоставления лабораторных бриллиантов по диапазону карат, цвету и чистоте.</div>
-      <div class="tool-note">Не является офертой, финальной ценой конкретного камня, финансовым индексом или инвестиционной рекомендацией.</div>
-      <div class="index-meta">Snapshot: Admin Price Table v0.1 · values: USD / ct · zeros скрыты как request</div>
-      <div class="index-table-wrap">
-        <table class="index-table">
-          <thead><tr><th>Carat</th><th>Color</th><th>Clarity</th><th>USD/ct</th><th>Status</th></tr></thead>
-          <tbody>{index_rows}</tbody>
-        </table>
+    <section class="index-shell">
+      <div class="index-info-card">
+        <div class="index-title">KURGIN Index v1.0</div>
+        <div>Обновлено: текущий период</div>
+        <div>Основные камни: 1.00–2.99 ct</div>
       </div>
+      <div class="index-score-card">
+        <div class="index-subtitle">KURGIN Score range</div>
+        <div>Выбрано: 80–89 · коэффициент ×1</div>
+        <div class="index-hint">selector влияет на значения таблицы, это не фильтр</div>
+      </div>
+      {index_sections}
+      <button type="button" class="index-filter-button">☰ Фильтры Index</button>
+      <div class="tool-note">Индекс — ориентир для сопоставления. Не оферта, не финальная цена конкретного камня, не финансовый индекс и не инвестиционная рекомендация.</div>
     </section>
   </div>
 
