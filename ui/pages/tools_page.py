@@ -3,7 +3,16 @@ def render_tools_page() -> str:
     mode_click = "const root=this.closest('.single-tool');const active=this.getAttribute('data-mode');root.querySelectorAll('[data-mode]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-mode-panel]').forEach(p=>p.hidden=p.getAttribute('data-mode-panel')!==active);"
     return f"""
 <div class="tools-page">
-  <div class="tools-intro" data-tools-intro>Выберите инструмент: анализ одного камня, индекс, проверка данных, массовый анализ или обучение. Раздел не запускает расчёт, пока не выбран конкретный сценарий.</div>
+  <div class="tools-intro" data-tools-intro>
+    <div>Выберите инструмент: анализ одного камня, индекс, проверка данных, массовый анализ или обучение.</div>
+    <div class="tools-description-list">
+      <div><strong>Анализ</strong> — проверка одного камня по фото, файлу или ручному вводу.</div>
+      <div><strong>Индекс</strong> — ориентир рынка для сравнения лабораторных бриллиантов.</div>
+      <div><strong>Проверить</strong> — базовая проверка данных перед анализом или подбором.</div>
+      <div><strong>Массовый</strong> — пакетная обработка списка камней через Excel.</div>
+      <div><strong>Обучение</strong> — материалы KURGIN Academy для понимания параметров.</div>
+    </div>
+  </div>
 
   <div class="tools-tabs" role="tablist" aria-label="Инструменты KURGIN">
     <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" data-tool-title="KURGIN Analyzer One" data-tool-subtitle="анализ одного камня" aria-selected="false" onclick="{tab_click}">Анализ</button>
