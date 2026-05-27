@@ -1,17 +1,19 @@
 def render_tools_page() -> str:
-    tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');const title=this.getAttribute('data-tool-title');const subtitle=this.getAttribute('data-tool-subtitle');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);const headerTitle=document.querySelector('.brand-title');const headerSub=document.querySelector('.brand-sub');if(headerTitle&&title)headerTitle.textContent=title;if(headerSub&&subtitle)headerSub.textContent=subtitle;"
+    tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');const title=this.getAttribute('data-tool-title');const subtitle=this.getAttribute('data-tool-subtitle');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');const intro=root.querySelector('[data-tools-intro]');if(intro)intro.hidden=true;root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);const headerTitle=document.querySelector('.brand-title');const headerSub=document.querySelector('.brand-sub');if(headerTitle&&title)headerTitle.textContent=title;if(headerSub&&subtitle)headerSub.textContent=subtitle;"
     mode_click = "const root=this.closest('.single-tool');const active=this.getAttribute('data-mode');root.querySelectorAll('[data-mode]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-mode-panel]').forEach(p=>p.hidden=p.getAttribute('data-mode-panel')!==active);"
     return f"""
 <div class="tools-page">
+  <div class="tools-intro" data-tools-intro>Выберите инструмент: анализ одного камня, индекс, проверка данных, массовый анализ или обучение. Раздел не запускает расчёт, пока не выбран конкретный сценарий.</div>
+
   <div class="tools-tabs" role="tablist" aria-label="Инструменты KURGIN">
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" data-tool-title="KURGIN Analyzer One" data-tool-subtitle="анализ одного камня" aria-selected="true" onclick="{tab_click}">Анализ</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" data-tool-title="KURGIN Analyzer One" data-tool-subtitle="анализ одного камня" aria-selected="false" onclick="{tab_click}">Анализ</button>
     <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_index" data-tool-title="KURGIN Index" data-tool-subtitle="рыночный ориентир" aria-selected="false" onclick="{tab_click}">Индекс</button>
     <button type="button" class="tools-tab" role="tab" data-tool-tab="database_analysis" data-tool-title="KURGIN Verify" data-tool-subtitle="проверка данных" aria-selected="false" onclick="{tab_click}">Проверить</button>
     <button type="button" class="tools-tab" role="tab" data-tool-tab="excel_analyzer" data-tool-title="KURGIN Analyzer Excel" data-tool-subtitle="массовый анализ" aria-selected="false" onclick="{tab_click}">Массовый</button>
     <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_academy" data-tool-title="KURGIN Academy" data-tool-subtitle="обучение и база знаний" aria-selected="false" onclick="{tab_click}">Обучение</button>
   </div>
 
-  <div class="tools-tab-content" data-tool-panel="single_stone_analyzer">
+  <div class="tools-tab-content" data-tool-panel="single_stone_analyzer" hidden>
     <div class="single-tool">
       <div class="tool-section-title">Анализ одного камня</div>
       <div class="single-mode-tabs" role="tablist" aria-label="Способ ввода">
