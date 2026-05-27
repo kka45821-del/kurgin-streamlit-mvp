@@ -10,7 +10,7 @@ from ui.pages.tools_page import render_tools_page
 from ui.scripts import catalog_script
 from ui.styles import BASE_CSS
 
-LOGO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/Vectorr.svg?v=16"
+LOGO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/Vectorr-header.svg?v=1"
 
 PAGE_TITLES = {
     "kurgin": "KURGIN",
