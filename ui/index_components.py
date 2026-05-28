@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import html
+
 from ui.index_data import INDEX_BANDS, INDEX_CLARITIES, INDEX_COLORS, load_public_index_rows
 from ui.index_score_rules import SCORE_INDEX_RULES, SCORE_RANGE_SELECTOR_ORDER
 from ui.index_scripts import INDEX_PDF_PRINT, SCORE_RANGE_CLICK, SHARE_CLICK
@@ -7,6 +9,10 @@ from ui.score_ranges import KURGIN_SCORE_RANGES, default_score_range_id
 
 
 LOGO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/Vectorr-header.svg?v=1"
+
+
+def _html_attr(value: str) -> str:
+    return html.escape(value, quote=True)
 
 
 def _score_ranges_by_id() -> dict[str, dict[str, object]]:
@@ -94,6 +100,7 @@ def _score_range_selector_html() -> str:
     default_id = default_score_range_id()
     ranges = _score_ranges_by_id()
     buttons = []
+    score_range_click = _html_attr(SCORE_RANGE_CLICK)
     for range_id in SCORE_RANGE_SELECTOR_ORDER:
         item = ranges[range_id]
         rule = SCORE_INDEX_RULES[range_id]
@@ -107,7 +114,7 @@ def _score_range_selector_html() -> str:
             f"data-score-mode='{rule['mode']}' "
             f"data-score-coefficient='{rule['coefficient']}' "
             f"data-score-coefficient-label='{rule['coefficient_label']}' "
-            f"aria-selected='{selected}' onclick=\"{SCORE_RANGE_CLICK}\">"
+            f"aria-selected='{selected}' onclick=\"{score_range_click}\">"
             f"<strong>{item['en']}</strong><span>{item['range_label']}</span><small>{item['ru']}</small>"
             "</button>"
         )
@@ -134,14 +141,16 @@ def render_public_index_tool() -> str:
     index_sections = _index_sections_html()
     score_selector = _score_range_selector_html()
     pdf_template = _pdf_template_html()
+    share_click = _html_attr(SHARE_CLICK)
+    index_pdf_print = _html_attr(INDEX_PDF_PRINT)
     return f"""
 <section class="index-shell" id="kurgin-index">
   <div class="index-info-card">
     <div class="index-title">KURGIN Index v1.0</div>
     <div>Обновлено: текущий период</div>
     <div>Основные камни: 1.00–4.99 ct</div>
-    <button type="button" class="btn light" onclick="{SHARE_CLICK}">↗ Поделиться Index</button>
-    <button type="button" class="btn light" onclick="{INDEX_PDF_PRINT}">⬇ Скачать PDF</button>
+    <button type="button" class="btn light" onclick="{share_click}">↗ Поделиться Index</button>
+    <button type="button" class="btn light" onclick="{index_pdf_print}">⬇ Скачать PDF</button>
   </div>
   <div class="index-score-card">
     <div class="index-subtitle">KURGIN Score range</div>
