@@ -35,6 +35,7 @@ jobs:
           python -m py_compile services/__init__.py
           python -m py_compile services/analyzer_adapter.py
           python -m py_compile scripts/smoke_analyzer_adapter_contract.py
+          python -m py_compile scripts/smoke_analyzer_preview_ui.py
           python -m py_compile ui/mobile_shell.py
           python -m py_compile ui/scripts.py
           python -m py_compile ui/extra_styles.py
@@ -68,3 +69,7 @@ jobs:
       - name: Run Analyzer adapter contract smoke checks
         run: |
           python scripts/smoke_analyzer_adapter_contract.py
+
+      - name: Run Analyzer preview UI smoke checks
+        run: |
+          python scripts/smoke_analyzer_preview_ui.py
