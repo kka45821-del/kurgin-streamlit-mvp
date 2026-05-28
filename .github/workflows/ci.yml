@@ -2,6 +2,12 @@ name: KURGIN Streamlit CI
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   checks:
@@ -27,6 +33,30 @@ jobs:
           python -m py_compile catalog/catalog_core.py
           python -m py_compile catalog/data_loader.py
           python -m py_compile ui/mobile_shell.py
+          python -m py_compile ui/scripts.py
+          python -m py_compile ui/extra_styles.py
+          python -m py_compile ui/styles.py
+          python -m py_compile ui/index_components.py
+          python -m py_compile ui/index_data.py
+          python -m py_compile ui/index_scripts.py
+          python -m py_compile ui/index_styles.py
+          python -m py_compile ui/pages/kurgin_page.py
+          python -m py_compile ui/pages/tools_page.py
+          python -m py_compile ui/pages/favorites_page.py
+          python -m py_compile ui/pages/cart_page.py
+          python -m py_compile ui/pages/profile_page.py
+          python -m py_compile config/request_contacts.py
+
+      - name: Check forbidden production patterns
+        shell: bash
+        run: |
+          set -euo pipefail
+          pattern='onerror|textarea|new[[:space:]]+Function|eval[[:space:]]*\(|createOrder'
+          targets=(app.py catalog config ui)
+          if grep -RInE "$pattern" -- "${targets[@]}"; then
+            echo "Forbidden production pattern found. Remove it or move it out of production code."
+            exit 1
+          fi
 
       - name: Run public price state smoke checks
         run: |
