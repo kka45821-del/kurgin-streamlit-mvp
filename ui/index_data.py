@@ -101,7 +101,10 @@ PUBLIC_INDEX_ACTIVE_STATUSES = {"", "ok", "active"}
 
 
 def _carat_band_label(carat_band_from: float, carat_band_to: float) -> str:
-    return f"{carat_band_from:.2f}–{carat_band_to:.2f}"
+    # Admin table stores half-open bands such as 1.00–1.50.
+    # Public matrix displays buyer-friendly inclusive labels such as 1.00–1.49.
+    public_to = carat_band_to - 0.01 if carat_band_to > carat_band_from else carat_band_to
+    return f"{carat_band_from:.2f}–{public_to:.2f}"
 
 
 def _normalize_public_index_row(row: dict[str, Any]) -> tuple[str, str, str, int] | None:
