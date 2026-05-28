@@ -10,6 +10,61 @@ INDEX_INIT = r"""
     return target && target.closest ? target.closest('.index-shell') : null;
   }
 
+  function showIndexNotice(root, message){
+    if(!root) return;
+    const notice = root.querySelector('.index-action-notice');
+    if(!notice) return;
+    notice.textContent = message || '';
+    notice.hidden = !message;
+    if(message){
+      window.setTimeout(() => {
+        if(notice.textContent === message){
+          notice.textContent = '';
+          notice.hidden = true;
+        }
+      }, 2200);
+    }
+  }
+
+  function currentIndexUrl(){
+    let url;
+    try{
+      url = new URL(window.parent.location.href);
+    }catch(e){
+      url = new URL(window.location.href);
+    }
+    url.searchParams.set('page', 'tools');
+    url.searchParams.set('tool', 'kurgin_index');
+    url.hash = 'kurgin-index';
+    return url.toString();
+  }
+
+  function shareIndex(root){
+    const url = currentIndexUrl();
+    const shareData = {
+      title: 'KURGIN Index',
+      text: 'KURGIN Index — ориентир для сопоставления лабораторных бриллиантов.',
+      url: url
+    };
+    if(navigator.share){
+      navigator.share(shareData)
+        .then(() => showIndexNotice(root, 'Ссылка Index подготовлена.'))
+        .catch(() => showIndexNotice(root, 'Поделиться не удалось. Ссылка осталась на этой странице.'));
+      return;
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url)
+        .then(() => showIndexNotice(root, 'Ссылка Index скопирована.'))
+        .catch(() => showIndexNotice(root, 'Не удалось скопировать ссылку.'));
+      return;
+    }
+    showIndexNotice(root, 'Скопируйте ссылку из адресной строки браузера.');
+  }
+
+  function showPdfPlaceholder(root){
+    showIndexNotice(root, 'PDF Index будет подключён отдельно.');
+  }
+
   function syncIndexTableWidth(root){
     if(!root) return;
     const clarityWidth = 82;
@@ -238,6 +293,8 @@ INDEX_INIT = r"""
     const root = indexRootFromTarget(button);
     if(!root) return;
     const action = button.getAttribute('data-index-action');
+    if(action === 'share') shareIndex(root);
+    if(action === 'pdf-placeholder') showPdfPlaceholder(root);
     if(action === 'score-range') applyScoreRange(root, button);
     if(action === 'view-toggle') toggleViewPanel(root, button);
     if(action === 'view-close') closeViewPanel(root);
