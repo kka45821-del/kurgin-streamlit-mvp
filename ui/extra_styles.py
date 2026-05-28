@@ -62,7 +62,6 @@ SYSTEM_CSS = r'''
 .single-next-box{border:1px solid #d0d0d0;border-radius:16px;background:#fff;padding:1rem;font-size:.72rem;line-height:1.45}
 .disabledStaticButton,.disabledMode,.inactiveField{opacity:.5!important;cursor:not-allowed!important;filter:grayscale(1)}
 .disabledStaticButton,.disabledMode{pointer-events:none!important;background:#f4f3f1!important;color:#777!important;border-color:#ddd!important}
-.index-info-card .btn.light{opacity:.42!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#777!important;border-color:#ddd!important}
 .actions .act.disabled{opacity:.18!important;pointer-events:none!important;filter:grayscale(1)}
 .actions .act.requestDetailBtn{opacity:1!important;pointer-events:auto!important;filter:none!important;background:#111!important;color:#fff!important;border-color:#111!important}
 .actions .act.requestDetailBtn svg{stroke-width:1.7}
