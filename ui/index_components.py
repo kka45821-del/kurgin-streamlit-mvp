@@ -165,8 +165,8 @@ def render_public_index_tool() -> str:
     <div class="index-range-summary-coefficient">Коэффициент: ×1.00</div>
     <div class="index-range-disclaimer">Это индексный ориентир для сопоставления лабораторных бриллиантов. Это не цена конкретного камня, не оферта, не финансовый индекс и не инвестиционная рекомендация.</div>
   </div>
-  <button type="button" class="index-filter-button">☰ Фильтры Index</button>
-  <div class="tool-note">Индекс — ориентир для сопоставления. Не оферта, не финальная цена конкретного камня, не финансовый индекс и не инвестиционная рекомендация.</div>
+  <button type="button" class="index-filter-button">☰ Вид таблицы Index</button>
+  <div class="tool-note">“Вид таблицы Index” — это будущие настройки просмотра самой таблицы индекса, не фильтры каталога. Индекс остаётся ориентиром: не оферта, не финальная цена конкретного камня, не финансовый индекс и не инвестиционная рекомендация.</div>
   {pdf_template}
 </section>
 """
