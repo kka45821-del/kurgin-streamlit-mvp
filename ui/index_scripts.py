@@ -15,3 +15,9 @@ INDEX_VIEW_TOGGLE = "const shell=this.closest('.index-shell');const panel=shell&
 INDEX_EXPAND_ALL_COLORS = "const shell=this.closest('.index-shell');shell.querySelectorAll('.index-color-section').forEach(section=>{section.open=true;});"
 
 INDEX_COLLAPSE_ALL_COLORS = "const shell=this.closest('.index-shell');shell.querySelectorAll('.index-color-section').forEach(section=>{section.open=false;});"
+
+INDEX_VIEW_OPTION_TOGGLE = "const shell=this.closest('.index-shell');const type=this.getAttribute('data-index-view-type');const value=this.getAttribute('data-index-view-value');const active=this.getAttribute('aria-pressed')!=='true';this.setAttribute('aria-pressed',String(active));if(type==='color'){shell.querySelectorAll('.index-color-section[data-index-color=\\\"'+value+'\\\"]').forEach(el=>{el.hidden=!active;});}if(type==='clarity'){shell.querySelectorAll('tr[data-index-clarity=\\\"'+value+'\\\"]').forEach(el=>{el.hidden=!active;});}if(type==='band'){shell.querySelectorAll('[data-index-band=\\\"'+value+'\\\"]').forEach(el=>{el.hidden=!active;});}"
+
+INDEX_VIEW_SHOW_ALL = "const shell=this.closest('.index-shell');shell.querySelectorAll('.index-view-choice').forEach(button=>button.setAttribute('aria-pressed','true'));shell.querySelectorAll('.index-color-section,[data-index-clarity],[data-index-band]').forEach(el=>{el.hidden=false;});"
+
+INDEX_VIEW_RESET = "const shell=this.closest('.index-shell');shell.querySelectorAll('.index-view-choice').forEach(button=>button.setAttribute('aria-pressed','true'));shell.querySelectorAll('.index-color-section,[data-index-clarity],[data-index-band]').forEach(el=>{el.hidden=false;});shell.querySelectorAll('.index-color-section').forEach(section=>{section.open=section.getAttribute('data-index-color')==='E';});"
