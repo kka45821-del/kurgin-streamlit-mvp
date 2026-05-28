@@ -120,7 +120,7 @@ def _catalog_section_fix_script() -> str:
     return String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
   }
 
-  window.catalogNormalizeFilterValue = window.catalogNormalizeFilterValue || function catalogNormalizeFilterValue(group, value){
+  window.catalogNormalizeFilterValue = function catalogNormalizeFilterValue(group, value){
     const raw = String(value || '').trim();
     const v = raw.toLowerCase().replace(/ё/g,'е').replace(/,/g,'.').replace(/\s+/g,' ');
     if(group === 'shape'){
@@ -140,7 +140,7 @@ def _catalog_section_fix_script() -> str:
     return raw;
   };
 
-  window.finishMatches = window.finishMatches || function finishMatches(actual, selected){
+  window.finishMatches = function finishMatches(actual, selected){
     const normalizedActual = window.catalogNormalizeFilterValue('finish', actual);
     const normalizedSelected = window.catalogNormalizeFilterValue('finish', selected);
     if(!normalizedSelected) return true;
@@ -153,7 +153,7 @@ def _catalog_section_fix_script() -> str:
     return false;
   };
 
-  window.filterMatches = window.filterMatches || function filterMatches(group, actual, selected){
+  window.filterMatches = function filterMatches(group, actual, selected){
     if(group === 'finish') return window.finishMatches(actual, selected);
     return window.catalogNormalizeFilterValue(group, actual) === window.catalogNormalizeFilterValue(group, selected);
   };
@@ -168,6 +168,41 @@ def _catalog_section_fix_script() -> str:
     if(Number.isFinite(number) && number > 0) return number;
     return direction === 'asc' ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
   };
+
+  window.catalogFilter = function catalogFilter(){
+    if(!document.getElementById('cards')) return;
+    const active = {};
+    groups.forEach(group => { active[group] = []; });
+    document.querySelectorAll('.chip').forEach(chip => {
+      if(chip.classList.contains('on')) active[chip.dataset.group].push(chip.dataset.value);
+    });
+    let visibleCount = 0;
+    document.querySelectorAll('.card').forEach(card => {
+      let visible = true;
+      groups.forEach(group => {
+        if(active[group].length && !active[group].some(selected => window.filterMatches(group, card.dataset[group] || '', selected))) visible = false;
+      });
+      card.classList.toggle('hide', !visible);
+      if(visible) visibleCount += 1;
+    });
+    const emptyNode = document.getElementById('empty');
+    if(emptyNode){
+      emptyNode.innerHTML = "По выбранным фильтрам камни не найдены.<br><button class='btn light' type='button' data-reset-filters>Сбросить фильтры</button>";
+      emptyNode.classList.toggle('show', visibleCount === 0);
+    }
+  };
+
+  window.resetCatalogFilters = function resetCatalogFilters(){
+    document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('on'));
+    window.catalogFilter();
+  };
+
+  document.addEventListener('click', event => {
+    const resetButton = event.target.closest('[data-reset-filters]');
+    if(!resetButton) return;
+    event.preventDefault();
+    window.resetCatalogFilters();
+  });
 
   function stoneKey(stone){
     return String((stone && (stone.id || stone.stone_id || stone.report)) || '');
@@ -357,7 +392,7 @@ def _catalog_section_fix_script() -> str:
     wireCards();
     wireFavoriteButtons();
     wireRequestButtons();
-    filter();
+    window.catalogFilter();
   };
 
   function wireFavoriteButtons(){
