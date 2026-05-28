@@ -81,13 +81,24 @@ INDEX_INIT = r"""
       tracking = true;
     }, {passive: true});
 
+    panel.addEventListener('touchmove', event => {
+      if(!tracking || !event.touches || !event.touches.length) return;
+      const touch = event.touches[0];
+      const deltaY = touch.clientY - startY;
+      const deltaX = Math.abs(touch.clientX - startX);
+      if(deltaY > 26 && deltaX < 130 && panel.scrollTop <= 4){
+        tracking = false;
+        closeViewPanel(root);
+      }
+    }, {passive: true});
+
     panel.addEventListener('touchend', event => {
       if(!tracking || !event.changedTouches || !event.changedTouches.length) return;
       tracking = false;
       const touch = event.changedTouches[0];
       const deltaY = touch.clientY - startY;
       const deltaX = Math.abs(touch.clientX - startX);
-      if(deltaY > 42 && deltaX < 130 && panel.scrollTop <= 18){
+      if(deltaY > 34 && deltaX < 130 && panel.scrollTop <= 18){
         closeViewPanel(root);
       }
     }, {passive: true});
@@ -101,6 +112,7 @@ INDEX_INIT = r"""
     panel.hidden = !shouldOpen;
     button.setAttribute('aria-expanded', String(shouldOpen));
     if(shouldOpen){
+      panel.scrollTop = 0;
       ensureViewPanelSwipeClose(root);
     }
   }
