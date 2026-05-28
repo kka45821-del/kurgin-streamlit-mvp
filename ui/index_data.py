@@ -97,6 +97,8 @@ PUBLIC_INDEX_SNAPSHOT_PATHS = (
     Path(__file__).resolve().parents[1] / "public_index.json",
 )
 
+PUBLIC_INDEX_ACTIVE_STATUSES = {"", "ok", "active"}
+
 
 def _carat_band_label(carat_band_from: float, carat_band_to: float) -> str:
     return f"{carat_band_from:.2f}–{carat_band_to:.2f}"
@@ -104,7 +106,7 @@ def _carat_band_label(carat_band_from: float, carat_band_to: float) -> str:
 
 def _normalize_public_index_row(row: dict[str, Any]) -> tuple[str, str, str, int] | None:
     status = str(row.get("status", "")).strip().lower()
-    if status and status != "ok":
+    if status not in PUBLIC_INDEX_ACTIVE_STATUSES:
         return None
 
     color = str(row.get("color", "")).strip().upper()
