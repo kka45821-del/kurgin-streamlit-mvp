@@ -10,6 +10,17 @@ INDEX_INIT = r"""
     return target && target.closest ? target.closest('.index-shell') : null;
   }
 
+  function syncIndexTableWidth(root){
+    if(!root) return;
+    const visibleBandHeaders = root.querySelectorAll('thead [data-index-band]:not([hidden])');
+    const count = Math.max(visibleBandHeaders.length, 1);
+    const clarityWidth = 82;
+    const bandWidth = 84;
+    const tableWidth = clarityWidth + (count * bandWidth);
+    root.style.setProperty('--index-table-width', tableWidth + 'px');
+    root.style.setProperty('--index-visible-band-count', String(count));
+  }
+
   function applyScoreRange(root, button){
     if(!root || !button) return;
     const card = button.closest('.index-score-card');
@@ -116,6 +127,7 @@ INDEX_INIT = r"""
     if(shouldOpen){
       panel.scrollTop = 0;
       ensureViewPanelHandleClose(root);
+      syncIndexTableWidth(root);
     }
   }
 
@@ -139,6 +151,7 @@ INDEX_INIT = r"""
     }
     if(type === 'band'){
       root.querySelectorAll('[data-index-band="' + value + '"]').forEach(el => { el.hidden = !active; });
+      syncIndexTableWidth(root);
     }
   }
 
@@ -146,6 +159,7 @@ INDEX_INIT = r"""
     if(!root) return;
     root.querySelectorAll('.index-view-choice').forEach(button => button.setAttribute('aria-pressed', 'true'));
     root.querySelectorAll('.index-color-section,[data-index-clarity],[data-index-band]').forEach(el => { el.hidden = false; });
+    syncIndexTableWidth(root);
   }
 
   function resetView(root){
@@ -154,6 +168,7 @@ INDEX_INIT = r"""
     root.querySelectorAll('.index-color-section').forEach(section => {
       section.open = section.getAttribute('data-index-color') === 'E';
     });
+    syncIndexTableWidth(root);
   }
 
   document.addEventListener('click', event => {
