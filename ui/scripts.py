@@ -82,14 +82,14 @@ document.addEventListener('click', (event) => {
 const sections=[['small','Мелкие','0–0.29 ct'],['medium','Средние','0.30–0.99 ct'],['main','Основной каталог','1.00–2.99 ct'],['large','Крупные','3.00+ ct'],['colored','Цветные',''],['side','Боковые',''],['pairs','Парные',''],['exclusive','Эксклюзив','']];
 let activeSection='main';
 let sort='price_asc';
-const sortLabels={score_desc:'по Karo Score ↓',score_asc:'по Karo Score ↑',price_asc:'по цене ↑',price_desc:'по цене ↓',carat_asc:'по весу ↑',carat_desc:'по весу ↓',diameter_asc:'по диаметру ↑',diameter_desc:'по диаметру ↓',new:'по новизне'};
+const sortLabels={score_desc:'по KURGIN Score ↓',score_asc:'по KURGIN Score ↑',price_asc:'по цене ↑',price_desc:'по цене ↓',carat_asc:'по весу ↑',carat_desc:'по весу ↓',diameter_asc:'по диаметру ↑',diameter_desc:'по диаметру ↓',new:'по новизне'};
 const groups=['shape','weight','color','clarity','score','fluorescence','finish'];
 
 function renderCatalogPage(){
   content.innerHTML = pageHeader(pageTitles.catalog, pageSubtitles.catalog) + `
     <div class='top'><div class='catalogBox' id='catalogBox'><button class='select' id='catalogBtn'><div><div class='select-title' id='sectionTitle'>Основной каталог</div><div class='select-sub' id='sectionSub'>1.00–2.99 ct</div></div><div class='chev'><svg viewBox='0 0 20 20'><path d='M5 8l5 5 5-5'/></svg></div></button><div class='menu' id='catalogMenu'></div></div><div class='pick'>Индив.<br>подбор</div></div>
-    <div class='cols'><div>ФОРМА</div><div>КАРАТ</div><div>ЦВЕТ</div><div>ЧИСТОТА</div><div>KARO SCORE</div><div>ЦЕНА</div></div>
-    <div id='cards'></div><div class='empty' id='empty'>По выбранному разделу и фильтрам камни не найдены</div>`;
+    <div class='cols'><div>ФОРМА</div><div>КАРАТ</div><div>ЦВЕТ</div><div>ЧИСТОТА</div><div>KURGIN SCORE</div><div>ЦЕНА</div></div>
+    <div id='cards'></div><div class='empty' id='empty'>По выбранным фильтрам камни не найдены.<br><button class='btn light' type='button' data-reset-filters>Сбросить фильтры</button></div>`;
   setupCatalog();
   content.scrollTop = 0;
 }
@@ -117,9 +117,57 @@ function drawMenu(){
 function mkTags(score,base){return (base||'')+(Number(score)>=98.5?'<span class="tag elite">ELITE</span>':'')}
 function shapeKey(s){return (s.shape==='Круг'||s.shape==='Round')?'Round':(s.shape||'')}
 
-sortList.innerHTML=`<div class=group><div class=g-name>Karo Score</div><div class=sorts><button class=sort data-sort=score_desc>по Karo Score ↓</button><button class=sort data-sort=score_asc>по Karo Score ↑</button></div></div><div class=group><div class=g-name>Цена</div><div class=sorts><button class='sort on' data-sort=price_asc>по цене ↑</button><button class=sort data-sort=price_desc>по цене ↓</button></div></div><div class=group><div class=g-name>Вес</div><div class=sorts><button class=sort data-sort=carat_asc>по весу ↑</button><button class=sort data-sort=carat_desc>по весу ↓</button></div></div><div class=group><div class=g-name>Диаметр</div><div class=sorts><button class=sort data-sort=diameter_asc>по диаметру ↑</button><button class=sort data-sort=diameter_desc>по диаметру ↓</button></div></div><div class=group><div class=g-name>Прочее</div><div class=sorts><button class=sort data-sort=new>по новизне</button></div></div>`;
+function normalizeFilterValue(group, value){
+  let raw = String(value || '').trim();
+  let v = raw.toLowerCase().replace(/ё/g,'е').replace(/,/g,'.').replace(/\s+/g,' ');
+  if(group === 'shape'){
+    if(['round','круг','круглый'].includes(v)) return 'round';
+    if(v.includes('oval') || v.includes('овал')) return 'oval';
+    if(v.includes('pear') || v.includes('капля')) return 'pear';
+    if(v.includes('cushion') || v.includes('кушон')) return 'cushion';
+  }
+  if(group === 'color' || group === 'clarity') return raw.toUpperCase();
+  if(group === 'fluorescence'){
+    if(!v || v === 'none' || v === 'no' || v === 'нет') return 'none';
+    if(v.includes('faint')) return 'faint';
+    if(v.includes('medium')) return 'medium';
+    if(v.includes('strong')) return 'strong';
+  }
+  if(group === 'finish') return v.toUpperCase().replace(/[\/\-+\s]/g,'');
+  return raw;
+}
 
-filterContent.innerHTML=[['shape','1. Форма / огранка',['Round','Oval','Pear','Cushion']],['weight','2. Вес',['1–1.49','1.5–1.99','2–2.49','2.5–2.99']],['color','3. Цвет',['D','E','F','G','H']],['clarity','4. Чистота',['IF','VVS1','VVS2','VS1','VS2']],['score','5. Karo Score',['0–49','50–79','80–89','90–94.9','95–98','99+']],['fluorescence','6. Флюоресценция',['None','Faint','Medium','Strong']],['finish','7. Качество отделки',['Ex/Ex/Ex+','2Ex/1VG+']]].map(g=>`<div class=group><div class=g-name>${g[1]}</div><div class=chips>${g[2].map((v,i)=>`<button class='chip ${g[0]=='shape'&&i==0?'on':''}' data-group='${g[0]}' data-value='${v}'>${v}</button>`).join('')}</div></div>`).join('');
+function finishMatches(actual, selected){
+  const normalizedActual = normalizeFilterValue('finish', actual);
+  const normalizedSelected = normalizeFilterValue('finish', selected);
+  if(!normalizedSelected) return true;
+  if(normalizedActual === normalizedSelected) return true;
+  const exCount = (String(actual || '').toUpperCase().match(/EX/g) || []).length;
+  const vgCount = (String(actual || '').toUpperCase().match(/VG/g) || []).length;
+  if(normalizedSelected === 'EXEXEX' || normalizedSelected === '3EX') return exCount >= 3;
+  if(normalizedSelected === '2EX1VG') return exCount >= 2 && (vgCount >= 1 || exCount >= 3);
+  return false;
+}
+
+function filterMatches(group, actual, selected){
+  if(group === 'finish') return finishMatches(actual, selected);
+  return normalizeFilterValue(group, actual) === normalizeFilterValue(group, selected);
+}
+
+function sortNumber(stone, key, direction){
+  let value = stone[key];
+  if(key === 'diameter'){
+    value = String(value || '').replace(',', '.').match(/\d+(?:\.\d+)?/);
+    value = value ? value[0] : '';
+  }
+  const number = Number(value || 0);
+  if(Number.isFinite(number) && number > 0) return number;
+  return direction === 'asc' ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+}
+
+sortList.innerHTML=`<div class=group><div class=g-name>KURGIN Score</div><div class=sorts><button class=sort data-sort=score_desc>по KURGIN Score ↓</button><button class=sort data-sort=score_asc>по KURGIN Score ↑</button></div></div><div class=group><div class=g-name>Цена</div><div class=sorts><button class='sort on' data-sort=price_asc>по цене ↑</button><button class=sort data-sort=price_desc>по цене ↓</button></div></div><div class=group><div class=g-name>Вес</div><div class=sorts><button class=sort data-sort=carat_asc>по весу ↑</button><button class=sort data-sort=carat_desc>по весу ↓</button></div></div><div class=group><div class=g-name>Диаметр</div><div class=sorts><button class=sort data-sort=diameter_asc>по диаметру ↑</button><button class=sort data-sort=diameter_desc>по диаметру ↓</button></div></div><div class=group><div class=g-name>Прочее</div><div class=sorts><button class=sort data-sort=new>по новизне</button></div></div>`;
+
+filterContent.innerHTML=[['shape','1. Форма / огранка',['Round','Oval','Pear','Cushion']],['weight','2. Вес',['1–1.49','1.5–1.99','2–2.49','2.5–2.99','3+']],['color','3. Цвет',['D','E','F','G','H']],['clarity','4. Чистота',['IF','VVS1','VVS2','VS1','VS2']],['score','5. KURGIN Score',['0–49','50–79','80–89','90–94.9','95–98','99+']],['fluorescence','6. Флюоресценция',['None','Faint','Medium','Strong']],['finish','7. Качество отделки',['Ex/Ex/Ex+','2Ex/1VG+']]].map(g=>`<div class=group><div class=g-name>${g[1]}</div><div class=chips>${g[2].map(v=>`<button class='chip' data-group='${g[0]}' data-value='${v}'>${v}</button>`).join('')}</div></div>`).join('');
 
 const actions=`<button class=act data-stop=1>${icon('message')}</button><button class=act data-stop=1>${icon('reserve')}</button><button class='act infoBtn'>${icon('info')}</button><button class=act data-stop=1>${icon('heart')}</button><button class=act data-stop=1>${icon('shopping')}</button><button class=act data-stop=1>${icon('share')}</button>`;
 
@@ -127,7 +175,7 @@ function source(){
   let a=activeSection==='main'?stones:stones.filter(x=>x.section===activeSection);
   if(sort==='new') return a;
   let [k,d]=sort.split('_');
-  return [...a].sort((x,y)=>{let xv=Number(x[k]||0),yv=Number(y[k]||0);return d==='asc'?xv-yv:yv-xv});
+  return [...a].sort((x,y)=>{let xv=sortNumber(x,k,d),yv=sortNumber(y,k,d);return d==='asc'?xv-yv:yv-xv});
 }
 
 function renderCards(){
@@ -151,11 +199,31 @@ function filter(){
   let f=activeFilters(),n=0;
   document.querySelectorAll('.card').forEach(card=>{
     let v=true;
-    groups.forEach(g=>{if(f[g].length&&!f[g].includes(card.dataset[g]))v=false});
+    groups.forEach(g=>{if(f[g].length&&!f[g].some(selected=>filterMatches(g,card.dataset[g] || '',selected)))v=false});
     card.classList.toggle('hide',!v);
     if(v)n++;
   });
-  empty.classList.toggle('show',n===0);
+  if(empty){
+    empty.innerHTML="По выбранным фильтрам камни не найдены.<br><button class='btn light' type='button' data-reset-filters>Сбросить фильтры</button>";
+    empty.classList.toggle('show',n===0);
+  }
+}
+
+function resetFilters(){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  filter();
+}
+
+function installCatalogSortCleanup(){
+  window.source = function source(){
+    let a = activeSection === 'all' ? stones : stones.filter(x => x.section === activeSection);
+    if(sort === 'new') return a;
+    let [k, d] = sort.split('_');
+    return [...a].sort((x, y) => {
+      let xv = sortNumber(x, k, d), yv = sortNumber(y, k, d);
+      return d === 'asc' ? xv - yv : yv - xv;
+    });
+  };
 }
 
 function open(t){
@@ -170,7 +238,7 @@ function close(){
 
 function openDetail(i){
   let s=stones[i];
-  detailContent.innerHTML=`<div class=detailTop><div><div class=detailName>${s.shape||''} ${Number(s.carat||0).toFixed(2).replace('.00','')} ct</div><div class=tags style='justify-content:flex-start;margin-top:.55rem'>${mkTags(s.score,s.tags)}</div></div><div class=detailPrice>${s.priceText||''} ₽</div></div><div class=detailGrid><div class=detailCell><div class=detailLabel>Цвет</div><div class=detailValue>${s.color||''}</div></div><div class=detailCell><div class=detailLabel>Чистота</div><div class=detailValue>${s.clarity||''}</div></div><div class=detailCell><div class=detailLabel>Karo Score</div><div class='detailValue scoreBold'>${s.score||''}</div></div><div class=detailCell><div class=detailLabel>Диаметр</div><div class=detailValue>${s.diameter||''} мм</div></div><div class=detailCell><div class=detailLabel>Флюоресценция</div><div class=detailValue>${s.fluor||s.fluorescence||''}</div></div><div class=detailCell><div class=detailLabel>Отделка</div><div class=detailValue>${s.finish||''}</div></div></div><div class=detailNote>Сертификат: ${s.report||''}<br>${s.meta||''}<br>Подробная профессиональная карточка будет расширяться: параметры, пропорции, световое поведение и условия резерва.</div><div class=detailActions><button class='detailBtn dark'>В корзину</button><button class=detailBtn>В избранное</button></div>`;
+  detailContent.innerHTML=`<div class=detailTop><div><div class=detailName>${s.shape||''} ${Number(s.carat||0).toFixed(2).replace('.00','')} ct</div><div class=tags style='justify-content:flex-start;margin-top:.55rem'>${mkTags(s.score,s.tags)}</div></div><div class=detailPrice>${s.priceText||''} ₽</div></div><div class=detailGrid><div class=detailCell><div class=detailLabel>Цвет</div><div class=detailValue>${s.color||''}</div></div><div class=detailCell><div class=detailLabel>Чистота</div><div class=detailValue>${s.clarity||''}</div></div><div class=detailCell><div class=detailLabel>KURGIN Score</div><div class='detailValue scoreBold'>${s.score||''}</div></div><div class=detailCell><div class=detailLabel>Диаметр</div><div class=detailValue>${s.diameter||''} мм</div></div><div class=detailCell><div class=detailLabel>Флюоресценция</div><div class=detailValue>${s.fluor||s.fluorescence||''}</div></div><div class=detailCell><div class=detailLabel>Отделка</div><div class=detailValue>${s.finish||''}</div></div></div><div class=detailNote>Документ / report: ${s.report||'—'}<br>${s.meta||''}<br>Параметры карточки будут уточняться: пропорции, световое поведение и условия запроса.</div><div class=detailActions><button class='detailBtn dark disabled' type='button' disabled>Запросить условия</button><button class=detailBtn>В избранное</button></div>`;
   open('detail');
 }
 
@@ -188,9 +256,10 @@ handle.onclick=close;
 sortHandle.onclick=close;
 detailHandle.onclick=close;
 closeDetail.onclick=close;
-document.querySelectorAll('.sort').forEach(b=>b.onclick=()=>{sort=b.dataset.sort;renderCards();close()});
-document.addEventListener('click',e=>{if(e.target.classList.contains('chip')){e.target.classList.toggle('on');filter()}});
-reset.onclick=()=>{document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));filter()};
+document.querySelectorAll('.sort').forEach(b=>b.onclick=()=>{sort=b.dataset.sort;installCatalogSortCleanup();renderCards();close()});
+document.addEventListener('click',e=>{if(e.target.classList.contains('chip')){e.target.classList.toggle('on');filter()} if(e.target.closest('[data-reset-filters]')){e.preventDefault();resetFilters();}});
+reset.onclick=resetFilters;
+setTimeout(installCatalogSortCleanup,0);
 
 function addSwipe(el){
   let sy=0,sx=0,drag=false;
