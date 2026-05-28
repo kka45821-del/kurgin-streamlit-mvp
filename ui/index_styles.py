@@ -30,7 +30,7 @@ INDEX_CSS = r'''
 .index-matrix tbody th{background:#fafafa}
 .index-cell-main{font-size:.72rem;line-height:1.15}
 .index-cell-sub{font-size:.65rem;line-height:1.15;margin-top:.18rem}
-.index-view-panel{position:fixed;left:50%;bottom:calc(124px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:38;width:calc(100% - 22px);max-width:408px;max-height:min(62vh,520px);overflow:auto;-webkit-overflow-scrolling:touch;box-shadow:0 16px 46px rgba(0,0,0,.18)}
+.index-view-panel{position:fixed;left:50%;bottom:calc(122px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:38;width:100%;max-width:430px;box-sizing:border-box;max-height:min(66vh,540px);overflow:auto;-webkit-overflow-scrolling:touch;box-shadow:0 -12px 38px rgba(0,0,0,.18);border-radius:18px 18px 0 0;margin:0;touch-action:pan-y}
 .index-view-panel[hidden]{display:none!important}
 .index-view-actions{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin:.75rem 0}
 .index-view-action{border:1px solid #aaa;border-radius:13px;background:#fff;min-height:40px;font:inherit;font-size:.72rem;color:#111}
@@ -40,6 +40,6 @@ INDEX_CSS = r'''
 .index-view-choice{border:1px solid #aaa;border-radius:999px;background:#fff;min-height:34px;padding:.35rem .65rem;font:inherit;font-size:.68rem;color:#111}
 .index-view-choice[aria-pressed="true"]{border-color:#111;background:#efefef;font-weight:700}
 .index-view-choice[aria-pressed="false"]{opacity:.42;background:#fafafa}
-.index-filter-button{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom));z-index:39;width:100%;max-width:430px;border:1px solid #777;border-radius:20px 20px 0 0;background:#f3f3f3;min-height:58px;font:inherit;font-size:.92rem;color:#111}
+.index-filter-button{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom));z-index:39;width:100%;max-width:430px;border:1px solid #777;border-radius:0;background:#f3f3f3;min-height:58px;font:inherit;font-size:.92rem;color:#111}
 .index-filter-button[aria-expanded="true"]{background:#111;color:#fff;border-color:#111}
 '''
