@@ -1,3 +1,6 @@
+from ui.index_scripts import INDEX_INIT
+
+
 def catalog_script(stones_json: str, initial_page: str, pages_json: str, titles_json: str, subtitles_json: str, logo_url: str) -> str:
     template = r"""
 const stones = __STONES_JSON__;
@@ -209,4 +212,6 @@ setPage(currentPage);
         .replace("__TITLES_JSON__", titles_json)
         .replace("__SUBTITLES_JSON__", subtitles_json)
         .replace("__LOGO_URL__", logo_url)
+        + "\n"
+        + INDEX_INIT
     )
