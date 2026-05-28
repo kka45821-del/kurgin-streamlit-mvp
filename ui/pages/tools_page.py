@@ -88,6 +88,30 @@ INDEX_BANDS = [
     ("4.50–4.99", "4.5–4.99"),
 ]
 
+SCORE_RANGE_SELECTOR_ORDER = [
+    "standard",
+    "high",
+    "premium",
+    "elite",
+    "fair",
+    "poor",
+    "rejected",
+]
+
+SCORE_INDEX_RULES = {
+    "standard": {"mode": "numeric", "coefficient": 1.00, "coefficient_label": "×1.00"},
+    "high": {"mode": "numeric", "coefficient": 1.20, "coefficient_label": "×1.20"},
+    "premium": {"mode": "numeric", "coefficient": 1.40, "coefficient_label": "×1.40"},
+    "elite": {"mode": "numeric", "coefficient": 1.70, "coefficient_label": "×1.70"},
+    "fair": {"mode": "request_caution", "coefficient": 0.00, "coefficient_label": "request / caution"},
+    "poor": {"mode": "request", "coefficient": 0.00, "coefficient_label": "request"},
+    "rejected": {"mode": "request", "coefficient": 0.00, "coefficient_label": "request"},
+}
+
+
+def _score_ranges_by_id() -> dict[str, dict[str, object]]:
+    return {str(item["id"]): item for item in KURGIN_SCORE_RANGES}
+
 
 def _index_value_map() -> dict[tuple[str, str, str], int]:
     return {(color, clarity, carat_band): int(value) for color, clarity, carat_band, value in PUBLIC_INDEX_ROWS if value > 0}
@@ -95,8 +119,18 @@ def _index_value_map() -> dict[tuple[str, str, str], int]:
 
 def _index_cell_html(value: int | None) -> str:
     if value:
-        return f"<div class='index-cell-main'>{value} $/ct</div><div class='index-cell-sub'>Δ%</div>"
-    return "<div class='index-cell-main muted'>request</div><div class='index-cell-sub'>—</div>"
+        return (
+            f"<div class='index-cell' data-index-base='{int(value)}'>"
+            f"<div class='index-cell-main'>{int(value)} $/ct</div>"
+            "<div class='index-cell-sub'>×1.00</div>"
+            "</div>"
+        )
+    return (
+        "<div class='index-cell' data-index-base=''>"
+        "<div class='index-cell-main muted'>request</div>"
+        "<div class='index-cell-sub'>—</div>"
+        "</div>"
+    )
 
 
 def _index_table_for_color(color: str) -> str:
@@ -133,8 +167,11 @@ def _index_sections_html() -> str:
 
 def _score_range_selector_html(click_handler: str) -> str:
     default_id = default_score_range_id()
+    ranges = _score_ranges_by_id()
     buttons = []
-    for item in KURGIN_SCORE_RANGES:
+    for range_id in SCORE_RANGE_SELECTOR_ORDER:
+        item = ranges[range_id]
+        rule = SCORE_INDEX_RULES[range_id]
         selected = "true" if item["id"] == default_id else "false"
         buttons.append(
             "<button type='button' class='score-range-button' "
@@ -142,6 +179,9 @@ def _score_range_selector_html(click_handler: str) -> str:
             f"data-score-label='{item['en']}' "
             f"data-score-ru='{item['ru']}' "
             f"data-score-range-label='{item['range_label']}' "
+            f"data-score-mode='{rule['mode']}' "
+            f"data-score-coefficient='{rule['coefficient']}' "
+            f"data-score-coefficient-label='{rule['coefficient_label']}' "
             f"aria-selected='{selected}' onclick=\"{click_handler}\">"
             f"<strong>{item['en']}</strong><span>{item['range_label']}</span><small>{item['ru']}</small>"
             "</button>"
@@ -154,7 +194,7 @@ def render_tools_page() -> str:
     mode_click = "const root=this.closest('.single-tool');const active=this.getAttribute('data-mode');root.querySelectorAll('[data-mode]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-mode-panel]').forEach(p=>p.hidden=p.getAttribute('data-mode-panel')!==active);"
     share_click = "const url=new URL(window.parent.location.href);url.searchParams.set('page','tools');url.searchParams.set('tool','kurgin_index');url.hash='kurgin-index';const shareData={title:'KURGIN Index',text:'KURGIN Index — ориентир для сопоставления лабораторных бриллиантов',url:url.toString()};if(navigator.share){navigator.share(shareData).catch(()=>{});}else if(navigator.clipboard){navigator.clipboard.writeText(url.toString()).then(()=>{this.textContent='Ссылка скопирована';setTimeout(()=>{this.textContent='↗ Поделиться Index';},1400);});}else{window.prompt('Скопируйте ссылку',url.toString());}"
     deep_link_init = "const trigger=this;setTimeout(()=>{const allowed=['single_stone_analyzer','kurgin_index','database_analysis','excel_analyzer','kurgin_academy'];try{const url=new URL(window.parent.location.href);const tool=url.searchParams.get('tool');if(!allowed.includes(tool))return;const root=trigger.closest('.tools-page');const tab=root&&root.querySelector('[data-tool-tab=\\\"'+tool+'\\\"]');if(tab){tab.click();}if(url.hash){const target=root&&root.querySelector(url.hash);if(target)target.scrollIntoView({block:'start'});}}catch(e){}},0);"
-    score_range_click = "const root=this.closest('.index-score-card');root.querySelectorAll('[data-score-range]').forEach(b=>b.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');const label=this.getAttribute('data-score-label');const ru=this.getAttribute('data-score-ru');const range=this.getAttribute('data-score-range-label');const target=root.querySelector('.index-score-selected');if(target){target.textContent=label+' / '+ru+' · '+range;}"
+    score_range_click = "const shell=this.closest('.index-shell');const card=this.closest('.index-score-card');card.querySelectorAll('[data-score-range]').forEach(b=>b.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');const label=this.getAttribute('data-score-label');const ru=this.getAttribute('data-score-ru');const range=this.getAttribute('data-score-range-label');const mode=this.getAttribute('data-score-mode');const coeff=Number(this.getAttribute('data-score-coefficient')||0);const coeffLabel=this.getAttribute('data-score-coefficient-label');const selectedText=label+' / '+ru+' · '+range;card.querySelectorAll('.index-score-selected').forEach(el=>el.textContent=selectedText);shell.querySelectorAll('.index-range-summary-selected').forEach(el=>el.textContent=selectedText);shell.querySelectorAll('.index-score-coefficient,.index-range-summary-coefficient').forEach(el=>el.textContent='Коэффициент: '+coeffLabel);shell.querySelectorAll('.index-cell').forEach(cell=>{const base=Number(cell.getAttribute('data-index-base')||0);const main=cell.querySelector('.index-cell-main');const sub=cell.querySelector('.index-cell-sub');if(!base){main.textContent='request';main.classList.add('muted');sub.textContent='—';return;}if(mode==='numeric'){main.textContent=String(Math.round(base*coeff))+' $/ct';main.classList.remove('muted');sub.textContent=coeffLabel;}else{main.textContent='request';main.classList.add('muted');sub.textContent=mode==='request_caution'?'caution':'—';}});"
     index_sections = _index_sections_html()
     score_selector = _score_range_selector_html(score_range_click)
     return f"""
@@ -214,10 +254,16 @@ def render_tools_page() -> str:
       <div class="index-score-card">
         <div class="index-subtitle">KURGIN Score range</div>
         <div class="index-score-selected">Standard / Стандартный · 80–89.99</div>
+        <div class="index-score-coefficient">Коэффициент: ×1.00</div>
         <div class="score-range-selector" role="tablist" aria-label="KURGIN Score ranges">{score_selector}</div>
-        <div class="index-hint">диапазон используется как display label; scoring formula и pricing formula не менялись</div>
+        <div class="index-hint">Значения Index меняются визуально по выбранному диапазону KURGIN Score. Backend formula и pricing formula не менялись.</div>
       </div>
       {index_sections}
+      <div class="index-range-summary">
+        <div class="index-range-summary-selected">Standard / Стандартный · 80–89.99</div>
+        <div class="index-range-summary-coefficient">Коэффициент: ×1.00</div>
+        <div class="index-range-disclaimer">Это индексный ориентир для сопоставления лабораторных бриллиантов. Это не цена конкретного камня, не оферта, не финансовый индекс и не инвестиционная рекомендация.</div>
+      </div>
       <button type="button" class="index-filter-button">☰ Фильтры Index</button>
       <div class="tool-note">Индекс — ориентир для сопоставления. Не оферта, не финальная цена конкретного камня, не финансовый индекс и не инвестиционная рекомендация.</div>
     </section>
