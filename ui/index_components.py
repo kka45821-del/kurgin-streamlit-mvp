@@ -142,8 +142,9 @@ def render_public_index_tool() -> str:
     <div class="index-title">KURGIN Index v1.0</div>
     <div>Обновлено: текущий период</div>
     <div>Основные камни: 1.00–4.99 ct</div>
-    <button type="button" class="btn light">↗ Поделиться Index</button>
-    <button type="button" class="btn light">⬇ Скачать PDF</button>
+    <button type="button" class="btn light index-action-button" data-index-action="share">↗ Поделиться Index</button>
+    <button type="button" class="btn light index-action-button index-secondary-action" data-index-action="pdf-placeholder">PDF Index позже</button>
+    <div class="index-action-notice" aria-live="polite"></div>
   </div>
   <div class="index-score-card">
     <div class="index-subtitle">KURGIN Score range</div>
