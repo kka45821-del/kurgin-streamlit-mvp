@@ -11,10 +11,6 @@ from ui.score_ranges import KURGIN_SCORE_RANGES, default_score_range_id
 LOGO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/Vectorr-header.svg?v=1"
 
 
-def _html_attr(value: str) -> str:
-    return html.escape(value, quote=True)
-
-
 def _html_text(value: str) -> str:
     return html.escape(value, quote=False)
 
@@ -107,7 +103,7 @@ def _index_view_choice_group(title: str, view_type: str, values: list[tuple[str,
         buttons.append(
             "<button type='button' class='index-view-choice' aria-pressed='true' "
             "data-index-action='view-option' "
-            f"data-index-view-type='{view_type}' data-index-view-value='{value}'>"
+            f"data-index-view-type='{value if False else view_type}' data-index-view-value='{value}'>"
             f"{label}</button>"
         )
     return f"<div class='index-view-group'><div class='index-view-group-title'>{title}</div><div class='index-view-choice-grid'>{''.join(buttons)}</div></div>"
@@ -135,24 +131,18 @@ def _index_view_panel_html() -> str:
 """
 
 
-def _index_init_bootstrap_html() -> str:
-    # Keep the large delegated JS out of HTML attributes so it cannot render as visible text.
-    index_init_code = _html_text(INDEX_INIT)
-    init_attr = _html_attr("new Function(this.previousElementSibling.value).call(this)")
-    return f"""
-<textarea class="index-init-code" hidden>{index_init_code}</textarea>
-<img src="x" alt="" hidden onerror="{init_attr}">
-"""
+def _index_init_script_html() -> str:
+    return f"<script>\n{_html_text(INDEX_INIT)}\n</script>"
 
 
 def render_public_index_tool() -> str:
     index_sections = _index_sections_html()
     score_selector = _score_range_selector_html()
     index_view_panel = _index_view_panel_html()
-    index_init_bootstrap = _index_init_bootstrap_html()
+    index_init_script = _index_init_script_html()
     return f"""
 <section class="index-shell" id="kurgin-index">
-  {index_init_bootstrap}
+  {index_init_script}
   <div class="index-info-card">
     <div class="index-title">KURGIN Index v1.0</div>
     <div>Обновлено: текущий период</div>
