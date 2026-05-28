@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from ui.index_data import INDEX_BANDS, INDEX_CLARITIES, INDEX_COLORS, load_public_index_rows
 from ui.index_score_rules import SCORE_INDEX_RULES, SCORE_RANGE_SELECTOR_ORDER
-from ui.index_scripts import SCORE_RANGE_CLICK, SHARE_CLICK
+from ui.index_scripts import INDEX_PDF_PRINT, SCORE_RANGE_CLICK, SHARE_CLICK
 from ui.score_ranges import KURGIN_SCORE_RANGES, default_score_range_id
+
+
+LOGO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/Vectorr-header.svg?v=1"
 
 
 def _score_ranges_by_id() -> dict[str, dict[str, object]]:
@@ -49,6 +52,22 @@ def _index_table_for_color(color: str) -> str:
     )
 
 
+def _plain_index_value(value: int | None) -> str:
+    return f"{int(value)} $/ct" if value else "request"
+
+
+def _pdf_table_for_color(color: str) -> str:
+    values = _index_value_map()
+    header_cells = "".join(f"<th>{label}</th>" for _, label in INDEX_BANDS)
+    body_rows = []
+    for clarity in INDEX_CLARITIES:
+        cells = []
+        for band_key, _ in INDEX_BANDS:
+            cells.append(f"<td>{_plain_index_value(values.get((color, clarity, band_key)))}</td>")
+        body_rows.append(f"<tr><th>{clarity}</th>{''.join(cells)}</tr>")
+    return f"<table class='pdf-table'><thead><tr><th>Clarity</th>{header_cells}</tr></thead><tbody>{''.join(body_rows)}</tbody></table>"
+
+
 def _index_sections_html() -> str:
     sections = []
     for color in INDEX_COLORS:
@@ -58,6 +77,15 @@ def _index_sections_html() -> str:
             f"<summary>Цвет {color}</summary>"
             f"{_index_table_for_color(color)}"
             "</details>"
+        )
+    return "".join(sections)
+
+
+def _pdf_sections_html() -> str:
+    sections = []
+    for color in INDEX_COLORS:
+        sections.append(
+            f"<section class='pdf-section'><h2>Color {color}</h2>{_pdf_table_for_color(color)}</section>"
         )
     return "".join(sections)
 
@@ -86,9 +114,26 @@ def _score_range_selector_html() -> str:
     return "".join(buttons)
 
 
+def _pdf_template_html() -> str:
+    return f"""
+<div id="index-pdf-template" hidden>
+  <div class="pdf-head">
+    <img class="pdf-logo" src="{LOGO_URL}" alt="KURGIN">
+    <div>
+      <div class="pdf-title">KURGIN Index</div>
+      <div class="pdf-meta">Snapshot: public_index_v0_1 · Unit: USD / ct · Period: current</div>
+    </div>
+  </div>
+  <div class="pdf-note">KURGIN Index is an indicative benchmark for comparing laboratory-grown diamonds. It is not an offer, not a final price for a specific stone, not a financial index and not an investment recommendation.</div>
+  {_pdf_sections_html()}
+</div>
+"""
+
+
 def render_public_index_tool() -> str:
     index_sections = _index_sections_html()
     score_selector = _score_range_selector_html()
+    pdf_template = _pdf_template_html()
     return f"""
 <section class="index-shell" id="kurgin-index">
   <div class="index-info-card">
@@ -96,6 +141,7 @@ def render_public_index_tool() -> str:
     <div>Обновлено: текущий период</div>
     <div>Основные камни: 1.00–4.99 ct</div>
     <button type="button" class="btn light" onclick="{SHARE_CLICK}">↗ Поделиться Index</button>
+    <button type="button" class="btn light" onclick="{INDEX_PDF_PRINT}">⬇ Скачать PDF</button>
   </div>
   <div class="index-score-card">
     <div class="index-subtitle">KURGIN Score range</div>
@@ -112,5 +158,6 @@ def render_public_index_tool() -> str:
   </div>
   <button type="button" class="index-filter-button">☰ Фильтры Index</button>
   <div class="tool-note">Индекс — ориентир для сопоставления. Не оферта, не финальная цена конкретного камня, не финансовый индекс и не инвестиционная рекомендация.</div>
+  {pdf_template}
 </section>
 """
