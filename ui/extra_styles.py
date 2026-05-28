@@ -68,10 +68,18 @@ SYSTEM_CSS = r'''
 .analyzer-mode.inactive{opacity:.48;filter:grayscale(1)}
 .analyzer-workspace{background:#f7f7f7!important;margin-bottom:.85rem!important}
 .analyzer-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin:.75rem 0 .85rem}
+.analyzer-control{display:block;border:1px solid #ddd;border-radius:13px;background:#fff;padding:.5rem .55rem;min-height:56px}
+.analyzer-control span{display:block;font-size:.55rem;letter-spacing:.05em;text-transform:uppercase;color:#888;margin-bottom:.22rem}
+.analyzer-control input,.analyzer-control select{width:100%;border:0;background:transparent;padding:0;font:inherit;font-size:.78rem;line-height:1.2;color:#111;appearance:none;-webkit-appearance:none;opacity:1}
+.analyzer-control select{background-image:linear-gradient(45deg,transparent 50%,#777 50%),linear-gradient(135deg,#777 50%,transparent 50%);background-position:calc(100% - 10px) 48%,calc(100% - 5px) 48%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:1rem}
+.analyzer-control input:disabled,.analyzer-control select:disabled{color:#111;-webkit-text-fill-color:#111;cursor:not-allowed}
+.analyzer-control.optional{background:#fbfbfb;color:#777}
+.analyzer-control.optional input{color:#777;-webkit-text-fill-color:#777}
 .analyzer-field{border:1px solid #ddd;border-radius:13px;background:#fff;padding:.58rem .62rem;min-height:48px}
 .analyzer-field span{display:block;font-size:.57rem;letter-spacing:.05em;text-transform:uppercase;color:#888;margin-bottom:.18rem}
 .analyzer-field strong{display:block;font-size:.78rem;line-height:1.18;color:#111}
 .analyzer-field.optional{background:#fbfbfb;color:#777}
+.analyzer-preview-notice{border:1px dashed #d4d4d4;border-radius:13px;background:#fff;padding:.58rem .65rem;margin:.65rem 0 0;color:#666;font-size:.72rem;line-height:1.35}
 .analyzer-disabled-cta{opacity:.52!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#777!important;border-color:#ddd!important;margin-top:.75rem!important}
 .analyzer-disabled-note{font-size:.68rem;color:#777;text-align:center;margin-top:.45rem}
 .analyzer-preview-result{background:#fff!important;border-style:dashed!important}
