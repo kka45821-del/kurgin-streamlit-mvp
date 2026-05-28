@@ -55,6 +55,44 @@ INDEX_INIT = r"""
     });
   }
 
+  function closeViewPanel(root){
+    if(!root) return;
+    const panel = root.querySelector('.index-view-panel');
+    if(panel) panel.hidden = true;
+    root.querySelectorAll('[data-index-action="view-toggle"]').forEach(button => {
+      button.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  function ensureViewPanelSwipeClose(root){
+    if(!root) return;
+    const panel = root.querySelector('.index-view-panel');
+    if(!panel || panel.dataset.swipeCloseMounted === 'true') return;
+    panel.dataset.swipeCloseMounted = 'true';
+
+    let startY = 0;
+    let startX = 0;
+    let tracking = false;
+
+    panel.addEventListener('touchstart', event => {
+      if(!event.touches || !event.touches.length) return;
+      startY = event.touches[0].clientY;
+      startX = event.touches[0].clientX;
+      tracking = true;
+    }, {passive: true});
+
+    panel.addEventListener('touchend', event => {
+      if(!tracking || !event.changedTouches || !event.changedTouches.length) return;
+      tracking = false;
+      const touch = event.changedTouches[0];
+      const deltaY = touch.clientY - startY;
+      const deltaX = Math.abs(touch.clientX - startX);
+      if(deltaY > 70 && deltaX < 110 && panel.scrollTop <= 8){
+        closeViewPanel(root);
+      }
+    }, {passive: true});
+  }
+
   function toggleViewPanel(root, button){
     if(!root || !button) return;
     const panel = root.querySelector('.index-view-panel');
@@ -62,7 +100,10 @@ INDEX_INIT = r"""
     const shouldOpen = panel.hidden;
     panel.hidden = !shouldOpen;
     button.setAttribute('aria-expanded', String(shouldOpen));
-    if(shouldOpen && panel.scrollIntoView) panel.scrollIntoView({block: 'nearest'});
+    if(shouldOpen){
+      ensureViewPanelSwipeClose(root);
+      if(panel.scrollIntoView) panel.scrollIntoView({block: 'nearest'});
+    }
   }
 
   function setAllColorSections(root, open){
