@@ -63,9 +63,10 @@ SYSTEM_CSS = r'''
 .disabledStaticButton,.disabledMode,.inactiveField{opacity:.5!important;cursor:not-allowed!important;filter:grayscale(1)}
 .disabledStaticButton,.disabledMode{pointer-events:none!important;background:#f4f3f1!important;color:#777!important;border-color:#ddd!important}
 .index-info-card .btn.light{opacity:.42!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#777!important;border-color:#ddd!important}
-.actions .act[data-stop]:not(.favoriteToggle){opacity:.3!important;pointer-events:none!important;filter:grayscale(1)}
-.actions .act:first-child[data-stop]{opacity:1!important;filter:none!important;background:#111!important;color:#fff!important;border-color:#111!important}
-.actions .act:first-child[data-stop] svg{stroke-width:1.7}
+.actions .act.disabled{opacity:.18!important;pointer-events:none!important;filter:grayscale(1)}
+.actions .act.requestDetailBtn{opacity:1!important;pointer-events:auto!important;filter:none!important;background:#111!important;color:#fff!important;border-color:#111!important}
+.actions .act.requestDetailBtn svg{stroke-width:1.7}
+.actions .actionMuted{opacity:.28!important;pointer-events:none!important;filter:grayscale(1);font-size:.64rem;color:#777!important;background:#f5f5f5!important;border-color:#e2e2e2!important}
 .detailActions .detailBtn.dark.disabled{opacity:.62!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#555!important;border-color:#ddd!important}
 .inactiveProfileCard .authPanel{display:block;border-color:#d7d7d7}
 .empty-state-info{margin-top:.75rem}
