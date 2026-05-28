@@ -80,9 +80,20 @@ SYSTEM_CSS = r'''
 .analyzer-field strong{display:block;font-size:.78rem;line-height:1.18;color:#111}
 .analyzer-field.optional{background:#fbfbfb;color:#777}
 .analyzer-preview-notice{border:1px dashed #d4d4d4;border-radius:13px;background:#fff;padding:.58rem .65rem;margin:.65rem 0 0;color:#666;font-size:.72rem;line-height:1.35}
+.analyzer-mock-cta{background:#111!important;color:#fff!important;border-color:#111!important;opacity:1!important;filter:none!important;pointer-events:none!important;margin-top:.75rem!important}
 .analyzer-disabled-cta{opacity:.52!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#777!important;border-color:#ddd!important;margin-top:.75rem!important}
 .analyzer-disabled-note{font-size:.68rem;color:#777;text-align:center;margin-top:.45rem}
 .analyzer-preview-result{background:#fff!important;border-style:dashed!important}
+.analyzer-adapter-preview{margin:.75rem 0;border:1px solid #ddd;border-radius:15px;background:#fafafa;overflow:hidden}
+.analyzer-adapter-preview summary{list-style:none;cursor:pointer;min-height:40px;display:flex;align-items:center;justify-content:center;background:#111;color:#fff;font-size:.74rem;font-weight:700;padding:.35rem .7rem}
+.analyzer-adapter-preview summary::-webkit-details-marker{display:none}
+.analyzer-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;padding:.75rem .75rem .35rem}
+.analyzer-result-grid div{border:1px solid #e5e5e5;border-radius:12px;background:#fff;padding:.5rem .55rem}
+.analyzer-result-grid .wide{grid-column:1/-1}
+.analyzer-result-grid span{display:block;font-size:.55rem;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:.2rem}
+.analyzer-result-grid strong{display:block;font-size:.72rem;line-height:1.3;color:#111;font-weight:700}
+.analyzer-result-list{padding:.4rem .75rem .75rem;font-size:.72rem;line-height:1.35;color:#666}
+.analyzer-result-list strong{display:block;color:#111;margin-bottom:.25rem}.analyzer-result-list ul{margin:.2rem 0 0;padding-left:1rem}.analyzer-result-list li{margin:.15rem 0}
 .result-kicker{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:#888;margin-bottom:.25rem}
 .result-title{font-weight:700;font-size:.9rem;margin-bottom:.35rem}
 .result-text{color:#666;font-size:.78rem;line-height:1.4}
