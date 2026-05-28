@@ -60,4 +60,11 @@ SYSTEM_CSS = r'''
 .workspace-title{font-weight:700;margin-bottom:.65rem;font-size:.88rem}.workspace-text{font-size:.78rem;line-height:1.45;color:#111;margin-bottom:1.05rem}
 .single-file-button{display:block;width:72%;margin:.25rem auto 0;border:1px solid #bbb;border-radius:13px;background:#fff;min-height:42px;font:inherit;font-size:.72rem;color:#111}
 .single-next-box{border:1px solid #d0d0d0;border-radius:16px;background:#fff;padding:1rem;font-size:.72rem;line-height:1.45;color:#111}
+.disabledStaticButton,.disabledMode,.inactiveField{opacity:.5!important;cursor:not-allowed!important;filter:grayscale(1)}
+.disabledStaticButton,.disabledMode{pointer-events:none!important;background:#f4f3f1!important;color:#777!important;border-color:#ddd!important}
+.index-info-card .btn.light{opacity:.42!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#777!important;border-color:#ddd!important}
+.actions .act[data-stop]:not(.favoriteToggle){opacity:.3!important;pointer-events:none!important;filter:grayscale(1)}
+.detailActions .detailBtn.dark{opacity:.42!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#777!important;border-color:#ddd!important}
+.inactiveProfileCard .authPanel{display:block;border-color:#d7d7d7}
+.empty-state-info{margin-top:.75rem}
 ''' + INDEX_CSS
