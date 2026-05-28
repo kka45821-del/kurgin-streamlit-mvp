@@ -46,7 +46,8 @@ def _catalog_section_fix_script() -> str:
 // Public catalog section UX:
 // - show all published stones by default;
 // - keep professional sections available;
-// - show section counts so the user does not confuse total catalog count with one section.
+// - keep favorites as a browser-only saved-stone flow;
+// - never create checkout, payment, order, reserve or ownership states.
 (function(){
   const requestContactConfig = __REQUEST_CONTACTS_JSON__;
   const requestContact = {
@@ -84,9 +85,18 @@ def _catalog_section_fix_script() -> str:
       .favoriteList{display:grid;gap:.7rem;padding:0 1rem 1rem}
       .favoriteCard{border:1px solid #ddd8ce;border-radius:18px;background:#fff;padding:.85rem;box-shadow:0 10px 24px rgba(0,0,0,.035)}
       .favoriteTop{display:flex;justify-content:space-between;gap:.75rem;align-items:flex-start}
-      .favoriteName{font-size:.95rem;font-weight:700;color:#111}.favoriteMeta{font-size:.72rem;color:#666;margin-top:.3rem;line-height:1.35}
-      .favoritePrice{font-size:.78rem;font-weight:700;text-align:right;color:#111}.favoriteUnavailable{margin-top:.65rem;font-size:.72rem;line-height:1.35;color:#8a5b00;background:#fff7df;border-radius:12px;padding:.55rem}
-      .favoriteActions{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-top:.75rem}.favoriteBtn{border:1px solid #d9d4ca;border-radius:13px;background:#fff;color:#111;font-size:.75rem;font-weight:700;min-height:36px}.favoriteBtn.dark{background:#111;color:#fff;border-color:#111}.favoriteBtn.danger{color:#8a1c1c}
+      .favoriteName{font-size:.95rem;font-weight:700;color:#111}
+      .favoriteMeta{font-size:.72rem;color:#666;margin-top:.3rem;line-height:1.35}
+      .favoritePrice{font-size:.78rem;font-weight:700;text-align:right;color:#111;white-space:nowrap}
+      .favoriteGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.45rem;margin-top:.75rem}
+      .favoriteCell{border:1px solid #eee;border-radius:12px;background:#fafafa;padding:.5rem .55rem;min-height:46px}
+      .favoriteCell span{display:block;font-size:.58rem;letter-spacing:.04em;text-transform:uppercase;color:#888;margin-bottom:.18rem}
+      .favoriteCell strong{display:block;font-size:.78rem;line-height:1.2;color:#111;font-weight:700;word-break:break-word}
+      .favoriteSafety{margin-top:.65rem;font-size:.68rem;line-height:1.35;color:#666;background:#f7f7f7;border-radius:12px;padding:.55rem}
+      .favoriteUnavailable{margin-top:.65rem;font-size:.72rem;line-height:1.35;color:#8a5b00;background:#fff7df;border-radius:12px;padding:.55rem}
+      .favoriteActions{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-top:.75rem}
+      .favoriteBtn{border:1px solid #d9d4ca;border-radius:13px;background:#fff;color:#111;font-size:.75rem;font-weight:700;min-height:36px}
+      .favoriteBtn.dark{background:#111;color:#fff;border-color:#111}.favoriteBtn.danger{color:#8a1c1c}
     `;
     document.head.appendChild(style);
   }
@@ -103,6 +113,10 @@ def _catalog_section_fix_script() -> str:
   function currentSectionLabel(){
     const section = sections.find(x => x[0] === activeSection) || sections[0];
     return section;
+  }
+
+  function escapeHtml(value){
+    return String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
   }
 
   function stoneKey(stone){
@@ -130,7 +144,12 @@ def _catalog_section_fix_script() -> str:
       clarity: stone.clarity || '',
       score: stone.score || stone.karo_score || '',
       priceText: stone.priceText || stone.priceDisplay || (isRequestPrice(stone) ? 'по запросу' : ''),
-      public_action: stone.public_action || 'request_price'
+      price_status: stone.price_status || '',
+      public_action: stone.public_action || 'request_price',
+      diameter: stone.diameter || '',
+      fluor: stone.fluor || stone.fluorescence || '',
+      finish: stone.finish || '',
+      report: stone.report || ''
     };
   }
 
@@ -346,24 +365,39 @@ def _catalog_section_fix_script() -> str:
     return stones.find(stone => stoneKey(stone) === String(stoneId || ''));
   }
 
+  function formattedCarat(value){
+    const number = Number(value || 0);
+    if(!number) return '—';
+    return number.toFixed(2).replace('.00','') + ' ct';
+  }
+
+  function favoriteCell(label, value){
+    const safeValue = value !== undefined && value !== null && String(value).trim() ? value : '—';
+    return `<div class='favoriteCell'><span>${escapeHtml(label)}</span><strong>${escapeHtml(safeValue)}</strong></div>`;
+  }
+
   function favoriteCardHtml(item){
     const current = currentStoneById(item.stone_id);
     const snapshot = item.snapshot || {};
-    const stone = current || {id:item.stone_id, stone_id:item.stone_id, shape:snapshot.shape, carat:snapshot.carat, color:snapshot.color, clarity:snapshot.clarity, score:snapshot.score, priceText:snapshot.priceText, public_action:snapshot.public_action};
+    const stone = current || {id:item.stone_id, stone_id:item.stone_id, shape:snapshot.shape, carat:snapshot.carat, color:snapshot.color, clarity:snapshot.clarity, score:snapshot.score, priceText:snapshot.priceText, public_action:snapshot.public_action, diameter:snapshot.diameter, fluor:snapshot.fluor, finish:snapshot.finish, report:snapshot.report};
     const unavailable = !current;
-    const name = `${stone.shape || ''} ${stone.carat || ''} ct`.trim();
-    const meta = `${stone.color || ''} ${stone.clarity || ''} · KURGIN Score ${stone.score || ''}`;
+    const shape = stone.shape || snapshot.shape || '';
+    const carat = stone.carat || snapshot.carat || '';
+    const color = stone.color || snapshot.color || '';
+    const clarity = stone.clarity || snapshot.clarity || '';
+    const score = stone.score || snapshot.score || '';
     const price = unavailable ? (snapshot.priceText && snapshot.priceText !== '0' ? snapshot.priceText : 'по запросу') : displayPriceText(stone);
-    const detailAction = current ? `<button class='favoriteBtn dark' data-open-favorite='${stoneKey(stone)}'>Открыть карточку</button>` : `<button class='favoriteBtn dark' data-nav-page='catalog'>В каталог</button>`;
-    return `<div class='favoriteCard'><div class='favoriteTop'><div><div class='favoriteName'>${name || item.stone_id}</div><div class='favoriteMeta'>${meta}</div></div><div class='favoritePrice'>${price}</div></div>${unavailable?`<div class='favoriteUnavailable'>Камень больше не доступен в текущем каталоге.</div>`:''}<div class='favoriteActions'>${detailAction}<button class='favoriteBtn danger' data-remove-favorite='${item.stone_id}'>Удалить</button></div></div>`;
+    const name = `${shape || 'Камень'} ${formattedCarat(carat)}`.trim();
+    const detailAction = current ? `<button class='favoriteBtn dark' data-open-favorite='${escapeHtml(stoneKey(stone))}'>Открыть карточку</button>` : `<button class='favoriteBtn dark' data-nav-page='catalog'>В каталог</button>`;
+    return `<div class='favoriteCard'><div class='favoriteTop'><div><div class='favoriteName'>${escapeHtml(name)}</div><div class='favoriteMeta'>ID: ${escapeHtml(item.stone_id || '')}</div></div><div class='favoritePrice'>${escapeHtml(price)}</div></div><div class='favoriteGrid'>${favoriteCell('Форма', shape)}${favoriteCell('Карат', formattedCarat(carat))}${favoriteCell('Цвет', color)}${favoriteCell('Чистота', clarity)}${favoriteCell('KURGIN Score', score)}${favoriteCell('Цена', price)}</div>${unavailable?`<div class='favoriteUnavailable'>Камень больше не доступен в текущем каталоге.</div>`:''}<div class='favoriteSafety'>Избранное хранится только в этом браузере. Оно не резервирует камень, не фиксирует цену и не создаёт заказ.</div><div class='favoriteActions'>${detailAction}<button class='favoriteBtn danger' data-remove-favorite='${escapeHtml(item.stone_id)}'>Удалить</button></div></div>`;
   }
 
   window.renderFavoritesPage = function renderFavoritesPage(){
     const favorites = getFavorites();
     if(!favorites.length){
-      content.innerHTML = pageHeader(pageTitles.favorites, pageSubtitles.favorites) + `<div class='pageBody'><div class='placeholder empty-state'><div class='empty-title'>Вы пока не добавили камни в избранное.</div><div class='muted'>Сохраняйте интересные камни из каталога, чтобы вернуться к ним позже.</div><button class='btn light' type='button' data-nav-page='catalog'>Перейти в каталог</button></div><div class='favoritesInfo'>Избранное помогает сохранить интересные камни в этом браузере. Оно не резервирует камни и не фиксирует цену.</div></div>`;
+      content.innerHTML = pageHeader(pageTitles.favorites, pageSubtitles.favorites) + `<div class='pageBody'><div class='placeholder empty-state'><div class='empty-title'>Вы пока не добавили камни в избранное.</div><div class='muted'>Сохраняйте интересные камни из каталога, чтобы вернуться к ним позже. Избранное хранится только в этом браузере.</div><button class='btn light' type='button' data-nav-page='catalog'>Перейти в каталог</button></div><div class='favoritesInfo'>Избранное не резервирует камни, не фиксирует цену и не создаёт заказ.</div></div>`;
     } else {
-      content.innerHTML = pageHeader(pageTitles.favorites, pageSubtitles.favorites) + `<div class='favoritesInfo'>Избранное помогает сохранить интересные камни в этом браузере. Оно не резервирует камни и не фиксирует цену.</div><div class='favoriteList'>${favorites.map(favoriteCardHtml).join('')}</div>`;
+      content.innerHTML = pageHeader(pageTitles.favorites, pageSubtitles.favorites) + `<div class='favoritesInfo'>Избранное хранится только в этом браузере. Оно не резервирует камни, не фиксирует цену, не создаёт заказ и не подтверждает наличие.</div><div class='favoriteList'>${favorites.map(favoriteCardHtml).join('')}</div>`;
     }
     content.scrollTop = 0;
     wireFavoritePageActions();
