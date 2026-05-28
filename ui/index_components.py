@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import html
+
 from ui.index_data import INDEX_BANDS, INDEX_CLARITIES, INDEX_COLORS, load_public_index_rows
 from ui.index_score_rules import SCORE_INDEX_RULES, SCORE_RANGE_SELECTOR_ORDER
 from ui.index_scripts import INDEX_INIT
@@ -7,6 +9,10 @@ from ui.score_ranges import KURGIN_SCORE_RANGES, default_score_range_id
 
 
 LOGO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/Vectorr-header.svg?v=1"
+
+
+def _html_attr(value: str) -> str:
+    return html.escape(value, quote=True)
 
 
 def _score_ranges_by_id() -> dict[str, dict[str, object]]:
@@ -129,9 +135,10 @@ def render_public_index_tool() -> str:
     index_sections = _index_sections_html()
     score_selector = _score_range_selector_html()
     index_view_panel = _index_view_panel_html()
+    index_init = _html_attr(INDEX_INIT)
     return f"""
 <section class="index-shell" id="kurgin-index">
-  <img src="x" alt="" hidden onerror="{INDEX_INIT}">
+  <img src="x" alt="" hidden onerror="{index_init}">
   <div class="index-info-card">
     <div class="index-title">KURGIN Index v1.0</div>
     <div>Обновлено: текущий период</div>
