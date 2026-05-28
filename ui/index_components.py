@@ -108,6 +108,14 @@ def _index_view_panel_html() -> str:
     band_group = _index_view_choice_group("Каратность", "band", [(band_key, label) for band_key, label in INDEX_BANDS])
     return f"""
 <div class="index-view-panel" hidden>
+  <button
+    type="button"
+    class="index-view-close-handle"
+    data-index-action="view-close"
+    aria-label="Закрыть панель"
+  >
+    <span></span>
+  </button>
   <div class="index-view-title">Вид таблицы Index</div>
   <div class="index-view-text">Это настройки просмотра таблицы Index. Они не меняют каталог, цены камней, формулы или наличие камней.</div>
   <div class="index-view-actions">
