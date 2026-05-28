@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import html
-
 from ui.index_data import INDEX_BANDS, INDEX_CLARITIES, INDEX_COLORS, load_public_index_rows
 from ui.index_score_rules import SCORE_INDEX_RULES, SCORE_RANGE_SELECTOR_ORDER
 from ui.index_scripts import INDEX_INIT
@@ -11,8 +9,8 @@ from ui.score_ranges import KURGIN_SCORE_RANGES, default_score_range_id
 LOGO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/Vectorr-header.svg?v=1"
 
 
-def _html_text(value: str) -> str:
-    return html.escape(value, quote=False)
+def _safe_script_body(value: str) -> str:
+    return value.replace("</script", "<\\/script")
 
 
 def _score_ranges_by_id() -> dict[str, dict[str, object]]:
@@ -103,7 +101,7 @@ def _index_view_choice_group(title: str, view_type: str, values: list[tuple[str,
         buttons.append(
             "<button type='button' class='index-view-choice' aria-pressed='true' "
             "data-index-action='view-option' "
-            f"data-index-view-type='{value if False else view_type}' data-index-view-value='{value}'>"
+            f"data-index-view-type='{view_type}' data-index-view-value='{value}'>"
             f"{label}</button>"
         )
     return f"<div class='index-view-group'><div class='index-view-group-title'>{title}</div><div class='index-view-choice-grid'>{''.join(buttons)}</div></div>"
@@ -132,7 +130,7 @@ def _index_view_panel_html() -> str:
 
 
 def _index_init_script_html() -> str:
-    return f"<script>\n{_html_text(INDEX_INIT)}\n</script>"
+    return f"<script>\n{_safe_script_body(INDEX_INIT)}\n</script>"
 
 
 def render_public_index_tool() -> str:
