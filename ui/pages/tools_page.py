@@ -43,34 +43,34 @@ def render_tools_page() -> str:
   <div class="tools-tab-content" data-tool-panel="single_stone_analyzer"{_hidden(active_tool, 'single_stone_analyzer')}>
     <div class="single-tool">
       <div class="tool-section-title">KURGIN Stone Analyzer</div>
-      <div class="muted">Анализ одного камня по фото, файлу или ручному вводу. Сейчас это UX-скелет без запуска расчёта.</div>
-      <div class="single-mode-tabs" role="tablist" aria-label="Способ ввода">
-        <button type="button" class="single-mode-tab" data-mode="photo" aria-selected="false" onclick="{mode_click}"><strong>Фото</strong><span>камера</span></button>
-        <button type="button" class="single-mode-tab" data-mode="upload" aria-selected="true" onclick="{mode_click}"><strong>Загрузка</strong><span>файл</span></button>
-        <button type="button" class="single-mode-tab" data-mode="manual" aria-selected="false" onclick="{mode_click}"><strong>Вручную</strong><span>форма</span></button>
+      <div class="muted">MVP-скелет интерфейса. Расчёт, распознавание, загрузка файла и ручной ввод сейчас не активны.</div>
+      <div class="single-mode-tabs disabledToolModes" role="tablist" aria-label="Будущие способы ввода">
+        <button type="button" class="single-mode-tab disabledMode" data-mode="photo" aria-selected="false" onclick="{mode_click}" disabled><strong>Фото</strong><span>скоро</span></button>
+        <button type="button" class="single-mode-tab disabledMode" data-mode="upload" aria-selected="true" onclick="{mode_click}" disabled><strong>Загрузка</strong><span>скоро</span></button>
+        <button type="button" class="single-mode-tab disabledMode" data-mode="manual" aria-selected="false" onclick="{mode_click}" disabled><strong>Вручную</strong><span>скоро</span></button>
       </div>
 
       <section class="single-workspace" data-mode-panel="upload">
-        <div class="workspace-title">Рабочая зона: Загрузка</div>
-        <div class="workspace-text">PDF / JPG / PNG документа или сертификата.</div>
-        <button type="button" class="single-file-button">[ выбрать файл ]</button>
+        <div class="workspace-title">Analyzer не запущен в public MVP</div>
+        <div class="workspace-text">Этот раздел показывает будущую структуру. Сейчас он не принимает файлы, фото или ручные параметры.</div>
+        <button type="button" class="single-file-button disabledStaticButton" disabled>[ недоступно в MVP ]</button>
       </section>
 
       <section class="single-workspace" data-mode-panel="photo" hidden>
-        <div class="workspace-title">Рабочая зона: Фото</div>
-        <div class="workspace-text">Фото документа или сертификата.</div>
-        <button type="button" class="single-file-button">[ открыть камеру ]</button>
+        <div class="workspace-title">Фото — позже</div>
+        <div class="workspace-text">Камера и распознавание не подключены в текущей public-версии.</div>
+        <button type="button" class="single-file-button disabledStaticButton" disabled>[ недоступно в MVP ]</button>
       </section>
 
       <section class="single-workspace" data-mode-panel="manual" hidden>
-        <div class="workspace-title">Рабочая зона: Вручную</div>
-        <div class="workspace-text">Ручной ввод параметров камня.</div>
-        <button type="button" class="single-file-button">[ открыть форму ]</button>
+        <div class="workspace-title">Ручной ввод — позже</div>
+        <div class="workspace-text">Форма ввода параметров будет подключаться отдельно после стабилизации методологии и интерфейса.</div>
+        <button type="button" class="single-file-button disabledStaticButton" disabled>[ недоступно в MVP ]</button>
       </section>
 
       <section class="single-next-box">
-        <div>Дальше: распознавание → проверка данных</div>
-        <div>→ KURGIN Score → отчёт KURGIN Analyzer</div>
+        <div>Сейчас: только безопасная демонстрация структуры.</div>
+        <div>Нет расчёта, отчёта, оплаты или загрузки данных.</div>
       </section>
     </div>
   </div>
@@ -80,15 +80,15 @@ def render_tools_page() -> str:
   </div>
 
   <div class="tools-tab-content" data-tool-panel="database_analysis"{_hidden(active_tool, 'database_analysis')}>
-    <section class="tool-card"><div class="tool-kicker">Verify</div><div class="tool-title">KURGIN Verify</div><div class="tool-text">Проверка, сверка и базовый анализ данных по камню или базе перед подбором.</div><div class="tool-note">UX-скелет. Не сертификат и не гарантия наличия.</div></section>
+    <section class="tool-card"><div class="tool-kicker">Verify · MVP skeleton</div><div class="tool-title">KURGIN Verify</div><div class="tool-text">Будущий раздел проверки и сверки данных. Сейчас не выполняет проверку, не создаёт заключение и не подтверждает наличие.</div><div class="tool-note">Не сертификат, не гарантия и не рабочий сервис в public MVP.</div></section>
   </div>
 
   <div class="tools-tab-content" data-tool-panel="excel_analyzer"{_hidden(active_tool, 'excel_analyzer')}>
-    <section class="tool-card"><div class="tool-kicker">Mass Analyzer</div><div class="tool-title">KURGIN Mass Analyzer</div><div class="tool-text">Excel / batch / массовый анализ списка камней. Реальная логика Excel Analyzer не подключена в этом public-скелете.</div><div class="tool-note">Не публикация, не checkout и не изменение каталога.</div></section>
+    <section class="tool-card"><div class="tool-kicker">Mass Analyzer · MVP skeleton</div><div class="tool-title">KURGIN Mass Analyzer</div><div class="tool-text">Будущий Excel / batch-анализ списка камней. Загрузка файлов и расчёты сейчас не подключены в public MVP.</div><div class="tool-note">Не публикация, не checkout, не изменение каталога и не рабочий Analyzer.</div></section>
   </div>
 
   <div class="tools-tab-content" data-tool-panel="kurgin_academy"{_hidden(active_tool, 'kurgin_academy')}>
-    <section class="tool-card"><div class="tool-kicker">Academy</div><div class="tool-title">KURGIN Academy</div><div class="tool-text">Обучение и объяснения по лабораторным бриллиантам, параметрам, анализу и интерпретации результатов.</div><div class="tool-note">UX-скелет. Материалы будут расширяться отдельно.</div></section>
+    <section class="tool-card"><div class="tool-kicker">Academy · MVP skeleton</div><div class="tool-title">KURGIN Academy</div><div class="tool-text">Будущий образовательный раздел о лабораторных бриллиантах, параметрах и интерпретации результатов.</div><div class="tool-note">Материалы и обучение не запущены как рабочий продукт в текущей public-версии.</div></section>
   </div>
 </div>
 """
