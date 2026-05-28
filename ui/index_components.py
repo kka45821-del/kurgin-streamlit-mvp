@@ -15,6 +15,10 @@ def _html_attr(value: str) -> str:
     return html.escape(value, quote=True)
 
 
+def _html_text(value: str) -> str:
+    return html.escape(value, quote=False)
+
+
 def _score_ranges_by_id() -> dict[str, dict[str, object]]:
     return {str(item["id"]): item for item in KURGIN_SCORE_RANGES}
 
@@ -131,14 +135,24 @@ def _index_view_panel_html() -> str:
 """
 
 
+def _index_init_bootstrap_html() -> str:
+    # Keep the large delegated JS out of HTML attributes so it cannot render as visible text.
+    index_init_code = _html_text(INDEX_INIT)
+    init_attr = _html_attr("new Function(this.previousElementSibling.value).call(this)")
+    return f"""
+<textarea class="index-init-code" hidden>{index_init_code}</textarea>
+<img src="x" alt="" hidden onerror="{init_attr}">
+"""
+
+
 def render_public_index_tool() -> str:
     index_sections = _index_sections_html()
     score_selector = _score_range_selector_html()
     index_view_panel = _index_view_panel_html()
-    index_init = _html_attr(INDEX_INIT)
+    index_init_bootstrap = _index_init_bootstrap_html()
     return f"""
 <section class="index-shell" id="kurgin-index">
-  <img src="x" alt="" hidden onerror="{index_init}">
+  {index_init_bootstrap}
   <div class="index-info-card">
     <div class="index-title">KURGIN Index v1.0</div>
     <div>Обновлено: текущий период</div>
