@@ -1,3 +1,6 @@
+from ui.score_ranges import KURGIN_SCORE_RANGES, default_score_range_id
+
+
 PUBLIC_INDEX_ROWS = [
     ("D", "IF", "1.00–1.49", 250),
     ("D", "IF", "1.50–1.99", 380),
@@ -128,12 +131,32 @@ def _index_sections_html() -> str:
     return "".join(sections)
 
 
+def _score_range_selector_html(click_handler: str) -> str:
+    default_id = default_score_range_id()
+    buttons = []
+    for item in KURGIN_SCORE_RANGES:
+        selected = "true" if item["id"] == default_id else "false"
+        buttons.append(
+            "<button type='button' class='score-range-button' "
+            f"data-score-range='{item['id']}' "
+            f"data-score-label='{item['en']}' "
+            f"data-score-ru='{item['ru']}' "
+            f"data-score-range-label='{item['range_label']}' "
+            f"aria-selected='{selected}' onclick=\"{click_handler}\">"
+            f"<strong>{item['en']}</strong><span>{item['range_label']}</span><small>{item['ru']}</small>"
+            "</button>"
+        )
+    return "".join(buttons)
+
+
 def render_tools_page() -> str:
     tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);try{const url=new URL(window.parent.location.href);url.searchParams.set('page','tools');url.searchParams.set('tool',active);window.parent.history.replaceState(null,'',url.toString());}catch(e){}"
     mode_click = "const root=this.closest('.single-tool');const active=this.getAttribute('data-mode');root.querySelectorAll('[data-mode]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-mode-panel]').forEach(p=>p.hidden=p.getAttribute('data-mode-panel')!==active);"
     share_click = "const url=new URL(window.parent.location.href);url.searchParams.set('page','tools');url.searchParams.set('tool','kurgin_index');url.hash='kurgin-index';const shareData={title:'KURGIN Index',text:'KURGIN Index — ориентир для сопоставления лабораторных бриллиантов',url:url.toString()};if(navigator.share){navigator.share(shareData).catch(()=>{});}else if(navigator.clipboard){navigator.clipboard.writeText(url.toString()).then(()=>{this.textContent='Ссылка скопирована';setTimeout(()=>{this.textContent='↗ Поделиться Index';},1400);});}else{window.prompt('Скопируйте ссылку',url.toString());}"
     deep_link_init = "const trigger=this;setTimeout(()=>{const allowed=['single_stone_analyzer','kurgin_index','database_analysis','excel_analyzer','kurgin_academy'];try{const url=new URL(window.parent.location.href);const tool=url.searchParams.get('tool');if(!allowed.includes(tool))return;const root=trigger.closest('.tools-page');const tab=root&&root.querySelector('[data-tool-tab=\\\"'+tool+'\\\"]');if(tab){tab.click();}if(url.hash){const target=root&&root.querySelector(url.hash);if(target)target.scrollIntoView({block:'start'});}}catch(e){}},0);"
+    score_range_click = "const root=this.closest('.index-score-card');root.querySelectorAll('[data-score-range]').forEach(b=>b.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');const label=this.getAttribute('data-score-label');const ru=this.getAttribute('data-score-ru');const range=this.getAttribute('data-score-range-label');const target=root.querySelector('.index-score-selected');if(target){target.textContent=label+' / '+ru+' · '+range;}"
     index_sections = _index_sections_html()
+    score_selector = _score_range_selector_html(score_range_click)
     return f"""
 <div class="tools-page">
   <img src="x" alt="" hidden onerror="{deep_link_init}">
@@ -190,8 +213,9 @@ def render_tools_page() -> str:
       </div>
       <div class="index-score-card">
         <div class="index-subtitle">KURGIN Score range</div>
-        <div>Выбрано: 80–89 · коэффициент ×1</div>
-        <div class="index-hint">selector влияет на значения таблицы, это не фильтр</div>
+        <div class="index-score-selected">Standard / Стандартный · 80–89.99</div>
+        <div class="score-range-selector" role="tablist" aria-label="KURGIN Score ranges">{score_selector}</div>
+        <div class="index-hint">диапазон используется как display label; scoring formula и pricing formula не менялись</div>
       </div>
       {index_sections}
       <button type="button" class="index-filter-button">☰ Фильтры Index</button>
