@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 INDEX_CSS = r'''
-.index-shell{padding-bottom:7.6rem}
+.index-shell{padding-bottom:7.6rem;--index-clarity-width:82px;--index-band-width:84px;--index-table-width:754px}
 .index-info-card,.index-score-card,.index-range-summary,.index-view-panel{border:1px solid #aaa;border-radius:18px;background:#f7f7f7;padding:1rem;margin:0 0 1rem}
 .index-title,.index-subtitle,.index-view-title{font-weight:700;font-size:1rem;margin-bottom:.55rem}
 .index-info-card div,.index-score-card div,.index-range-summary div,.index-view-panel div{font-size:.82rem;line-height:1.45}
@@ -22,10 +22,11 @@ INDEX_CSS = r'''
 .index-color-section[open] summary{border-color:#555;background:#dedede}
 .index-color-section[open] summary:before{content:'▼ '}
 .index-matrix-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.55rem 0 1rem;border:1px solid #bcbcbc;border-radius:10px;background:#fff}
-.index-matrix{min-width:760px;width:max-content;border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:.72rem}
-.index-matrix th,.index-matrix td{border-right:1px solid #bcbcbc;border-bottom:1px solid #bcbcbc;text-align:center;padding:.5rem .25rem;vertical-align:middle;min-width:84px;background:#fff}
+.index-matrix{width:var(--index-table-width,754px);min-width:var(--index-table-width,754px);max-width:var(--index-table-width,754px);border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:.72rem}
+.index-matrix th,.index-matrix td{border-right:1px solid #bcbcbc;border-bottom:1px solid #bcbcbc;text-align:center;padding:.5rem .25rem;vertical-align:middle;background:#fff;box-sizing:border-box}
+.index-matrix th[data-index-band],.index-matrix td[data-index-band]{width:var(--index-band-width,84px);min-width:var(--index-band-width,84px);max-width:var(--index-band-width,84px)}
 .index-matrix thead th{background:#dedede;font-weight:400;position:sticky;top:0;z-index:2}
-.index-matrix thead th:first-child,.index-matrix tbody th{position:sticky;left:0;z-index:4;min-width:82px;width:82px;background:#f8f8f8;text-align:left;padding-left:.7rem;font-weight:400;box-shadow:2px 0 0 #bcbcbc}
+.index-matrix thead th:first-child,.index-matrix tbody th{position:sticky;left:0;z-index:4;width:var(--index-clarity-width,82px);min-width:var(--index-clarity-width,82px);max-width:var(--index-clarity-width,82px);background:#f8f8f8;text-align:left;padding-left:.7rem;font-weight:400;box-shadow:2px 0 0 #bcbcbc;box-sizing:border-box}
 .index-matrix thead th:first-child{background:#dedede;z-index:5}
 .index-matrix tbody th{background:#fafafa}
 .index-cell-main{font-size:.72rem;line-height:1.15}
