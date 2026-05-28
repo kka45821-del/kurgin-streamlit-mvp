@@ -62,11 +62,35 @@ SYSTEM_CSS = r'''
 .single-next-box{border:1px solid #d0d0d0;border-radius:16px;background:#fff;padding:1rem;font-size:.72rem;line-height:1.45}
 .disabledStaticButton,.disabledMode,.inactiveField{opacity:.5!important;cursor:not-allowed!important;filter:grayscale(1)}
 .disabledStaticButton,.disabledMode{pointer-events:none!important;background:#f4f3f1!important;color:#777!important;border-color:#ddd!important}
-.actions .act.disabled{opacity:.18!important;pointer-events:none!important;filter:grayscale(1)}
-.actions .act.requestDetailBtn{opacity:1!important;pointer-events:auto!important;filter:none!important;background:#111!important;color:#fff!important;border-color:#111!important}
+.actions{gap:.22rem!important;padding-top:.78rem!important}
+.actions .act{border-radius:10px!important;min-height:32px!important}
+.actions .act.disabled{opacity:.16!important;pointer-events:none!important;filter:grayscale(1);background:#f6f6f6!important}
+.actions .act.requestDetailBtn{opacity:1!important;pointer-events:auto!important;filter:none!important;background:#111!important;color:#fff!important;border:1px solid #111!important}
+.actions .act.infoBtn{background:#f5f5f5!important;color:#111!important;border:1px solid #ddd!important}
+.actions .act.favoriteToggle{background:#fff!important;border:1px solid #dedede!important;color:#666!important}
+.actions .act.favoriteToggle.on{background:#f7f4ee!important;border-color:#111!important;color:#111!important}
 .actions .act.requestDetailBtn svg{stroke-width:1.7}
 .actions .actionMuted{opacity:.28!important;pointer-events:none!important;filter:grayscale(1);font-size:.64rem;color:#777!important;background:#f5f5f5!important;border-color:#e2e2e2!important}
+.detailSheet{padding-bottom:calc(1.4rem + env(safe-area-inset-bottom))!important}
+.detailActions{gap:.55rem!important}
+.detailActions .detailBtn{font-size:.82rem!important;line-height:1.15!important;padding:0 .45rem!important}
 .detailActions .detailBtn.dark.disabled{opacity:.62!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#555!important;border-color:#ddd!important}
+.requestBox{margin:.85rem 0 .7rem!important;padding:.78rem!important}
+.requestChannels{gap:.35rem!important}
+.requestBtn{min-height:36px!important;font-size:.72rem!important}
+.detailNote{font-size:.8rem!important;line-height:1.42!important}
+.favoriteGrid{grid-template-columns:1fr 1fr!important;gap:.42rem!important}
+.favoriteCell{min-height:42px!important;padding:.45rem .5rem!important}
+.favoriteCell span{font-size:.55rem!important}
+.favoriteCell strong{font-size:.74rem!important}
+.favoriteActions{gap:.4rem!important}
+.favoriteBtn{min-height:38px!important;font-size:.72rem!important;padding:0 .45rem!important}
+.favBadge{top:.05rem!important;right:.12rem!important;min-width:16px!important;height:16px!important;line-height:16px!important;font-size:.55rem!important}
+.nav a{min-height:52px!important}
+.nav .active{box-shadow:inset 0 0 0 1px #cfd5dc!important}
+.index-action-button{min-height:42px!important;margin-top:.55rem!important}
+.index-action-notice{font-size:.68rem!important}
+.index-view-panel{bottom:calc(118px + env(safe-area-inset-bottom))!important;max-height:min(62vh,520px)!important}
 .inactiveProfileCard .authPanel{display:block;border-color:#d7d7d7}
 .empty-state-info{margin-top:.75rem}
 ''' + INDEX_CSS
