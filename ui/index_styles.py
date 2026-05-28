@@ -9,6 +9,11 @@ INDEX_CSS = r'''
 .index-hint,.index-range-disclaimer,.index-view-text,.index-view-hint{font-size:.64rem!important;color:#666}
 .index-score-selected,.index-range-summary-selected{font-weight:700;margin:.15rem 0 .35rem}
 .index-score-coefficient,.index-range-summary-coefficient{font-size:.72rem!important;color:#555;margin-bottom:.65rem}
+.index-action-button{display:block;width:100%;margin:.65rem 0 0;border:1px solid #aaa;border-radius:13px;background:#fff;min-height:40px;font:inherit;font-size:.78rem;color:#111;text-align:center;cursor:pointer}
+.index-action-button:active{transform:translateY(1px)}
+.index-secondary-action{background:#f3f3f3;color:#555;border-color:#d5d5d5}
+.index-action-notice{margin-top:.6rem;border:1px solid #ddd;border-radius:12px;background:#fff;padding:.55rem .65rem;color:#555;font-size:.7rem!important;line-height:1.35!important}
+.index-action-notice:empty,.index-action-notice[hidden]{display:none!important}
 .score-range-selector{display:flex;gap:.4rem;margin:.65rem 0;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:.2rem}
 .score-range-button{flex:0 0 108px;border:1px solid #c8c8c8;border-radius:13px;background:#fff;padding:.52rem .45rem;text-align:left;font:inherit;color:#111;min-height:58px}
 .score-range-button[aria-selected="true"]{border-color:#111;background:#efefef}
