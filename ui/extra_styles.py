@@ -1,3 +1,4 @@
+# TODO: Index styles should move to ui/index_styles.py later.
 SYSTEM_CSS = r'''
 .system-state{border:1px solid #d7d7d7;border-radius:18px;background:#fff;padding:1rem;margin-bottom:1rem;box-shadow:0 10px 24px rgba(0,0,0,.04)}
 .system-title,.empty-title{font-weight:700;margin-bottom:.35rem}
