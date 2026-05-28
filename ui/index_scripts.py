@@ -87,7 +87,7 @@ INDEX_INIT = r"""
       const touch = event.changedTouches[0];
       const deltaY = touch.clientY - startY;
       const deltaX = Math.abs(touch.clientX - startX);
-      if(deltaY > 70 && deltaX < 110 && panel.scrollTop <= 8){
+      if(deltaY > 42 && deltaX < 130 && panel.scrollTop <= 18){
         closeViewPanel(root);
       }
     }, {passive: true});
@@ -102,7 +102,6 @@ INDEX_INIT = r"""
     button.setAttribute('aria-expanded', String(shouldOpen));
     if(shouldOpen){
       ensureViewPanelSwipeClose(root);
-      if(panel.scrollIntoView) panel.scrollIntoView({block: 'nearest'});
     }
   }
 
