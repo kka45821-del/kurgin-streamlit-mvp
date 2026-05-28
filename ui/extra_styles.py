@@ -66,8 +66,7 @@ SYSTEM_CSS = r'''
 .actions .act[data-stop]:not(.favoriteToggle){opacity:.3!important;pointer-events:none!important;filter:grayscale(1)}
 .actions .act:first-child[data-stop]{opacity:1!important;filter:none!important;background:#111!important;color:#fff!important;border-color:#111!important}
 .actions .act:first-child[data-stop] svg{stroke-width:1.7}
-.detailActions .detailBtn.dark{opacity:.42!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#777!important;border-color:#ddd!important;font-size:0!important}
-.detailActions .detailBtn.dark:after{content:'Действие недоступно';font-size:.78rem}
+.detailActions .detailBtn.dark.disabled{opacity:.62!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#555!important;border-color:#ddd!important}
 .inactiveProfileCard .authPanel{display:block;border-color:#d7d7d7}
 .empty-state-info{margin-top:.75rem}
 ''' + INDEX_CSS
