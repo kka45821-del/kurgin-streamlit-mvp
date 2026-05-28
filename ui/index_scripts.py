@@ -17,8 +17,14 @@ INDEX_INIT = r"""
     const clarityWidth = 82;
     const bandWidth = 84;
     const tableWidth = clarityWidth + (count * bandWidth);
-    root.style.setProperty('--index-table-width', tableWidth + 'px');
+    const tableWidthPx = tableWidth + 'px';
+    root.style.setProperty('--index-table-width', tableWidthPx);
     root.style.setProperty('--index-visible-band-count', String(count));
+    root.querySelectorAll('.index-matrix').forEach(table => {
+      table.style.width = tableWidthPx;
+      table.style.minWidth = tableWidthPx;
+      table.style.maxWidth = tableWidthPx;
+    });
   }
 
   function applyScoreRange(root, button){
