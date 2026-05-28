@@ -32,5 +32,11 @@ INDEX_CSS = r'''
 .index-cell-sub{font-size:.65rem;line-height:1.15;margin-top:.18rem}
 .index-view-actions{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin:.75rem 0}
 .index-view-action{border:1px solid #aaa;border-radius:13px;background:#fff;min-height:40px;font:inherit;font-size:.72rem;color:#111}
+.index-view-group{border-top:1px solid #ddd;margin-top:.8rem;padding-top:.75rem}
+.index-view-group-title{font-weight:700;margin-bottom:.45rem}
+.index-view-choice-grid{display:flex;flex-wrap:wrap;gap:.42rem}
+.index-view-choice{border:1px solid #aaa;border-radius:999px;background:#fff;min-height:34px;padding:.35rem .65rem;font:inherit;font-size:.68rem;color:#111}
+.index-view-choice[aria-pressed="true"]{border-color:#111;background:#efefef;font-weight:700}
+.index-view-choice[aria-pressed="false"]{opacity:.42;background:#fafafa}
 .index-filter-button{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom));z-index:34;width:100%;max-width:430px;border:1px solid #777;border-radius:20px 20px 0 0;background:#f3f3f3;min-height:58px;font:inherit;font-size:.92rem;color:#111}
 '''
