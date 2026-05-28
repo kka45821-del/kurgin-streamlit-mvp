@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 
+# TODO: Move index JS handlers to safer structured script module after MVP smoke.
 SHARE_CLICK = "let url;try{url=new URL(window.parent.location.href);}catch(e){url=new URL(window.location.href);}url.searchParams.set('page','tools');url.searchParams.set('tool','kurgin_index');url.hash='kurgin-index';const shareData={title:'KURGIN Index',text:'KURGIN Index — ориентир для сопоставления лабораторных бриллиантов',url:url.toString()};if(navigator.share){navigator.share(shareData).catch(()=>{});}else if(navigator.clipboard){navigator.clipboard.writeText(url.toString()).then(()=>{this.textContent='Ссылка скопирована';setTimeout(()=>{this.textContent='↗ Поделиться Index';},1400);}).catch(()=>{window.prompt('Скопируйте ссылку',url.toString());});}else{window.prompt('Скопируйте ссылку',url.toString());}"
 
 DEEP_LINK_INIT = "const trigger=this;setTimeout(()=>{const allowed=['single_stone_analyzer','kurgin_index','database_analysis','excel_analyzer','kurgin_academy'];try{const url=new URL(window.parent.location.href);const tool=url.searchParams.get('tool');if(!allowed.includes(tool))return;const root=trigger.closest('.tools-page');const tab=root&&root.querySelector('[data-tool-tab=\\\"'+tool+'\\\"]');if(tab){tab.click();}if(url.hash){const target=root&&root.querySelector(url.hash);if(target)target.scrollIntoView({block:'start'});}}catch(e){}},0);"
