@@ -1,25 +1,46 @@
+import streamlit as st
+
 from ui.index_components import render_public_index_tool
 
 
-TOOLS_DEEP_LINK_INIT = "const trigger=this;setTimeout(()=>{const allowed=['single_stone_analyzer','kurgin_index','database_analysis','excel_analyzer','kurgin_academy'];try{const url=new URL(window.parent.location.href);const tool=url.searchParams.get('tool');if(!allowed.includes(tool))return;const root=trigger.closest('.tools-page');const tab=root&&root.querySelector('[data-tool-tab=\\\"'+tool+'\\\"]');if(tab){tab.click();}if(url.hash){const target=root&&root.querySelector(url.hash);if(target)target.scrollIntoView({block:'start'});}}catch(e){}},0);"
+TOOLS = (
+    "single_stone_analyzer",
+    "kurgin_index",
+    "database_analysis",
+    "excel_analyzer",
+    "kurgin_academy",
+)
+
+
+def _active_tool_from_query() -> str:
+    tool = st.query_params.get("tool")
+    return tool if tool in TOOLS else "single_stone_analyzer"
+
+
+def _selected(active_tool: str, tool: str) -> str:
+    return "true" if active_tool == tool else "false"
+
+
+def _hidden(active_tool: str, tool: str) -> str:
+    return "" if active_tool == tool else " hidden"
 
 
 def render_tools_page() -> str:
+    active_tool = _active_tool_from_query()
     tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);try{const url=new URL(window.parent.location.href);url.searchParams.set('page','tools');url.searchParams.set('tool',active);window.parent.history.replaceState(null,'',url.toString());}catch(e){}"
     mode_click = "const root=this.closest('.single-tool');const active=this.getAttribute('data-mode');root.querySelectorAll('[data-mode]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-mode-panel]').forEach(p=>p.hidden=p.getAttribute('data-mode-panel')!==active);"
     public_index_tool = render_public_index_tool()
     return f"""
 <div class="tools-page">
-  <img src="x" alt="" hidden onerror="{TOOLS_DEEP_LINK_INIT}">
   <div class="tools-tabs" role="tablist" aria-label="Инструменты KURGIN">
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" aria-selected="true" onclick="{tab_click}">KURGIN<br>Stone Analyzer</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_index" aria-selected="false" onclick="{tab_click}">KURGIN<br>Index</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="database_analysis" aria-selected="false" onclick="{tab_click}">KURGIN<br>Verify</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="excel_analyzer" aria-selected="false" onclick="{tab_click}">KURGIN<br>Mass Analyzer</button>
-    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_academy" aria-selected="false" onclick="{tab_click}">KURGIN<br>Academy</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" aria-selected="{_selected(active_tool, 'single_stone_analyzer')}" onclick="{tab_click}">KURGIN<br>Stone Analyzer</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_index" aria-selected="{_selected(active_tool, 'kurgin_index')}" onclick="{tab_click}">KURGIN<br>Index</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="database_analysis" aria-selected="{_selected(active_tool, 'database_analysis')}" onclick="{tab_click}">KURGIN<br>Verify</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="excel_analyzer" aria-selected="{_selected(active_tool, 'excel_analyzer')}" onclick="{tab_click}">KURGIN<br>Mass Analyzer</button>
+    <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_academy" aria-selected="{_selected(active_tool, 'kurgin_academy')}" onclick="{tab_click}">KURGIN<br>Academy</button>
   </div>
 
-  <div class="tools-tab-content" data-tool-panel="single_stone_analyzer">
+  <div class="tools-tab-content" data-tool-panel="single_stone_analyzer"{_hidden(active_tool, 'single_stone_analyzer')}>
     <div class="single-tool">
       <div class="tool-section-title">KURGIN Stone Analyzer</div>
       <div class="muted">Анализ одного камня по фото, файлу или ручному вводу. Сейчас это UX-скелет без запуска расчёта.</div>
@@ -54,19 +75,19 @@ def render_tools_page() -> str:
     </div>
   </div>
 
-  <div class="tools-tab-content" data-tool-panel="kurgin_index" hidden>
+  <div class="tools-tab-content" data-tool-panel="kurgin_index"{_hidden(active_tool, 'kurgin_index')}>
     {public_index_tool}
   </div>
 
-  <div class="tools-tab-content" data-tool-panel="database_analysis" hidden>
+  <div class="tools-tab-content" data-tool-panel="database_analysis"{_hidden(active_tool, 'database_analysis')}>
     <section class="tool-card"><div class="tool-kicker">Verify</div><div class="tool-title">KURGIN Verify</div><div class="tool-text">Проверка, сверка и базовый анализ данных по камню или базе перед подбором.</div><div class="tool-note">UX-скелет. Не сертификат и не гарантия наличия.</div></section>
   </div>
 
-  <div class="tools-tab-content" data-tool-panel="excel_analyzer" hidden>
+  <div class="tools-tab-content" data-tool-panel="excel_analyzer"{_hidden(active_tool, 'excel_analyzer')}>
     <section class="tool-card"><div class="tool-kicker">Mass Analyzer</div><div class="tool-title">KURGIN Mass Analyzer</div><div class="tool-text">Excel / batch / массовый анализ списка камней. Реальная логика Excel Analyzer не подключена в этом public-скелете.</div><div class="tool-note">Не публикация, не checkout и не изменение каталога.</div></section>
   </div>
 
-  <div class="tools-tab-content" data-tool-panel="kurgin_academy" hidden>
+  <div class="tools-tab-content" data-tool-panel="kurgin_academy"{_hidden(active_tool, 'kurgin_academy')}>
     <section class="tool-card"><div class="tool-kicker">Academy</div><div class="tool-title">KURGIN Academy</div><div class="tool-text">Обучение и объяснения по лабораторным бриллиантам, параметрам, анализу и интерпретации результатов.</div><div class="tool-note">UX-скелет. Материалы будут расширяться отдельно.</div></section>
   </div>
 </div>
