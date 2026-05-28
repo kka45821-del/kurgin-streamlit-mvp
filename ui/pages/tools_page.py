@@ -1,5 +1,7 @@
 from ui.index_components import render_public_index_tool
-from ui.index_scripts import DEEP_LINK_INIT
+
+
+TOOLS_DEEP_LINK_INIT = "const trigger=this;setTimeout(()=>{const allowed=['single_stone_analyzer','kurgin_index','database_analysis','excel_analyzer','kurgin_academy'];try{const url=new URL(window.parent.location.href);const tool=url.searchParams.get('tool');if(!allowed.includes(tool))return;const root=trigger.closest('.tools-page');const tab=root&&root.querySelector('[data-tool-tab=\\\"'+tool+'\\\"]');if(tab){tab.click();}if(url.hash){const target=root&&root.querySelector(url.hash);if(target)target.scrollIntoView({block:'start'});}}catch(e){}},0);"
 
 
 def render_tools_page() -> str:
@@ -8,7 +10,7 @@ def render_tools_page() -> str:
     public_index_tool = render_public_index_tool()
     return f"""
 <div class="tools-page">
-  <img src="x" alt="" hidden onerror="{DEEP_LINK_INIT}">
+  <img src="x" alt="" hidden onerror="{TOOLS_DEEP_LINK_INIT}">
   <div class="tools-tabs" role="tablist" aria-label="Инструменты KURGIN">
     <button type="button" class="tools-tab" role="tab" data-tool-tab="single_stone_analyzer" aria-selected="true" onclick="{tab_click}">KURGIN<br>Stone Analyzer</button>
     <button type="button" class="tools-tab" role="tab" data-tool-tab="kurgin_index" aria-selected="false" onclick="{tab_click}">KURGIN<br>Index</button>
