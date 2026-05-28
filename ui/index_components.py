@@ -8,6 +8,9 @@ from ui.index_scripts import (
     INDEX_COLLAPSE_ALL_COLORS,
     INDEX_EXPAND_ALL_COLORS,
     INDEX_PDF_PRINT,
+    INDEX_VIEW_OPTION_TOGGLE,
+    INDEX_VIEW_RESET,
+    INDEX_VIEW_SHOW_ALL,
     INDEX_VIEW_TOGGLE,
     SCORE_RANGE_CLICK,
     SHARE_CLICK,
@@ -48,13 +51,13 @@ def _index_cell_html(value: int | None) -> str:
 
 def _index_table_for_color(color: str) -> str:
     values = _index_value_map()
-    header_cells = "".join(f"<th>{label}</th>" for _, label in INDEX_BANDS)
+    header_cells = "".join(f"<th data-index-band='{band_key}'>{label}</th>" for band_key, label in INDEX_BANDS)
     body_rows = []
     for clarity in INDEX_CLARITIES:
         cells = []
         for band_key, _ in INDEX_BANDS:
-            cells.append(f"<td>{_index_cell_html(values.get((color, clarity, band_key)))}</td>")
-        body_rows.append(f"<tr><th>{clarity}</th>{''.join(cells)}</tr>")
+            cells.append(f"<td data-index-band='{band_key}'>{_index_cell_html(values.get((color, clarity, band_key)))}</td>")
+        body_rows.append(f"<tr data-index-clarity='{clarity}'><th>{clarity}</th>{''.join(cells)}</tr>")
     return (
         "<div class='index-matrix-wrap'>"
         "<table class='index-matrix'>"
@@ -86,7 +89,7 @@ def _index_sections_html() -> str:
     for color in INDEX_COLORS:
         open_attr = " open" if color == "E" else ""
         sections.append(
-            f"<details class='index-color-section'{open_attr}>"
+            f"<details class='index-color-section' data-index-color='{color}'{open_attr}>"
             f"<summary>Цвет {color}</summary>"
             f"{_index_table_for_color(color)}"
             "</details>"
@@ -128,6 +131,19 @@ def _score_range_selector_html() -> str:
     return "".join(buttons)
 
 
+def _index_view_choice_group(title: str, view_type: str, values: list[tuple[str, str]] | list[str]) -> str:
+    option_toggle = _html_attr(INDEX_VIEW_OPTION_TOGGLE)
+    buttons = []
+    for raw in values:
+        value, label = raw if isinstance(raw, tuple) else (raw, raw)
+        buttons.append(
+            "<button type='button' class='index-view-choice' aria-pressed='true' "
+            f"data-index-view-type='{view_type}' data-index-view-value='{value}' "
+            f"onclick=\"{option_toggle}\">{label}</button>"
+        )
+    return f"<div class='index-view-group'><div class='index-view-group-title'>{title}</div><div class='index-view-choice-grid'>{''.join(buttons)}</div></div>"
+
+
 def _pdf_template_html() -> str:
     return f"""
 <div id="index-pdf-template" hidden>
@@ -147,14 +163,24 @@ def _pdf_template_html() -> str:
 def _index_view_panel_html() -> str:
     expand_all = _html_attr(INDEX_EXPAND_ALL_COLORS)
     collapse_all = _html_attr(INDEX_COLLAPSE_ALL_COLORS)
+    show_all = _html_attr(INDEX_VIEW_SHOW_ALL)
+    reset_view = _html_attr(INDEX_VIEW_RESET)
+    color_group = _index_view_choice_group("Цвет", "color", INDEX_COLORS)
+    clarity_group = _index_view_choice_group("Чистота", "clarity", INDEX_CLARITIES)
+    band_group = _index_view_choice_group("Каратность", "band", [(band_key, label) for band_key, label in INDEX_BANDS])
     return f"""
 <div class="index-view-panel" hidden>
   <div class="index-view-title">Вид таблицы Index</div>
-  <div class="index-view-text">Это настройки просмотра таблицы индекса. Они не меняют каталог, цены камней или формулы.</div>
+  <div class="index-view-text">Это настройки просмотра таблицы Index. Они не меняют каталог, цены камней, формулы или наличие камней.</div>
   <div class="index-view-actions">
+    <button type="button" class="index-view-action" onclick="{show_all}">Показать всё</button>
+    <button type="button" class="index-view-action" onclick="{reset_view}">Сбросить вид</button>
     <button type="button" class="index-view-action" onclick="{expand_all}">Раскрыть все цвета</button>
     <button type="button" class="index-view-action" onclick="{collapse_all}">Свернуть все цвета</button>
   </div>
+  {color_group}
+  {clarity_group}
+  {band_group}
   <div class="index-view-hint">Подсказка: двигайте таблицу влево-вправо. Первый столбик “Clarity / чистота” остаётся на месте.</div>
 </div>
 """
