@@ -6,6 +6,8 @@ from urllib.request import urlopen
 from catalog.catalog_core import extract_stones, normalize_public_stones
 from catalog.stones import STONES as LOCAL_STONES
 
+CATALOG_LOADER_VERSION = "state_v1"
+
 DEFAULT_CATALOG_URLS = [
     "https://raw.githubusercontent.com/kka45821-del/kurgin-data/main/catalog.json",
     "https://raw.githubusercontent.com/kka45821-del/kurgin-data/main/stones.json",
