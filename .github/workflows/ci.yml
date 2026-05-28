@@ -32,6 +32,9 @@ jobs:
           python -m py_compile app.py
           python -m py_compile catalog/catalog_core.py
           python -m py_compile catalog/data_loader.py
+          python -m py_compile services/__init__.py
+          python -m py_compile services/analyzer_adapter.py
+          python -m py_compile scripts/smoke_analyzer_adapter_contract.py
           python -m py_compile ui/mobile_shell.py
           python -m py_compile ui/scripts.py
           python -m py_compile ui/extra_styles.py
@@ -52,7 +55,7 @@ jobs:
         run: |
           set -euo pipefail
           pattern='onerror|textarea|new[[:space:]]+Function|eval[[:space:]]*\(|createOrder'
-          targets=(app.py catalog config ui)
+          targets=(app.py catalog config ui services)
           if grep -RInE "$pattern" -- "${targets[@]}"; then
             echo "Forbidden production pattern found. Remove it or move it out of production code."
             exit 1
@@ -61,3 +64,7 @@ jobs:
       - name: Run public price state smoke checks
         run: |
           python scripts/smoke_public_price_states.py
+
+      - name: Run Analyzer adapter contract smoke checks
+        run: |
+          python scripts/smoke_analyzer_adapter_contract.py
