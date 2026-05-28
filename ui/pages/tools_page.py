@@ -28,7 +28,6 @@ def _hidden(active_tool: str, tool: str) -> str:
 def render_tools_page() -> str:
     active_tool = _active_tool_from_query()
     tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);try{const url=new URL(window.parent.location.href);url.searchParams.set('page','tools');url.searchParams.set('tool',active);window.parent.history.replaceState(null,'',url.toString());}catch(e){}"
-    mode_click = "const root=this.closest('.single-tool');const active=this.getAttribute('data-mode');root.querySelectorAll('[data-mode]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-mode-panel]').forEach(p=>p.hidden=p.getAttribute('data-mode-panel')!==active);"
     public_index_tool = render_public_index_tool()
     return f"""
 <div class="tools-page">
@@ -41,36 +40,45 @@ def render_tools_page() -> str:
   </div>
 
   <div class="tools-tab-content" data-tool-panel="single_stone_analyzer"{_hidden(active_tool, 'single_stone_analyzer')}>
-    <div class="single-tool">
+    <div class="single-tool analyzer-preview">
       <div class="tool-section-title">KURGIN Stone Analyzer</div>
-      <div class="muted">MVP-скелет интерфейса. Расчёт, распознавание, загрузка файла и ручной ввод сейчас не активны.</div>
-      <div class="single-mode-tabs disabledToolModes" role="tablist" aria-label="Будущие способы ввода">
-        <button type="button" class="single-mode-tab disabledMode" data-mode="photo" aria-selected="false" onclick="{mode_click}" disabled><strong>Фото</strong><span>скоро</span></button>
-        <button type="button" class="single-mode-tab disabledMode" data-mode="upload" aria-selected="true" onclick="{mode_click}" disabled><strong>Загрузка</strong><span>скоро</span></button>
-        <button type="button" class="single-mode-tab disabledMode" data-mode="manual" aria-selected="false" onclick="{mode_click}" disabled><strong>Вручную</strong><span>скоро</span></button>
+      <div class="muted">Public preview skeleton. Engine не подключён: расчёт, формула, загрузка файлов и отчёты сейчас не выполняются.</div>
+
+      <div class="analyzer-mode-row" aria-label="Analyzer modes">
+        <div class="analyzer-mode active"><strong>Manual preview</strong><span>phase 1</span></div>
+        <div class="analyzer-mode inactive"><strong>Upload</strong><span>later</span></div>
+        <div class="analyzer-mode inactive"><strong>Batch</strong><span>later</span></div>
       </div>
 
-      <section class="single-workspace" data-mode-panel="upload">
-        <div class="workspace-title">Analyzer не запущен в public MVP</div>
-        <div class="workspace-text">Этот раздел показывает будущую структуру. Сейчас он не принимает файлы, фото или ручные параметры.</div>
-        <button type="button" class="single-file-button disabledStaticButton" disabled>[ недоступно в MVP ]</button>
+      <section class="single-workspace analyzer-workspace">
+        <div class="workspace-title">Manual input preview</div>
+        <div class="workspace-text">Поля ниже показывают будущую структуру ручного ввода. Они не запускают backend calculation и не отправляют данные.</div>
+
+        <div class="analyzer-form-grid" aria-label="KURGIN Stone Analyzer preview fields">
+          <div class="analyzer-field"><span>Shape</span><strong>Round</strong></div>
+          <div class="analyzer-field"><span>Carat</span><strong>1.00 ct</strong></div>
+          <div class="analyzer-field"><span>Color</span><strong>D / E / F</strong></div>
+          <div class="analyzer-field"><span>Clarity</span><strong>VVS / VS</strong></div>
+          <div class="analyzer-field optional"><span>Table %</span><strong>optional</strong></div>
+          <div class="analyzer-field optional"><span>Depth %</span><strong>optional</strong></div>
+          <div class="analyzer-field optional"><span>Crown angle</span><strong>optional</strong></div>
+          <div class="analyzer-field optional"><span>Pavilion angle</span><strong>optional</strong></div>
+        </div>
+
+        <button type="button" class="single-file-button analyzer-disabled-cta" disabled>Получить предварительный результат</button>
+        <div class="analyzer-disabled-note">Engine не подключён в public MVP.</div>
       </section>
 
-      <section class="single-workspace" data-mode-panel="photo" hidden>
-        <div class="workspace-title">Фото — позже</div>
-        <div class="workspace-text">Камера и распознавание не подключены в текущей public-версии.</div>
-        <button type="button" class="single-file-button disabledStaticButton" disabled>[ недоступно в MVP ]</button>
-      </section>
-
-      <section class="single-workspace" data-mode-panel="manual" hidden>
-        <div class="workspace-title">Ручной ввод — позже</div>
-        <div class="workspace-text">Форма ввода параметров будет подключаться отдельно после стабилизации методологии и интерфейса.</div>
-        <button type="button" class="single-file-button disabledStaticButton" disabled>[ недоступно в MVP ]</button>
-      </section>
-
-      <section class="single-next-box">
-        <div>Сейчас: только безопасная демонстрация структуры.</div>
-        <div>Нет расчёта, отчёта, оплаты или загрузки данных.</div>
+      <section class="single-next-box analyzer-preview-result">
+        <div class="result-kicker">Предварительный режим</div>
+        <div class="result-title">Расчёт будет подключён через adapter layer</div>
+        <div class="result-text">Этот блок показывает будущий public-safe результат без раскрытия формулы и внутренних коэффициентов.</div>
+        <ul class="analyzer-limitations">
+          <li>Не является сертификатом.</li>
+          <li>Не является оценкой стоимости.</li>
+          <li>Не является геммологическим заключением.</li>
+          <li>Формула и внутренние коэффициенты не раскрываются.</li>
+        </ul>
       </section>
     </div>
   </div>
