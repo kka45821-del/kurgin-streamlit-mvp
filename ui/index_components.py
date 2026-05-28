@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ui.index_data import INDEX_BANDS, INDEX_CLARITIES, INDEX_COLORS, PUBLIC_INDEX_ROWS
+from ui.index_data import INDEX_BANDS, INDEX_CLARITIES, INDEX_COLORS, load_public_index_rows
 from ui.index_score_rules import SCORE_INDEX_RULES, SCORE_RANGE_SELECTOR_ORDER
 from ui.index_scripts import SCORE_RANGE_CLICK, SHARE_CLICK
 from ui.score_ranges import KURGIN_SCORE_RANGES, default_score_range_id
@@ -11,7 +11,7 @@ def _score_ranges_by_id() -> dict[str, dict[str, object]]:
 
 
 def _index_value_map() -> dict[tuple[str, str, str], int]:
-    return {(color, clarity, carat_band): int(value) for color, clarity, carat_band, value in PUBLIC_INDEX_ROWS if value > 0}
+    return {(color, clarity, carat_band): int(value) for color, clarity, carat_band, value in load_public_index_rows() if value > 0}
 
 
 def _index_cell_html(value: int | None) -> str:
