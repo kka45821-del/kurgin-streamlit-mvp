@@ -129,8 +129,9 @@ def _index_sections_html() -> str:
 
 
 def render_tools_page() -> str:
-    tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);"
+    tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);try{const url=new URL(window.parent.location.href);url.searchParams.set('page','tools');url.searchParams.set('tool',active);window.parent.history.replaceState(null,'',url.toString());}catch(e){}"
     mode_click = "const root=this.closest('.single-tool');const active=this.getAttribute('data-mode');root.querySelectorAll('[data-mode]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-mode-panel]').forEach(p=>p.hidden=p.getAttribute('data-mode-panel')!==active);"
+    share_click = "const url=new URL(window.parent.location.href);url.searchParams.set('page','tools');url.searchParams.set('tool','kurgin_index');url.hash='kurgin-index';const shareData={title:'KURGIN Index',text:'KURGIN Index — ориентир для сопоставления лабораторных бриллиантов',url:url.toString()};if(navigator.share){navigator.share(shareData).catch(()=>{});}else if(navigator.clipboard){navigator.clipboard.writeText(url.toString()).then(()=>{this.textContent='Ссылка скопирована';setTimeout(()=>{this.textContent='↗ Поделиться Index';},1400);});}else{window.prompt('Скопируйте ссылку',url.toString());}"
     index_sections = _index_sections_html()
     return f"""
 <div class="tools-page">
@@ -178,11 +179,12 @@ def render_tools_page() -> str:
   </div>
 
   <div class="tools-tab-content" data-tool-panel="kurgin_index" hidden>
-    <section class="index-shell">
+    <section class="index-shell" id="kurgin-index">
       <div class="index-info-card">
         <div class="index-title">KURGIN Index v1.0</div>
         <div>Обновлено: текущий период</div>
         <div>Основные камни: 1.00–4.99 ct</div>
+        <button type="button" class="btn light" onclick="{share_click}">↗ Поделиться Index</button>
       </div>
       <div class="index-score-card">
         <div class="index-subtitle">KURGIN Score range</div>
