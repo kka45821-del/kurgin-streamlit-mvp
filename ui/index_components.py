@@ -74,6 +74,7 @@ def _score_range_selector_html() -> str:
         selected = "true" if item["id"] == default_id else "false"
         buttons.append(
             "<button type='button' class='score-range-button' role='tab' "
+            "data-index-action='score-range' "
             f"data-score-range='{item['id']}' "
             f"data-score-label='{item['en']}' "
             f"data-score-ru='{item['ru']}' "
@@ -94,6 +95,7 @@ def _index_view_choice_group(title: str, view_type: str, values: list[tuple[str,
         value, label = raw if isinstance(raw, tuple) else (raw, raw)
         buttons.append(
             "<button type='button' class='index-view-choice' aria-pressed='true' "
+            "data-index-action='view-option' "
             f"data-index-view-type='{view_type}' data-index-view-value='{value}'>"
             f"{label}</button>"
         )
@@ -109,10 +111,10 @@ def _index_view_panel_html() -> str:
   <div class="index-view-title">Вид таблицы Index</div>
   <div class="index-view-text">Это настройки просмотра таблицы Index. Они не меняют каталог, цены камней, формулы или наличие камней.</div>
   <div class="index-view-actions">
-    <button type="button" class="index-view-action">Показать всё</button>
-    <button type="button" class="index-view-action">Сбросить вид</button>
-    <button type="button" class="index-view-action">Раскрыть все цвета</button>
-    <button type="button" class="index-view-action">Свернуть все цвета</button>
+    <button type="button" class="index-view-action" data-index-action="show-all">Показать всё</button>
+    <button type="button" class="index-view-action" data-index-action="reset-view">Сбросить вид</button>
+    <button type="button" class="index-view-action" data-index-action="expand-all-colors">Раскрыть все цвета</button>
+    <button type="button" class="index-view-action" data-index-action="collapse-all-colors">Свернуть все цвета</button>
   </div>
   {color_group}
   {clarity_group}
@@ -149,7 +151,7 @@ def render_public_index_tool() -> str:
     <div class="index-range-disclaimer">Это индексный ориентир для сопоставления лабораторных бриллиантов. Это не цена конкретного камня, не оферта, не финансовый индекс и не инвестиционная рекомендация.</div>
   </div>
   {index_view_panel}
-  <button type="button" class="index-filter-button" aria-expanded="false">☰ Вид таблицы Index</button>
-  <div class="tool-note">Временно отключена интерактивность Index после JS-stabilization rollback. Таблица остаётся доступной для просмотра; следующий слой — safe shell-level JS mount.</div>
+  <button type="button" class="index-filter-button" aria-expanded="false" data-index-action="view-toggle">☰ Вид таблицы Index</button>
+  <div class="tool-note">Интерактивность Index подключена через safe shell-level JS mount. Если JS не сработает, таблица остаётся доступной как static render.</div>
 </section>
 """
