@@ -26,7 +26,7 @@ SYSTEM_CSS = r'''
 #role-customer:checked ~ .roleSwitch .roleCustomerLabel,#role-specialist:checked ~ .roleSwitch .roleSpecialistLabel{border-color:#111;background:#fafafa}
 .roleName{font-weight:700;font-size:.9rem}
 .roleHint{font-size:.72rem;color:#777;margin-top:.25rem;line-height:1.3}
-.roleExplanation{border:1px solid #e0e0e0;border-radius:14px;background:#fff;padding:.85rem;margin:.55rem 0 .8rem}
+.roleExplanation{border:1px solid #e0e0e0;border-radius:14px;padding:.85rem;margin:.55rem 0 .8rem}
 .rolePanel{display:none}
 #role-customer:checked ~ .roleExplanation .customerPanel,#role-specialist:checked ~ .roleExplanation .specialistPanel{display:block}
 .rolePanelTitle{font-weight:700;margin-bottom:.25rem}
@@ -58,12 +58,14 @@ SYSTEM_CSS = r'''
 .single-mode-tab strong{font-size:.82rem}.single-mode-tab span{font-size:.65rem;color:#555}
 .single-workspace{border:1px solid #aaa;border-radius:18px;background:#f3f3f3;padding:1rem;margin-bottom:1.6rem;min-height:150px}
 .workspace-title{font-weight:700;margin-bottom:.65rem;font-size:.88rem}.workspace-text{font-size:.78rem;line-height:1.45;color:#111;margin-bottom:1.05rem}
-.single-file-button{display:block;width:72%;margin:.25rem auto 0;border:1px solid #bbb;border-radius:13px;background:#fff;min-height:42px;font:inherit;font-size:.72rem;color:#111}
-.single-next-box{border:1px solid #d0d0d0;border-radius:16px;background:#fff;padding:1rem;font-size:.72rem;line-height:1.45;color:#111}
+.single-file-button{display:block;width:72%;margin:.25rem auto 0;border:1px solid #bbb;border-radius:13px;background:#fff;min-height:42px;font:inherit;font-size:.72rem}
+.single-next-box{border:1px solid #d0d0d0;border-radius:16px;background:#fff;padding:1rem;font-size:.72rem;line-height:1.45}
 .disabledStaticButton,.disabledMode,.inactiveField{opacity:.5!important;cursor:not-allowed!important;filter:grayscale(1)}
 .disabledStaticButton,.disabledMode{pointer-events:none!important;background:#f4f3f1!important;color:#777!important;border-color:#ddd!important}
 .index-info-card .btn.light{opacity:.42!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#777!important;border-color:#ddd!important}
 .actions .act[data-stop]:not(.favoriteToggle){opacity:.3!important;pointer-events:none!important;filter:grayscale(1)}
+.actions .act:first-child[data-stop]{opacity:1!important;filter:none!important;background:#111!important;color:#fff!important;border-color:#111!important}
+.actions .act:first-child[data-stop] svg{stroke-width:1.7}
 .detailActions .detailBtn.dark{opacity:.42!important;pointer-events:none!important;filter:grayscale(1);background:#f4f3f1!important;color:#777!important;border-color:#ddd!important;font-size:0!important}
 .detailActions .detailBtn.dark:after{content:'Действие недоступно';font-size:.78rem}
 .inactiveProfileCard .authPanel{display:block;border-color:#d7d7d7}
