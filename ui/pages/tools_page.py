@@ -1,5 +1,8 @@
+import html
+
 import streamlit as st
 
+from services.analyzer_adapter import analyze_public_stone
 from ui.index_components import render_public_index_tool
 
 
@@ -25,10 +28,58 @@ def _hidden(active_tool: str, tool: str) -> str:
     return "" if active_tool == tool else " hidden"
 
 
+def _escape(value: object) -> str:
+    return html.escape(str(value if value is not None else "—"), quote=True)
+
+
+def _preview_payload() -> dict[str, object]:
+    return {
+        "shape": "Round",
+        "carat": 1.00,
+        "color": "E",
+        "clarity": "VS1",
+        "table_pct": 57.0,
+        "depth_pct": 61.8,
+        "crown_angle": 34.7,
+        "pavilion_angle": 40.8,
+        "crown_height": 15.0,
+        "pavilion_depth": 43.0,
+        "girdle": 3.5,
+        "fluorescence": "None",
+        "report_number": "PREVIEW-STUB",
+    }
+
+
+def _list_items(values: list[object]) -> str:
+    if not values:
+        return "<li>—</li>"
+    return "".join(f"<li>{_escape(value)}</li>" for value in values)
+
+
+def _render_adapter_mock_result(result: dict[str, object]) -> str:
+    warnings = result.get("warnings") if isinstance(result.get("warnings"), list) else []
+    limitations = result.get("limitations") if isinstance(result.get("limitations"), list) else []
+    return f"""
+<details class="analyzer-adapter-preview">
+  <summary>Показать mock preview</summary>
+  <div class="analyzer-result-grid" aria-label="Analyzer adapter mock result">
+    <div><span>Status</span><strong>{_escape(result.get('status'))}</strong></div>
+    <div><span>Score band</span><strong>{_escape(result.get('score_band'))}</strong></div>
+    <div class="wide"><span>Summary</span><strong>{_escape(result.get('summary'))}</strong></div>
+    <div class="wide"><span>Next action</span><strong>{_escape(result.get('next_action'))}</strong></div>
+  </div>
+  <div class="analyzer-result-list"><strong>Warnings</strong><ul>{_list_items(warnings)}</ul></div>
+  <div class="analyzer-result-list"><strong>Limitations</strong><ul>{_list_items(limitations)}</ul></div>
+</details>
+"""
+
+
 def render_tools_page() -> str:
     active_tool = _active_tool_from_query()
     tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);try{const url=new URL(window.parent.location.href);url.searchParams.set('page','tools');url.searchParams.set('tool',active);window.parent.history.replaceState(null,'',url.toString());}catch(e){}"
     public_index_tool = render_public_index_tool()
+    adapter_mock_result = analyze_public_stone(_preview_payload())
+    adapter_mock_result_html = _render_adapter_mock_result(adapter_mock_result)
     return f"""
 <div class="tools-page">
   <div class="tools-tabs" role="tablist" aria-label="Инструменты KURGIN">
@@ -42,7 +93,7 @@ def render_tools_page() -> str:
   <div class="tools-tab-content" data-tool-panel="single_stone_analyzer"{_hidden(active_tool, 'single_stone_analyzer')}>
     <div class="single-tool analyzer-preview">
       <div class="tool-section-title">KURGIN Stone Analyzer</div>
-      <div class="muted">Public preview skeleton. Engine не подключён: расчёт, формула, загрузка файлов и отчёты сейчас не выполняются.</div>
+      <div class="muted">Это adapter stub preview. Реальная формула не подключена: расчёт, формула, загрузка файлов и отчёты сейчас не выполняются.</div>
 
       <div class="analyzer-mode-row" aria-label="Analyzer modes">
         <div class="analyzer-mode active"><strong>Manual preview</strong><span>phase 1</span></div>
@@ -51,29 +102,30 @@ def render_tools_page() -> str:
       </div>
 
       <section class="single-workspace analyzer-workspace">
-        <div class="workspace-title">Manual input preview</div>
-        <div class="workspace-text">Поля ниже показывают будущую структуру ручного ввода. Они не запускают backend calculation и не отправляют данные.</div>
+        <div class="workspace-title">Manual adapter preview</div>
+        <div class="workspace-text">Поля ниже показывают будущую структуру ручного ввода. Данные не отправляются в backend и не запускают реальный engine.</div>
         <div class="analyzer-preview-notice">Форма показана как preview. Данные не отправляются и расчёт не выполняется.</div>
 
         <div class="analyzer-form-grid" aria-label="KURGIN Stone Analyzer preview form">
           <label class="analyzer-control analyzer-select"><span>Shape</span><select disabled aria-label="Shape preview"><option>Round</option></select></label>
           <label class="analyzer-control analyzer-input"><span>Carat</span><input type="text" value="1.00 ct" disabled readonly aria-label="Carat preview"></label>
-          <label class="analyzer-control analyzer-select"><span>Color</span><select disabled aria-label="Color preview"><option>D / E / F</option></select></label>
-          <label class="analyzer-control analyzer-select"><span>Clarity</span><select disabled aria-label="Clarity preview"><option>VVS / VS</option></select></label>
-          <label class="analyzer-control analyzer-input optional"><span>Table %</span><input type="text" value="optional" disabled readonly aria-label="Table percentage preview"></label>
-          <label class="analyzer-control analyzer-input optional"><span>Depth %</span><input type="text" value="optional" disabled readonly aria-label="Depth percentage preview"></label>
-          <label class="analyzer-control analyzer-input optional"><span>Crown angle</span><input type="text" value="optional" disabled readonly aria-label="Crown angle preview"></label>
-          <label class="analyzer-control analyzer-input optional"><span>Pavilion angle</span><input type="text" value="optional" disabled readonly aria-label="Pavilion angle preview"></label>
+          <label class="analyzer-control analyzer-select"><span>Color</span><select disabled aria-label="Color preview"><option>E</option></select></label>
+          <label class="analyzer-control analyzer-select"><span>Clarity</span><select disabled aria-label="Clarity preview"><option>VS1</option></select></label>
+          <label class="analyzer-control analyzer-input optional"><span>Table %</span><input type="text" value="57.0" disabled readonly aria-label="Table percentage preview"></label>
+          <label class="analyzer-control analyzer-input optional"><span>Depth %</span><input type="text" value="61.8" disabled readonly aria-label="Depth percentage preview"></label>
+          <label class="analyzer-control analyzer-input optional"><span>Crown angle</span><input type="text" value="34.7" disabled readonly aria-label="Crown angle preview"></label>
+          <label class="analyzer-control analyzer-input optional"><span>Pavilion angle</span><input type="text" value="40.8" disabled readonly aria-label="Pavilion angle preview"></label>
         </div>
 
-        <button type="button" class="single-file-button analyzer-disabled-cta" disabled>Получить предварительный результат</button>
-        <div class="analyzer-disabled-note">Engine будет подключён через adapter contract.</div>
+        <button type="button" class="single-file-button analyzer-mock-cta">Показать mock preview</button>
+        <div class="analyzer-disabled-note">Результат ниже создан через public-safe adapter stub. Реальная формула не подключена.</div>
       </section>
 
       <section class="single-next-box analyzer-preview-result">
-        <div class="result-kicker">Предварительный режим</div>
-        <div class="result-title">Расчёт будет подключён через adapter layer</div>
-        <div class="result-text">Этот блок показывает будущий public-safe результат без раскрытия формулы и внутренних коэффициентов.</div>
+        <div class="result-kicker">Adapter stub preview</div>
+        <div class="result-title">Mock result по public adapter contract</div>
+        <div class="result-text">Это не настоящий расчёт. UI показывает только безопасные поля: status, score_band, summary, warnings, limitations и next_action.</div>
+        {adapter_mock_result_html}
         <ul class="analyzer-limitations">
           <li>Не является сертификатом.</li>
           <li>Не является оценкой стоимости.</li>
