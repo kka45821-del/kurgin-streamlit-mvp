@@ -69,6 +69,7 @@ def _catalog_section_fix_script() -> str:
       .detailPrice.request{font-size:.9rem;color:#666;white-space:normal;text-align:right;line-height:1.25}
       .act.disabled,.detailBtn.disabled{opacity:.38;pointer-events:none;filter:grayscale(1)}
       .act.favoriteToggle.on{color:#111;border-color:#111;background:#f7f4ee}
+      .act.requestDetailBtn{color:#111}
       .detailBtn.favoriteOn{border-color:#111;background:#f7f4ee;color:#111}
       .nav a{position:relative}
       .favBadge{position:absolute;top:.12rem;right:.22rem;min-width:15px;height:15px;border-radius:999px;background:#111;color:#fff;font-size:.55rem;line-height:15px;text-align:center;font-weight:700}
@@ -230,13 +231,12 @@ def _catalog_section_fix_script() -> str:
   }
 
   function requestChannelsHtml(stone){
-    return `<div class='requestBox'><div class='requestTitle'>Запросить цену</div><div class='requestHint'>Заявка не является заказом, резервом, оплатой или фиксацией цены. Менеджер уточнит наличие и условия. Контакт: ${requestContact.phone}</div><div class='requestChannels'>${requestButton('max','MAX',stone,true)}${requestButton('telegram','Telegram',stone,false)}${requestButton('whatsapp','WhatsApp',stone,false)}</div></div>`;
+    return `<div class='requestBox'><div class='requestTitle'>Запросить условия</div><div class='requestHint'>Заявка не является заказом, резервом, оплатой или фиксацией цены. Менеджер уточнит наличие, цену и условия. Контакт: ${requestContact.phone}</div><div class='requestChannels'>${requestButton('max','MAX',stone,true)}${requestButton('telegram','Telegram',stone,false)}${requestButton('whatsapp','WhatsApp',stone,false)}</div></div>`;
   }
 
   function actionHtml(stone){
-    const cartClass = isRequestPrice(stone) ? 'act disabled' : 'act';
     const favClass = isFavorite(stone) ? 'act favoriteToggle on' : 'act favoriteToggle';
-    return `<button class=act data-stop=1>${icon('message')}</button><button class=act data-stop=1>${icon('reserve')}</button><button class='act infoBtn'>${icon('info')}</button><button class='${favClass}' data-stop=1 data-favorite-id='${stoneKey(stone)}'>${icon('heart')}</button><button class='${cartClass}' data-stop=1>${icon('shopping')}</button><button class=act data-stop=1>${icon('share')}</button>`;
+    return `<button class='act requestDetailBtn' data-stop=1 title='Запросить условия'>${icon('message')}</button><button class='act disabled' data-stop=1 title='Резерв недоступен в MVP'>${icon('reserve')}</button><button class='act infoBtn'>${icon('info')}</button><button class='${favClass}' data-stop=1 data-favorite-id='${stoneKey(stone)}'>${icon('heart')}</button><button class='act disabled' data-stop=1 title='Checkout недоступен в MVP'>${icon('shopping')}</button><button class='act disabled' data-stop=1 title='Share недоступен в MVP'>${icon('share')}</button>`;
   }
 
   window.renderNav = function renderNav(){
@@ -287,6 +287,7 @@ def _catalog_section_fix_script() -> str:
     cards.innerHTML=source().map(s=>`<div class=card data-idx='${stones.indexOf(s)}' data-shape='${shapeKey(s)}' data-weight='${s.weight||''}' data-color='${s.color||''}' data-clarity='${s.clarity||''}' data-score='${s.scoreBand||''}' data-fluorescence='${s.fluor||s.fluorescence||''}' data-finish='${s.finish||''}'><div class=main><div>${s.shape||''}</div><div>${Number(s.carat||0).toFixed(2).replace('.00','')}</div><div>${s.color||''}</div><div>${s.clarity||''}</div><div class=scoreValue>${s.score||''}</div>${priceHtml(s)}</div><div class=line></div><div class=meta><div>${s.meta||''}</div><div class=tags>${mkTags(s.score,s.tags)}</div></div><div class=actions>${actionHtml(s)}</div></div>`).join('');
     wireCards();
     wireFavoriteButtons();
+    wireRequestButtons();
     filter();
   };
 
@@ -303,6 +304,17 @@ def _catalog_section_fix_script() -> str:
     });
   }
 
+  function wireRequestButtons(){
+    document.querySelectorAll('.requestDetailBtn').forEach(button=>{
+      button.onclick = event => {
+        event.stopPropagation();
+        const card = button.closest('.card');
+        if(!card) return;
+        openDetail(Number(card.dataset.idx));
+      };
+    });
+  }
+
   function syncFavoriteUI(){
     document.querySelectorAll('.favoriteToggle').forEach(button=>{
       button.classList.toggle('on', isFavorite(button.dataset.favoriteId));
@@ -313,13 +325,11 @@ def _catalog_section_fix_script() -> str:
 
   window.openDetail = function openDetail(i){
     let s=stones[i];
-    const request = isRequestPrice(s);
-    const cartClass = request ? 'detailBtn dark disabled' : 'detailBtn dark';
-    const cartLabel = request ? 'Запросить цену' : 'В корзину';
-    const requestBlock = request ? requestChannelsHtml(s) : '';
+    const requestBlock = requestChannelsHtml(s);
+    const mainLabel = isRequestPrice(s) ? 'Запросить условия' : 'Уточнить условия';
     const favLabel = isFavorite(s) ? 'В избранном' : 'В избранное';
     const favClass = isFavorite(s) ? 'detailBtn detailFavoriteBtn favoriteOn' : 'detailBtn detailFavoriteBtn';
-    detailContent.innerHTML=`<div class=detailTop><div><div class=detailName>${s.shape||''} ${Number(s.carat||0).toFixed(2).replace('.00','')} ct</div><div class=tags style='justify-content:flex-start;margin-top:.55rem'>${mkTags(s.score,s.tags)}</div></div>${priceHtml(s,true)}</div>${requestBlock}<div class=detailGrid><div class=detailCell><div class=detailLabel>Цвет</div><div class=detailValue>${s.color||''}</div></div><div class=detailCell><div class=detailLabel>Чистота</div><div class=detailValue>${s.clarity||''}</div></div><div class=detailCell><div class=detailLabel>KURGIN Score</div><div class='detailValue scoreBold'>${s.score||''}</div></div><div class=detailCell><div class=detailLabel>Диаметр</div><div class=detailValue>${s.diameter||''} мм</div></div><div class=detailCell><div class=detailLabel>Флюоресценция</div><div class=detailValue>${s.fluor||s.fluorescence||''}</div></div><div class=detailCell><div class=detailLabel>Отделка</div><div class=detailValue>${s.finish||''}</div></div></div><div class=detailNote>Сертификат: ${s.report||''}<br>${s.meta||''}<br>Подробная профессиональная карточка будет расширяться: параметры, пропорции, световое поведение и условия резерва.</div><div class=detailActions><button class='${cartClass}'>${cartLabel}</button><button class='${favClass}' data-favorite-id='${stoneKey(s)}'>${favLabel}</button></div>`;
+    detailContent.innerHTML=`<div class=detailTop><div><div class=detailName>${s.shape||''} ${Number(s.carat||0).toFixed(2).replace('.00','')} ct</div><div class=tags style='justify-content:flex-start;margin-top:.55rem'>${mkTags(s.score,s.tags)}</div></div>${priceHtml(s,true)}</div>${requestBlock}<div class=detailGrid><div class=detailCell><div class=detailLabel>Цвет</div><div class=detailValue>${s.color||''}</div></div><div class=detailCell><div class=detailLabel>Чистота</div><div class=detailValue>${s.clarity||''}</div></div><div class=detailCell><div class=detailLabel>KURGIN Score</div><div class='detailValue scoreBold'>${s.score||''}</div></div><div class=detailCell><div class=detailLabel>Диаметр</div><div class=detailValue>${s.diameter||''} мм</div></div><div class=detailCell><div class=detailLabel>Флюоресценция</div><div class=detailValue>${s.fluor||s.fluorescence||''}</div></div><div class=detailCell><div class=detailLabel>Отделка</div><div class=detailValue>${s.finish||''}</div></div></div><div class=detailNote>Сертификат: ${s.report||''}<br>${s.meta||''}<br>Подробная профессиональная карточка будет расширяться: параметры, пропорции, световое поведение и условия запроса.</div><div class=detailActions><button class='detailBtn dark disabled' type='button' disabled>${mainLabel}</button><button class='${favClass}' data-favorite-id='${stoneKey(s)}'>${favLabel}</button></div>`;
     const favoriteButton = detailContent.querySelector('.detailFavoriteBtn');
     if(favoriteButton){
       favoriteButton.onclick = () => {
