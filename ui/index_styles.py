@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 INDEX_CSS = r'''
-.index-shell{padding-bottom:4.8rem}
+.index-shell{padding-bottom:7.6rem}
 .index-info-card,.index-score-card,.index-range-summary,.index-view-panel{border:1px solid #aaa;border-radius:18px;background:#f7f7f7;padding:1rem;margin:0 0 1rem}
 .index-title,.index-subtitle,.index-view-title{font-weight:700;font-size:1rem;margin-bottom:.55rem}
 .index-info-card div,.index-score-card div,.index-range-summary div,.index-view-panel div{font-size:.82rem;line-height:1.45}
@@ -30,6 +30,8 @@ INDEX_CSS = r'''
 .index-matrix tbody th{background:#fafafa}
 .index-cell-main{font-size:.72rem;line-height:1.15}
 .index-cell-sub{font-size:.65rem;line-height:1.15;margin-top:.18rem}
+.index-view-panel{position:fixed;left:50%;bottom:calc(124px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:38;width:calc(100% - 22px);max-width:408px;max-height:min(62vh,520px);overflow:auto;-webkit-overflow-scrolling:touch;box-shadow:0 16px 46px rgba(0,0,0,.18)}
+.index-view-panel[hidden]{display:none!important}
 .index-view-actions{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin:.75rem 0}
 .index-view-action{border:1px solid #aaa;border-radius:13px;background:#fff;min-height:40px;font:inherit;font-size:.72rem;color:#111}
 .index-view-group{border-top:1px solid #ddd;margin-top:.8rem;padding-top:.75rem}
@@ -38,5 +40,6 @@ INDEX_CSS = r'''
 .index-view-choice{border:1px solid #aaa;border-radius:999px;background:#fff;min-height:34px;padding:.35rem .65rem;font:inherit;font-size:.68rem;color:#111}
 .index-view-choice[aria-pressed="true"]{border-color:#111;background:#efefef;font-weight:700}
 .index-view-choice[aria-pressed="false"]{opacity:.42;background:#fafafa}
-.index-filter-button{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom));z-index:34;width:100%;max-width:430px;border:1px solid #777;border-radius:20px 20px 0 0;background:#f3f3f3;min-height:58px;font:inherit;font-size:.92rem;color:#111}
+.index-filter-button{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom));z-index:39;width:100%;max-width:430px;border:1px solid #777;border-radius:20px 20px 0 0;background:#f3f3f3;min-height:58px;font:inherit;font-size:.92rem;color:#111}
+.index-filter-button[aria-expanded="true"]{background:#111;color:#fff;border-color:#111}
 '''
