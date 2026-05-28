@@ -47,6 +47,7 @@ def _catalog_section_fix_script() -> str:
 // - show all published stones by default;
 // - keep professional sections available;
 // - keep favorites as a browser-only saved-stone flow;
+// - keep filters and sorting stable in the active mobile shell layer;
 // - never create checkout, payment, order, reserve or ownership states.
 (function(){
   const requestContactConfig = __REQUEST_CONTACTS_JSON__;
@@ -118,6 +119,55 @@ def _catalog_section_fix_script() -> str:
   function escapeHtml(value){
     return String(value ?? '').replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
   }
+
+  window.catalogNormalizeFilterValue = window.catalogNormalizeFilterValue || function catalogNormalizeFilterValue(group, value){
+    const raw = String(value || '').trim();
+    const v = raw.toLowerCase().replace(/ё/g,'е').replace(/,/g,'.').replace(/\s+/g,' ');
+    if(group === 'shape'){
+      if(['round','круг','круглый'].includes(v)) return 'round';
+      if(v.includes('oval') || v.includes('овал')) return 'oval';
+      if(v.includes('pear') || v.includes('капля')) return 'pear';
+      if(v.includes('cushion') || v.includes('кушон')) return 'cushion';
+    }
+    if(group === 'color' || group === 'clarity') return raw.toUpperCase();
+    if(group === 'fluorescence'){
+      if(!v || v === 'none' || v === 'no' || v === 'нет') return 'none';
+      if(v.includes('faint')) return 'faint';
+      if(v.includes('medium')) return 'medium';
+      if(v.includes('strong')) return 'strong';
+    }
+    if(group === 'finish') return v.toUpperCase().replace(/[\/\-+\s]/g,'');
+    return raw;
+  };
+
+  window.finishMatches = window.finishMatches || function finishMatches(actual, selected){
+    const normalizedActual = window.catalogNormalizeFilterValue('finish', actual);
+    const normalizedSelected = window.catalogNormalizeFilterValue('finish', selected);
+    if(!normalizedSelected) return true;
+    if(normalizedActual === normalizedSelected) return true;
+    const text = String(actual || '').toUpperCase();
+    const exCount = (text.match(/EX/g) || []).length;
+    const vgCount = (text.match(/VG/g) || []).length;
+    if(normalizedSelected === 'EXEXEX' || normalizedSelected === '3EX') return exCount >= 3;
+    if(normalizedSelected === '2EX1VG') return exCount >= 2 && (vgCount >= 1 || exCount >= 3);
+    return false;
+  };
+
+  window.filterMatches = window.filterMatches || function filterMatches(group, actual, selected){
+    if(group === 'finish') return window.finishMatches(actual, selected);
+    return window.catalogNormalizeFilterValue(group, actual) === window.catalogNormalizeFilterValue(group, selected);
+  };
+
+  window.catalogSortNumber = function catalogSortNumber(stone, key, direction){
+    let value = stone ? stone[key] : '';
+    if(key === 'diameter'){
+      const match = String(value || '').replace(',', '.').match(/\d+(?:\.\d+)?/);
+      value = match ? match[0] : '';
+    }
+    const number = Number(value || 0);
+    if(Number.isFinite(number) && number > 0) return number;
+    return direction === 'asc' ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+  };
 
   function stoneKey(stone){
     return String((stone && (stone.id || stone.stone_id || stone.report)) || '');
@@ -269,7 +319,7 @@ def _catalog_section_fix_script() -> str:
     if(sort === 'new') return a;
     let [k, d] = sort.split('_');
     return [...a].sort((x, y) => {
-      let xv = Number(x[k] || 0), yv = Number(y[k] || 0);
+      let xv = window.catalogSortNumber(x, k, d), yv = window.catalogSortNumber(y, k, d);
       return d === 'asc' ? xv - yv : yv - xv;
     });
   };
@@ -294,7 +344,7 @@ def _catalog_section_fix_script() -> str:
       <div class='top'><div class='catalogBox' id='catalogBox'><button class='select' id='catalogBtn'><div><div class='select-title' id='sectionTitle'>${s[1]}</div><div class='select-sub' id='sectionSub'>${sectionCount(s[0])} камней${s[2]?` · ${s[2]}`:''}</div></div><div class='chev'><svg viewBox='0 0 20 20'><path d='M5 8l5 5 5-5'/></svg></div></button><div class='menu' id='catalogMenu'></div></div><div class='pick'>Индив.<br>подбор</div></div>
       <div class='catalogStats' id='catalogStats'><div class='catalogStat'><strong>${stones.length}</strong><span>всего</span></div><div class='catalogStat'><strong>${sectionCount('main')}</strong><span>основной</span></div><div class='catalogStat'><strong>${sectionCount('large')}</strong><span>крупные</span></div></div>
       <div class='cols'><div>ФОРМА</div><div>КАРАТ</div><div>ЦВЕТ</div><div>ЧИСТОТА</div><div>KURGIN SCORE</div><div>ЦЕНА</div></div>
-      <div id='cards'></div><div class='empty' id='empty'>По выбранному разделу и фильтрам камни не найдены</div>`;
+      <div id='cards'></div><div class='empty' id='empty'>По выбранным фильтрам камни не найдены.<br><button class='btn light' type='button' data-reset-filters>Сбросить фильтры</button></div>`;
     setupCatalog();
     content.scrollTop = 0;
   };
