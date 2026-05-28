@@ -12,19 +12,22 @@ INDEX_INIT = r"""
 
   function syncIndexTableWidth(root){
     if(!root) return;
-    const visibleBandHeaders = root.querySelectorAll('thead [data-index-band]:not([hidden])');
-    const count = Math.max(visibleBandHeaders.length, 1);
     const clarityWidth = 82;
     const bandWidth = 84;
-    const tableWidth = clarityWidth + (count * bandWidth);
-    const tableWidthPx = tableWidth + 'px';
-    root.style.setProperty('--index-table-width', tableWidthPx);
-    root.style.setProperty('--index-visible-band-count', String(count));
+    let maxVisibleBandCount = 1;
+
     root.querySelectorAll('.index-matrix').forEach(table => {
+      const visibleHeaders = Array.from(table.querySelectorAll('thead [data-index-band]')).filter(header => !header.hidden);
+      const count = Math.max(visibleHeaders.length, 1);
+      maxVisibleBandCount = Math.max(maxVisibleBandCount, count);
+      const tableWidthPx = (clarityWidth + (count * bandWidth)) + 'px';
       table.style.width = tableWidthPx;
       table.style.minWidth = tableWidthPx;
       table.style.maxWidth = tableWidthPx;
     });
+
+    root.style.setProperty('--index-visible-band-count', String(maxVisibleBandCount));
+    root.style.setProperty('--index-table-width', (clarityWidth + (maxVisibleBandCount * bandWidth)) + 'px');
   }
 
   function applyScoreRange(root, button){
