@@ -4,7 +4,14 @@ import html
 
 from ui.index_data import INDEX_BANDS, INDEX_CLARITIES, INDEX_COLORS, load_public_index_rows
 from ui.index_score_rules import SCORE_INDEX_RULES, SCORE_RANGE_SELECTOR_ORDER
-from ui.index_scripts import INDEX_PDF_PRINT, SCORE_RANGE_CLICK, SHARE_CLICK
+from ui.index_scripts import (
+    INDEX_COLLAPSE_ALL_COLORS,
+    INDEX_EXPAND_ALL_COLORS,
+    INDEX_PDF_PRINT,
+    INDEX_VIEW_TOGGLE,
+    SCORE_RANGE_CLICK,
+    SHARE_CLICK,
+)
 from ui.score_ranges import KURGIN_SCORE_RANGES, default_score_range_id
 
 
@@ -137,12 +144,30 @@ def _pdf_template_html() -> str:
 """
 
 
+def _index_view_panel_html() -> str:
+    expand_all = _html_attr(INDEX_EXPAND_ALL_COLORS)
+    collapse_all = _html_attr(INDEX_COLLAPSE_ALL_COLORS)
+    return f"""
+<div class="index-view-panel" hidden>
+  <div class="index-view-title">Вид таблицы Index</div>
+  <div class="index-view-text">Это настройки просмотра таблицы индекса. Они не меняют каталог, цены камней или формулы.</div>
+  <div class="index-view-actions">
+    <button type="button" class="index-view-action" onclick="{expand_all}">Раскрыть все цвета</button>
+    <button type="button" class="index-view-action" onclick="{collapse_all}">Свернуть все цвета</button>
+  </div>
+  <div class="index-view-hint">Подсказка: двигайте таблицу влево-вправо. Первый столбик “Clarity / чистота” остаётся на месте.</div>
+</div>
+"""
+
+
 def render_public_index_tool() -> str:
     index_sections = _index_sections_html()
     score_selector = _score_range_selector_html()
     pdf_template = _pdf_template_html()
+    index_view_panel = _index_view_panel_html()
     share_click = _html_attr(SHARE_CLICK)
     index_pdf_print = _html_attr(INDEX_PDF_PRINT)
+    index_view_toggle = _html_attr(INDEX_VIEW_TOGGLE)
     return f"""
 <section class="index-shell" id="kurgin-index">
   <div class="index-info-card">
@@ -165,8 +190,9 @@ def render_public_index_tool() -> str:
     <div class="index-range-summary-coefficient">Коэффициент: ×1.00</div>
     <div class="index-range-disclaimer">Это индексный ориентир для сопоставления лабораторных бриллиантов. Это не цена конкретного камня, не оферта, не финансовый индекс и не инвестиционная рекомендация.</div>
   </div>
-  <button type="button" class="index-filter-button">☰ Вид таблицы Index</button>
-  <div class="tool-note">“Вид таблицы Index” — это будущие настройки просмотра самой таблицы индекса, не фильтры каталога. Индекс остаётся ориентиром: не оферта, не финальная цена конкретного камня, не финансовый индекс и не инвестиционная рекомендация.</div>
+  {index_view_panel}
+  <button type="button" class="index-filter-button" aria-expanded="false" onclick="{index_view_toggle}">☰ Вид таблицы Index</button>
+  <div class="tool-note">“Вид таблицы Index” — это настройки просмотра самой таблицы индекса, не фильтры каталога. Индекс остаётся ориентиром: не оферта, не финальная цена конкретного камня, не финансовый индекс и не инвестиционная рекомендация.</div>
   {pdf_template}
 </section>
 """
