@@ -31,9 +31,10 @@ INDEX_CSS = r'''
 .index-matrix tbody th{background:#fafafa}
 .index-cell-main{font-size:.72rem;line-height:1.15}
 .index-cell-sub{font-size:.65rem;line-height:1.15;margin-top:.18rem}
-.index-view-panel{position:fixed;left:50%;bottom:calc(122px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:38;width:100%;max-width:430px;box-sizing:border-box;max-height:min(66vh,540px);overflow:auto;-webkit-overflow-scrolling:touch;box-shadow:0 -12px 38px rgba(0,0,0,.18);border-radius:18px 18px 0 0;margin:0}
+.index-view-panel{position:fixed;left:50%;bottom:calc(122px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:38;width:100%;max-width:430px;box-sizing:border-box;max-height:min(66vh,540px);overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-shadow:0 -12px 38px rgba(0,0,0,.18);border-radius:18px 18px 0 0;margin:0}
 .index-view-panel[hidden]{display:none!important}
-.index-view-close-handle{display:flex;align-items:center;justify-content:center;width:100%;height:34px;margin:-.45rem 0 .35rem;border:0;background:transparent;padding:0;cursor:pointer;touch-action:none;color:inherit}
+.index-view-close-handle{display:flex;align-items:center;justify-content:center;width:100%;height:34px;margin:-.45rem 0 .35rem;border:0;background:transparent;padding:0;cursor:grab;touch-action:none;color:inherit}
+.index-view-close-handle:active{cursor:grabbing}
 .index-view-close-handle span{display:block;width:42px;height:4px;border-radius:999px;background:#c8c8c8}
 .index-view-actions{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin:.75rem 0}
 .index-view-action{border:1px solid #aaa;border-radius:13px;background:#fff;min-height:40px;font:inherit;font-size:.72rem;color:#111}
