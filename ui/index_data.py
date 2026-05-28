@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+from typing import Any
+
 
 PUBLIC_INDEX_ROWS: list[tuple[str, str, str, int]] = [
     ("D", "IF", "1.00–1.49", 250),
@@ -87,3 +91,65 @@ INDEX_BANDS = [
     ("4.00–4.49", "4–4.49"),
     ("4.50–4.99", "4.5–4.99"),
 ]
+
+PUBLIC_INDEX_SNAPSHOT_PATHS = (
+    Path("public_index.json"),
+    Path(__file__).resolve().parents[1] / "public_index.json",
+)
+
+
+def _carat_band_label(carat_band_from: float, carat_band_to: float) -> str:
+    return f"{carat_band_from:.2f}–{carat_band_to:.2f}"
+
+
+def _normalize_public_index_row(row: dict[str, Any]) -> tuple[str, str, str, int] | None:
+    status = str(row.get("status", "")).strip().lower()
+    if status and status != "ok":
+        return None
+
+    color = str(row.get("color", "")).strip().upper()
+    clarity = str(row.get("clarity", "")).strip().upper()
+    if not color or not clarity:
+        return None
+
+    try:
+        carat_band_from = float(row.get("carat_band_from"))
+        carat_band_to = float(row.get("carat_band_to"))
+        index_value = int(float(row.get("index_value_usd_per_ct")))
+    except (TypeError, ValueError):
+        return None
+
+    if index_value <= 0 or carat_band_to <= carat_band_from:
+        return None
+
+    return color, clarity, _carat_band_label(carat_band_from, carat_band_to), index_value
+
+
+def _load_rows_from_snapshot(path: Path) -> list[tuple[str, str, str, int]]:
+    with path.open("r", encoding="utf-8") as file:
+        data = json.load(file)
+    raw_rows = data.get("rows", []) if isinstance(data, dict) else data
+    if not isinstance(raw_rows, list):
+        return []
+
+    rows: list[tuple[str, str, str, int]] = []
+    for raw_row in raw_rows:
+        if not isinstance(raw_row, dict):
+            continue
+        normalized = _normalize_public_index_row(raw_row)
+        if normalized is not None:
+            rows.append(normalized)
+    return rows
+
+
+def load_public_index_rows() -> list[tuple[str, str, str, int]]:
+    for path in PUBLIC_INDEX_SNAPSHOT_PATHS:
+        if not path.exists():
+            continue
+        try:
+            rows = _load_rows_from_snapshot(path)
+        except (OSError, json.JSONDecodeError):
+            continue
+        if rows:
+            return rows
+    return PUBLIC_INDEX_ROWS
