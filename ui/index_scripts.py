@@ -72,10 +72,19 @@ INDEX_INIT = r"""
     });
   }
 
+  function resetPanelMotion(panel){
+    if(!panel) return;
+    panel.style.transform = '';
+    panel.style.transition = '';
+  }
+
   function closeViewPanel(root){
     if(!root) return;
     const panel = root.querySelector('.index-view-panel');
-    if(panel) panel.hidden = true;
+    if(panel){
+      panel.hidden = true;
+      resetPanelMotion(panel);
+    }
     root.querySelectorAll('[data-index-action="view-toggle"]').forEach(button => {
       button.setAttribute('aria-expanded', 'false');
     });
@@ -83,44 +92,83 @@ INDEX_INIT = r"""
 
   function ensureViewPanelHandleClose(root){
     if(!root) return;
+    const panel = root.querySelector('.index-view-panel');
     const handle = root.querySelector('.index-view-close-handle');
-    if(!handle || handle.dataset.swipeCloseMounted === 'true') return;
-    handle.dataset.swipeCloseMounted = 'true';
+    if(!panel || !handle || handle.dataset.pointerCloseMounted === 'true') return;
+    handle.dataset.pointerCloseMounted = 'true';
 
     let startY = 0;
-    let startX = 0;
-    let tracking = false;
+    let currentY = 0;
+    let pointerId = null;
+    let dragging = false;
+    let moved = false;
 
-    handle.addEventListener('touchstart', event => {
-      if(!event.touches || !event.touches.length) return;
-      startY = event.touches[0].clientY;
-      startX = event.touches[0].clientX;
-      tracking = true;
-    }, {passive: true});
+    function finishDrag(event, cancelled){
+      if(!dragging) return;
+      const deltaY = Math.max(currentY - startY, 0);
+      const panelHeight = panel.offsetHeight || 0;
+      dragging = false;
 
-    handle.addEventListener('touchmove', event => {
-      if(!tracking || !event.touches || !event.touches.length) return;
-      const touch = event.touches[0];
-      const deltaY = touch.clientY - startY;
+      if(pointerId !== null && handle.releasePointerCapture){
+        try{ handle.releasePointerCapture(pointerId); }catch(e){}
+      }
+      pointerId = null;
+
+      if(!cancelled && (deltaY > 90 || deltaY > panelHeight * 0.22)){
+        closeViewPanel(root);
+        return;
+      }
+
+      panel.style.transition = 'transform .18s ease';
+      panel.style.transform = 'translateX(-50%)';
+    }
+
+    handle.addEventListener('pointerdown', event => {
+      if(event.button !== undefined && event.button !== 0) return;
+      startY = event.clientY;
+      currentY = event.clientY;
+      pointerId = event.pointerId;
+      dragging = true;
+      moved = false;
+      panel.style.transition = 'none';
+      if(handle.setPointerCapture){
+        try{ handle.setPointerCapture(pointerId); }catch(e){}
+      }
+    });
+
+    handle.addEventListener('pointermove', event => {
+      if(!dragging || event.pointerId !== pointerId) return;
+      currentY = event.clientY;
+      const deltaY = currentY - startY;
+      if(Math.abs(deltaY) > 3) moved = true;
       if(deltaY > 0){
         event.preventDefault();
+        panel.style.transform = 'translate(-50%, ' + deltaY + 'px)';
+      } else {
+        panel.style.transform = 'translateX(-50%)';
       }
-    }, {passive: false});
+    });
 
-    handle.addEventListener('touchend', event => {
-      if(!tracking || !event.changedTouches || !event.changedTouches.length) return;
-      tracking = false;
-      const touch = event.changedTouches[0];
-      const deltaY = touch.clientY - startY;
-      const deltaX = Math.abs(touch.clientX - startX);
-      if(deltaY > 60 && deltaX < 100){
+    handle.addEventListener('pointerup', event => {
+      if(!dragging || event.pointerId !== pointerId) return;
+      currentY = event.clientY;
+      const wasTap = !moved || Math.abs(currentY - startY) <= 6;
+      if(wasTap){
+        dragging = false;
+        if(pointerId !== null && handle.releasePointerCapture){
+          try{ handle.releasePointerCapture(pointerId); }catch(e){}
+        }
+        pointerId = null;
         closeViewPanel(root);
+        return;
       }
-    }, {passive: true});
+      finishDrag(event, false);
+    });
 
-    handle.addEventListener('touchcancel', () => {
-      tracking = false;
-    }, {passive: true});
+    handle.addEventListener('pointercancel', event => {
+      if(!dragging || event.pointerId !== pointerId) return;
+      finishDrag(event, true);
+    });
   }
 
   function toggleViewPanel(root, button){
@@ -128,13 +176,17 @@ INDEX_INIT = r"""
     const panel = root.querySelector('.index-view-panel');
     if(!panel) return;
     const shouldOpen = panel.hidden;
-    panel.hidden = !shouldOpen;
-    button.setAttribute('aria-expanded', String(shouldOpen));
-    if(shouldOpen){
-      panel.scrollTop = 0;
-      ensureViewPanelHandleClose(root);
-      syncIndexTableWidth(root);
+    if(!shouldOpen){
+      closeViewPanel(root);
+      return;
     }
+    panel.hidden = false;
+    panel.style.transform = 'translateX(-50%)';
+    panel.style.transition = 'transform .18s ease';
+    panel.scrollTop = 0;
+    button.setAttribute('aria-expanded', 'true');
+    ensureViewPanelHandleClose(root);
+    syncIndexTableWidth(root);
   }
 
   function setAllColorSections(root, open){
