@@ -53,20 +53,21 @@ def render_tools_page() -> str:
       <section class="single-workspace analyzer-workspace">
         <div class="workspace-title">Manual input preview</div>
         <div class="workspace-text">Поля ниже показывают будущую структуру ручного ввода. Они не запускают backend calculation и не отправляют данные.</div>
+        <div class="analyzer-preview-notice">Форма показана как preview. Данные не отправляются и расчёт не выполняется.</div>
 
-        <div class="analyzer-form-grid" aria-label="KURGIN Stone Analyzer preview fields">
-          <div class="analyzer-field"><span>Shape</span><strong>Round</strong></div>
-          <div class="analyzer-field"><span>Carat</span><strong>1.00 ct</strong></div>
-          <div class="analyzer-field"><span>Color</span><strong>D / E / F</strong></div>
-          <div class="analyzer-field"><span>Clarity</span><strong>VVS / VS</strong></div>
-          <div class="analyzer-field optional"><span>Table %</span><strong>optional</strong></div>
-          <div class="analyzer-field optional"><span>Depth %</span><strong>optional</strong></div>
-          <div class="analyzer-field optional"><span>Crown angle</span><strong>optional</strong></div>
-          <div class="analyzer-field optional"><span>Pavilion angle</span><strong>optional</strong></div>
+        <div class="analyzer-form-grid" aria-label="KURGIN Stone Analyzer preview form">
+          <label class="analyzer-control analyzer-select"><span>Shape</span><select disabled aria-label="Shape preview"><option>Round</option></select></label>
+          <label class="analyzer-control analyzer-input"><span>Carat</span><input type="text" value="1.00 ct" disabled readonly aria-label="Carat preview"></label>
+          <label class="analyzer-control analyzer-select"><span>Color</span><select disabled aria-label="Color preview"><option>D / E / F</option></select></label>
+          <label class="analyzer-control analyzer-select"><span>Clarity</span><select disabled aria-label="Clarity preview"><option>VVS / VS</option></select></label>
+          <label class="analyzer-control analyzer-input optional"><span>Table %</span><input type="text" value="optional" disabled readonly aria-label="Table percentage preview"></label>
+          <label class="analyzer-control analyzer-input optional"><span>Depth %</span><input type="text" value="optional" disabled readonly aria-label="Depth percentage preview"></label>
+          <label class="analyzer-control analyzer-input optional"><span>Crown angle</span><input type="text" value="optional" disabled readonly aria-label="Crown angle preview"></label>
+          <label class="analyzer-control analyzer-input optional"><span>Pavilion angle</span><input type="text" value="optional" disabled readonly aria-label="Pavilion angle preview"></label>
         </div>
 
         <button type="button" class="single-file-button analyzer-disabled-cta" disabled>Получить предварительный результат</button>
-        <div class="analyzer-disabled-note">Engine не подключён в public MVP.</div>
+        <div class="analyzer-disabled-note">Engine будет подключён через adapter contract.</div>
       </section>
 
       <section class="single-next-box analyzer-preview-result">
