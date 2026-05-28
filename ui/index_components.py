@@ -2,15 +2,10 @@ from __future__ import annotations
 
 from ui.index_data import INDEX_BANDS, INDEX_CLARITIES, INDEX_COLORS, load_public_index_rows
 from ui.index_score_rules import SCORE_INDEX_RULES, SCORE_RANGE_SELECTOR_ORDER
-from ui.index_scripts import INDEX_INIT
 from ui.score_ranges import KURGIN_SCORE_RANGES, default_score_range_id
 
 
 LOGO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/Vectorr-header.svg?v=1"
-
-
-def _safe_script_body(value: str) -> str:
-    return value.replace("</script", "<\\/script")
 
 
 def _score_ranges_by_id() -> dict[str, dict[str, object]]:
@@ -79,7 +74,6 @@ def _score_range_selector_html() -> str:
         selected = "true" if item["id"] == default_id else "false"
         buttons.append(
             "<button type='button' class='score-range-button' role='tab' "
-            "data-index-action='score-range' "
             f"data-score-range='{item['id']}' "
             f"data-score-label='{item['en']}' "
             f"data-score-ru='{item['ru']}' "
@@ -100,7 +94,6 @@ def _index_view_choice_group(title: str, view_type: str, values: list[tuple[str,
         value, label = raw if isinstance(raw, tuple) else (raw, raw)
         buttons.append(
             "<button type='button' class='index-view-choice' aria-pressed='true' "
-            "data-index-action='view-option' "
             f"data-index-view-type='{view_type}' data-index-view-value='{value}'>"
             f"{label}</button>"
         )
@@ -116,10 +109,10 @@ def _index_view_panel_html() -> str:
   <div class="index-view-title">Вид таблицы Index</div>
   <div class="index-view-text">Это настройки просмотра таблицы Index. Они не меняют каталог, цены камней, формулы или наличие камней.</div>
   <div class="index-view-actions">
-    <button type="button" class="index-view-action" data-index-action="show-all">Показать всё</button>
-    <button type="button" class="index-view-action" data-index-action="reset-view">Сбросить вид</button>
-    <button type="button" class="index-view-action" data-index-action="expand-all-colors">Раскрыть все цвета</button>
-    <button type="button" class="index-view-action" data-index-action="collapse-all-colors">Свернуть все цвета</button>
+    <button type="button" class="index-view-action">Показать всё</button>
+    <button type="button" class="index-view-action">Сбросить вид</button>
+    <button type="button" class="index-view-action">Раскрыть все цвета</button>
+    <button type="button" class="index-view-action">Свернуть все цвета</button>
   </div>
   {color_group}
   {clarity_group}
@@ -129,24 +122,18 @@ def _index_view_panel_html() -> str:
 """
 
 
-def _index_init_script_html() -> str:
-    return f"<script>\n{_safe_script_body(INDEX_INIT)}\n</script>"
-
-
 def render_public_index_tool() -> str:
     index_sections = _index_sections_html()
     score_selector = _score_range_selector_html()
     index_view_panel = _index_view_panel_html()
-    index_init_script = _index_init_script_html()
     return f"""
 <section class="index-shell" id="kurgin-index">
-  {index_init_script}
   <div class="index-info-card">
     <div class="index-title">KURGIN Index v1.0</div>
     <div>Обновлено: текущий период</div>
     <div>Основные камни: 1.00–4.99 ct</div>
-    <button type="button" class="btn light" data-index-action="share">↗ Поделиться Index</button>
-    <button type="button" class="btn light" data-index-action="pdf">⬇ Скачать PDF</button>
+    <button type="button" class="btn light">↗ Поделиться Index</button>
+    <button type="button" class="btn light">⬇ Скачать PDF</button>
   </div>
   <div class="index-score-card">
     <div class="index-subtitle">KURGIN Score range</div>
@@ -162,7 +149,7 @@ def render_public_index_tool() -> str:
     <div class="index-range-disclaimer">Это индексный ориентир для сопоставления лабораторных бриллиантов. Это не цена конкретного камня, не оферта, не финансовый индекс и не инвестиционная рекомендация.</div>
   </div>
   {index_view_panel}
-  <button type="button" class="index-filter-button" aria-expanded="false" data-index-action="view-toggle">☰ Вид таблицы Index</button>
-  <div class="tool-note">“Вид таблицы Index” — это настройки просмотра самой таблицы индекса, не фильтры каталога. Индекс остаётся ориентиром: не оферта, не финальная цена конкретного камня, не финансовый индекс и не инвестиционная рекомендация.</div>
+  <button type="button" class="index-filter-button" aria-expanded="false">☰ Вид таблицы Index</button>
+  <div class="tool-note">Временно отключена интерактивность Index после JS-stabilization rollback. Таблица остаётся доступной для просмотра; следующий слой — safe shell-level JS mount.</div>
 </section>
 """
