@@ -64,43 +64,45 @@ INDEX_INIT = r"""
     });
   }
 
-  function ensureViewPanelSwipeClose(root){
+  function ensureViewPanelHandleClose(root){
     if(!root) return;
-    const panel = root.querySelector('.index-view-panel');
-    if(!panel || panel.dataset.swipeCloseMounted === 'true') return;
-    panel.dataset.swipeCloseMounted = 'true';
+    const handle = root.querySelector('.index-view-close-handle');
+    if(!handle || handle.dataset.swipeCloseMounted === 'true') return;
+    handle.dataset.swipeCloseMounted = 'true';
 
     let startY = 0;
     let startX = 0;
     let tracking = false;
 
-    panel.addEventListener('touchstart', event => {
+    handle.addEventListener('touchstart', event => {
       if(!event.touches || !event.touches.length) return;
       startY = event.touches[0].clientY;
       startX = event.touches[0].clientX;
       tracking = true;
     }, {passive: true});
 
-    panel.addEventListener('touchmove', event => {
+    handle.addEventListener('touchmove', event => {
       if(!tracking || !event.touches || !event.touches.length) return;
       const touch = event.touches[0];
       const deltaY = touch.clientY - startY;
-      const deltaX = Math.abs(touch.clientX - startX);
-      if(deltaY > 26 && deltaX < 130 && panel.scrollTop <= 4){
-        tracking = false;
-        closeViewPanel(root);
+      if(deltaY > 0){
+        event.preventDefault();
       }
-    }, {passive: true});
+    }, {passive: false});
 
-    panel.addEventListener('touchend', event => {
+    handle.addEventListener('touchend', event => {
       if(!tracking || !event.changedTouches || !event.changedTouches.length) return;
       tracking = false;
       const touch = event.changedTouches[0];
       const deltaY = touch.clientY - startY;
       const deltaX = Math.abs(touch.clientX - startX);
-      if(deltaY > 34 && deltaX < 130 && panel.scrollTop <= 18){
+      if(deltaY > 60 && deltaX < 100){
         closeViewPanel(root);
       }
+    }, {passive: true});
+
+    handle.addEventListener('touchcancel', () => {
+      tracking = false;
     }, {passive: true});
   }
 
@@ -113,7 +115,7 @@ INDEX_INIT = r"""
     button.setAttribute('aria-expanded', String(shouldOpen));
     if(shouldOpen){
       panel.scrollTop = 0;
-      ensureViewPanelSwipeClose(root);
+      ensureViewPanelHandleClose(root);
     }
   }
 
@@ -162,6 +164,7 @@ INDEX_INIT = r"""
     const action = button.getAttribute('data-index-action');
     if(action === 'score-range') applyScoreRange(root, button);
     if(action === 'view-toggle') toggleViewPanel(root, button);
+    if(action === 'view-close') closeViewPanel(root);
     if(action === 'expand-all-colors') setAllColorSections(root, true);
     if(action === 'collapse-all-colors') setAllColorSections(root, false);
     if(action === 'view-option') toggleViewOption(root, button);
