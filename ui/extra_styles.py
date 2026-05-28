@@ -14,7 +14,6 @@ SYSTEM_CSS = r'''
 .authOption+ .authOption{margin-left:-1px}
 #auth-register:checked ~ .authSwitch .authRegisterLabel,#auth-login:checked ~ .authSwitch .authLoginLabel{border-color:#111;border-bottom-color:#fff;background:#fff;color:#111;position:relative;z-index:3}
 .authPanel{display:none;border:1px solid #111;background:#fff;border-radius:0 0 16px 16px;padding:1rem;box-shadow:0 10px 24px rgba(0,0,0,.04)}
-#auth-register:checked ~ .authSwitch .authRegisterLabel,#auth-login:checked ~ .authSwitch .authLoginLabel{border-color:#111;border-bottom-color:#fff;background:#fff;color:#111;position:relative;z-index:3}
 #auth-register:checked ~ .registerPanel,#auth-login:checked ~ .loginPanel{display:block}
 .profile-section-title{padding:0 0 .5rem;margin-top:.25rem}
 .profileRoleAfterButton{margin-top:1rem;border-top:1px solid #eee;padding-top:.9rem}
