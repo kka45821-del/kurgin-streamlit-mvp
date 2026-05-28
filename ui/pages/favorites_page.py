@@ -9,7 +9,7 @@ def render_favorites_page() -> str:
 
   <div class="placeholder empty-state-info">
     <div class="empty-title">Важно</div>
-    <div class="muted">Избранное не резервирует камни, не фиксирует цену и не создаёт заказ.</div>
+    <div class="muted">Избранное не резервирует камни, не фиксирует цену, не создаёт заказ и не подтверждает наличие. Перед любым решением условия нужно уточнить отдельно.</div>
   </div>
 </div>
 """
