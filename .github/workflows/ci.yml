@@ -34,6 +34,7 @@ jobs:
           python -m py_compile catalog/data_loader.py
           python -m py_compile services/__init__.py
           python -m py_compile services/analyzer_adapter.py
+          python -m py_compile scripts/smoke_catalog_public_state_contract.py
           python -m py_compile scripts/smoke_analyzer_adapter_contract.py
           python -m py_compile scripts/smoke_analyzer_preview_ui.py
           python -m py_compile ui/mobile_shell.py
@@ -68,6 +69,10 @@ jobs:
       - name: Run public price state smoke checks
         run: |
           python scripts/smoke_public_price_states.py
+
+      - name: Run catalog public-state contract smoke checks
+        run: |
+          python scripts/smoke_catalog_public_state_contract.py
 
       - name: Run Analyzer adapter contract smoke checks
         run: |
