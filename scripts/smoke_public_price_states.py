@@ -98,14 +98,14 @@ def run() -> None:
     assert "function removeFavorite(stoneId)" in shell
     assert "function isFavorite(stoneOrId)" in shell
     assert "function toggleFavorite(stone)" in shell
-    assert "Избранное помогает сохранить интересные камни в этом браузере" in shell
-    assert "Оно не резервирует камни и не фиксирует цену" in shell
+    assert "Избранное хранится только в этом браузере" in shell
     assert "checkout" in shell
     for pattern in ACTIVE_COMMERCE_PATTERNS:
         assert pattern not in shell, f"Active commerce pattern found: {pattern}"
     assert "заявка не является заказом" in shell.lower()
-    assert "не фиксирует цену" in shell.lower()
     assert "не резервирует" in shell.lower()
+    assert "не фиксирует цену" in shell.lower()
+    assert "не создаёт заказ" in shell.lower()
     print("OK: favorites localStorage helpers and safe inactive commerce boundary")
 
     print("SMOKE_PUBLIC_PRICE_STATES_OK")
