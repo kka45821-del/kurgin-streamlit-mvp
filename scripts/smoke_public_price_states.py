@@ -44,6 +44,20 @@ SELLABLE_STONE = {
     "show_in_catalog": True,
 }
 
+ACTIVE_COMMERCE_PATTERNS = (
+    "createOrder",
+    "paymentSession",
+    "startPayment",
+    "initPayment",
+    "initiatePayment",
+    "sberPayment",
+    "checkoutPayment",
+    "markSold",
+    "soldState",
+    "reserveStone",
+    "createReserve",
+)
+
 
 def run() -> None:
     assert REQUEST_CONTACTS["phone"], REQUEST_CONTACTS
@@ -87,9 +101,12 @@ def run() -> None:
     assert "Избранное помогает сохранить интересные камни в этом браузере" in shell
     assert "Оно не резервирует камни и не фиксирует цену" in shell
     assert "checkout" in shell
-    assert "createOrder" not in shell
-    assert "payment" not in shell.lower()
-    print("OK: favorites localStorage helpers")
+    for pattern in ACTIVE_COMMERCE_PATTERNS:
+        assert pattern not in shell, f"Active commerce pattern found: {pattern}"
+    assert "заявка не является заказом" in shell.lower()
+    assert "не фиксирует цену" in shell.lower()
+    assert "не резервирует" in shell.lower()
+    print("OK: favorites localStorage helpers and safe inactive commerce boundary")
 
     print("SMOKE_PUBLIC_PRICE_STATES_OK")
 
