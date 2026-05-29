@@ -4,11 +4,11 @@ HERO_VIDEO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamli
 HERO_VIDEO_WRAP_STYLE = (
     "width:min(100%,360px);"
     "margin:0 auto 1rem;"
-    "border:1px solid #e6e0d8;"
-    "border-radius:24px;"
+    "border:0;"
+    "border-radius:0;"
     "overflow:hidden;"
-    "background:#f7f7f7;"
-    "box-shadow:0 14px 34px rgba(0,0,0,.06);"
+    "background:transparent;"
+    "box-shadow:none;"
 )
 
 HERO_VIDEO_STYLE = (
