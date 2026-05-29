@@ -20,6 +20,28 @@ HERO_VIDEO_STYLE = (
 
 HERO_VIDEO_ON_ENDED = "this.pause();this.currentTime=0;"
 
+HERO_SIGNATURE_STYLE = (
+    "max-width:360px;"
+    "margin:.1rem auto 1rem;"
+    "text-align:center;"
+    "color:#111;"
+)
+
+HERO_TAGLINE_STYLE = (
+    "font-family:'Cinzel','Times New Roman',serif;"
+    "font-size:.82rem;"
+    "letter-spacing:.08em;"
+    "text-transform:none;"
+    "margin-bottom:.58rem;"
+)
+
+HERO_POEM_STYLE = (
+    "font-family:'Times New Roman',serif;"
+    "font-size:.82rem;"
+    "line-height:1.45;"
+    "color:#555;"
+)
+
 
 def render_kurgin_page(logo_url: str) -> str:
     return f"""
@@ -30,6 +52,15 @@ def render_kurgin_page(logo_url: str) -> str:
         <source src="{HERO_VIDEO_URL}" type="video/mp4">
         KURGIN visual introduction
       </video>
+    </div>
+    <div class="k-hero-signature" style="{HERO_SIGNATURE_STYLE}">
+      <div class="k-hero-tagline" style="{HERO_TAGLINE_STYLE}">Luxury, measured in geometry.</div>
+      <div class="k-hero-poem" style="{HERO_POEM_STYLE}">
+        Не вымыслом красота живет<br>
+        Ей мера строгая дана.<br>
+        Где свет по граням ровно льет<br>
+        Там гармония одна.
+      </div>
     </div>
     <div class="hero-label">public MVP / витрина KURGIN</div>
     <div class="hero-text">KURGIN сейчас работает как публичная витрина лабораторных бриллиантов: можно смотреть каталог, сохранять интересные камни и отправлять запрос на уточнение условий.</div>
