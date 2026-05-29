@@ -36,8 +36,8 @@ HERO_TAGLINE_STYLE = (
 )
 
 HERO_POEM_STYLE = (
-    "font-family:'Times New Roman',serif;"
-    "font-size:.82rem;"
+    "font-family:'Adine Kirnberg','Times New Roman',serif;"
+    "font-size:.92rem;"
     "line-height:1.45;"
     "color:#555;"
 )
