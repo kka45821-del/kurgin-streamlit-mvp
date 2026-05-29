@@ -1,12 +1,30 @@
 HERO_VIDEO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/video.mp4?v=1"
 
 
+HERO_VIDEO_WRAP_STYLE = (
+    "width:min(100%,360px);"
+    "margin:0 auto 1rem;"
+    "border:1px solid #e6e0d8;"
+    "border-radius:24px;"
+    "overflow:hidden;"
+    "background:#f7f7f7;"
+    "box-shadow:0 14px 34px rgba(0,0,0,.06);"
+)
+
+HERO_VIDEO_STYLE = (
+    "display:block;"
+    "width:100%;"
+    "aspect-ratio:16/10;"
+    "object-fit:cover;"
+)
+
+
 def render_kurgin_page(logo_url: str) -> str:
     return f"""
 <div class="k-info-page">
   <section class="hero">
-    <div class="k-hero-video-wrap" aria-label="KURGIN visual introduction">
-      <video class="k-hero-video" autoplay muted loop playsinline preload="metadata" poster="{logo_url}">
+    <div class="k-hero-video-wrap" style="{HERO_VIDEO_WRAP_STYLE}" aria-label="KURGIN visual introduction">
+      <video class="k-hero-video" style="{HERO_VIDEO_STYLE}" autoplay muted loop playsinline preload="metadata" poster="{logo_url}">
         <source src="{HERO_VIDEO_URL}" type="video/mp4">
         KURGIN visual introduction
       </video>
