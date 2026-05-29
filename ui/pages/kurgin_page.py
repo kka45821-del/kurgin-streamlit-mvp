@@ -1,8 +1,16 @@
+HERO_VIDEO_URL = "https://raw.githubusercontent.com/kka45821-del/kurgin-streamlit-mvp/main/video.mp4?v=1"
+
+
 def render_kurgin_page(logo_url: str) -> str:
     return f"""
 <div class="k-info-page">
   <section class="hero">
-    <div class="logo-orb"><img src="{logo_url}" alt="KURGIN"></div>
+    <div class="k-hero-video-wrap" aria-label="KURGIN visual introduction">
+      <video class="k-hero-video" autoplay muted loop playsinline preload="metadata" poster="{logo_url}">
+        <source src="{HERO_VIDEO_URL}" type="video/mp4">
+        KURGIN visual introduction
+      </video>
+    </div>
     <div class="hero-label">public MVP / витрина KURGIN</div>
     <div class="hero-text">KURGIN сейчас работает как публичная витрина лабораторных бриллиантов: можно смотреть каталог, сохранять интересные камни и отправлять запрос на уточнение условий.</div>
     <div class="trust-row"><span class="pill">каталог</span><span class="pill">избранное</span><span class="pill">запрос менеджеру</span></div>
