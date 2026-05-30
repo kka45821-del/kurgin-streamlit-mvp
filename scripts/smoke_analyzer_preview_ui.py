@@ -11,11 +11,23 @@ from ui.pages.tools_page import render_tools_page
 
 
 REQUIRED_FRAGMENTS = [
-    "Это adapter stub preview",
-    "Реальная формула не подключена",
-    "Показать mock preview",
-    "Adapter stub preview",
-    "Mock result по public adapter contract",
+    "KURGIN Stone Analyzer",
+    "Public preview/mock",
+    "Manual public input",
+    "KURGIN Stone Analyzer public preview form",
+    "Shape",
+    "Carat",
+    "Color",
+    "Clarity",
+    "Table %",
+    "Depth %",
+    "Crown angle",
+    "Pavilion angle",
+    "Crown height %",
+    "Pavilion depth %",
+    "Girdle %",
+    "Fluorescence",
+    "Report #",
     "Status",
     "Score band",
     "Summary",
@@ -25,6 +37,7 @@ REQUIRED_FRAGMENTS = [
     "Не является сертификатом.",
     "Не является оценкой стоимости.",
     "Не является геммологическим заключением.",
+    "Это не production integration и не расчёт Formula Service.",
 ]
 
 FORBIDDEN_FRAGMENTS = [
@@ -43,6 +56,11 @@ FORBIDDEN_FRAGMENTS = [
     "order_effect",
     "reserve_effect",
     "payment_effect",
+    "diagnostics",
+    "breakdown",
+    "triple_score",
+    "structure_modifier",
+    "raw JSON",
     "kurgin-score-analyzer",
 ]
 
