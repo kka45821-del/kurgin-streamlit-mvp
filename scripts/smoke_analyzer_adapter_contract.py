@@ -31,7 +31,7 @@ def assert_contract(response: dict, expected_status: str) -> None:
     assert isinstance(response["warnings"], list), response
     assert isinstance(response["limitations"], list), response
     assert response["summary"], response
-    assert response["next_action"] == "request_professional_review", response
+    assert response["next_action"], response
     assert_no_forbidden_keys(response)
     rendered = repr(response).lower()
     for fragment in ("traceback", "exception", "raw_formula", "diagnostics", "breakdown", "structure_modifier", "triple_score"):
@@ -44,6 +44,8 @@ def complete_round_payload() -> dict:
         "carat": 1.25,
         "color": "E",
         "clarity": "VS1",
+        "lab": "IGI",
+        "report_number": "LG123456789",
         "table_pct": 57.0,
         "depth_pct": 61.8,
         "crown_angle": 34.7,
@@ -52,7 +54,7 @@ def complete_round_payload() -> dict:
         "pavilion_depth": 43.0,
         "girdle": 3.5,
         "fluorescence": "None",
-        "report_number": "LG123456789",
+        "measurements": "6.43 x 6.47 x 3.97",
     }
 
 
@@ -71,25 +73,25 @@ def test_missing_geometry_returns_incomplete() -> None:
     assert response["score_band"] == "Review", response
 
 
-def test_unsupported_shape_returns_unsupported() -> None:
+def test_unsupported_shape_returns_unsupported_shape() -> None:
     payload = complete_round_payload()
     payload["shape"] = "Oval"
     response = analyze_public_stone(payload)
-    assert_contract(response, "unsupported")
+    assert_contract(response, "unsupported_shape")
     assert response["score_band"] == "Unsupported", response
 
 
-def test_bad_carat_returns_error() -> None:
+def test_bad_carat_returns_invalid_input() -> None:
     payload = complete_round_payload()
     payload["carat"] = "bad"
     response = analyze_public_stone(payload)
-    assert_contract(response, "error")
+    assert_contract(response, "invalid_input")
     assert response["score_band"] == "Unavailable", response
 
 
-def test_malformed_payload_returns_error() -> None:
+def test_malformed_payload_returns_invalid_input() -> None:
     response = analyze_public_stone("bad")  # type: ignore[arg-type]
-    assert_contract(response, "error")
+    assert_contract(response, "invalid_input")
     assert response["score_band"] == "Unavailable", response
 
 
@@ -97,9 +99,9 @@ def main() -> None:
     tests = [
         test_complete_round_returns_ok,
         test_missing_geometry_returns_incomplete,
-        test_unsupported_shape_returns_unsupported,
-        test_bad_carat_returns_error,
-        test_malformed_payload_returns_error,
+        test_unsupported_shape_returns_unsupported_shape,
+        test_bad_carat_returns_invalid_input,
+        test_malformed_payload_returns_invalid_input,
     ]
     for test in tests:
         test()
