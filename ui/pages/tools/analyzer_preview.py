@@ -1,5 +1,7 @@
 import html
 
+import streamlit as st
+
 from services.analyzer_adapter import analyze_public_stone
 
 
@@ -51,6 +53,10 @@ def _list_items(values: list[object]) -> str:
     return "".join(f"<li>{_escape(value)}</li>" for value in values)
 
 
+def _next_action_label(value: object) -> str:
+    return NEXT_ACTION_LABELS.get(str(value or "request_professional_review"), str(value or "request_professional_review"))
+
+
 def _render_form_fields() -> str:
     fields = []
     for key, label, placeholder in FORM_FIELDS:
@@ -68,8 +74,7 @@ def _render_form_fields() -> str:
 def _render_public_safe_result(result: dict[str, object]) -> str:
     warnings = result.get("warnings") if isinstance(result.get("warnings"), list) else []
     limitations = result.get("limitations") if isinstance(result.get("limitations"), list) else []
-    next_action = result.get("next_action") or "request_professional_review"
-    next_action_label = NEXT_ACTION_LABELS.get(str(next_action), str(next_action))
+    next_action_label = _next_action_label(result.get("next_action"))
     return f"""
       <section class="single-next-box analyzer-preview-result" aria-label="Предварительный публичный результат KURGIN Stone Analyzer">
         <div class="result-kicker">Демонстрационный режим</div>
@@ -85,6 +90,82 @@ def _render_public_safe_result(result: dict[str, object]) -> str:
         <div class="analyzer-result-list"><strong>Ограничения</strong><ul>{_list_items(limitations)}</ul></div>
       </section>
 """
+
+
+def _streamlit_result_block(result: dict[str, object]) -> None:
+    warnings = result.get("warnings") if isinstance(result.get("warnings"), list) else []
+    limitations = result.get("limitations") if isinstance(result.get("limitations"), list) else []
+
+    st.caption("Демонстрационный режим")
+    col_a, col_b = st.columns(2)
+    col_a.metric("Состояние", str(result.get("status", "—")))
+    col_b.metric("Класс результата", str(result.get("score_band", "—")))
+    st.write(str(result.get("summary", "—")))
+    st.write("**Следующий шаг:** " + _next_action_label(result.get("next_action")))
+
+    st.write("**Предупреждения**")
+    if warnings:
+        for warning in warnings:
+            st.write(f"- {warning}")
+    else:
+        st.write("- —")
+
+    st.write("**Ограничения**")
+    for limitation in limitations:
+        st.write(f"- {limitation}")
+
+
+def render_analyzer_preview_controls() -> dict[str, object]:
+    """Optional Streamlit-controls wrapper for a future non-iframe Tools page.
+
+    The current MVP shell renders Tools as an HTML iframe via components.html,
+    so this function is intentionally not called by the active shell yet. It is
+    ready for a future Streamlit-native Tools layer and uses the same local
+    preview adapter without live backend calls.
+    """
+    st.subheader("KURGIN Stone Analyzer")
+    st.caption("Демонстрационный режим. Расчётный контур не подключён в этой версии.")
+
+    with st.form("kurgin_stone_analyzer_preview_form"):
+        shape = st.selectbox("Огранка", ["Round", "Oval"], index=0)
+        col_a, col_b = st.columns(2)
+        with col_a:
+            carat = st.number_input("Каратность", min_value=0.0, value=float(DEFAULT_PUBLIC_INPUT["carat"]), step=0.01)
+            color = st.text_input("Цвет", value=str(DEFAULT_PUBLIC_INPUT["color"]))
+            clarity = st.text_input("Чистота", value=str(DEFAULT_PUBLIC_INPUT["clarity"]))
+            table_pct = st.number_input("Площадка, %", min_value=0.0, value=float(DEFAULT_PUBLIC_INPUT["table_pct"]), step=0.1)
+            depth_pct = st.number_input("Глубина, %", min_value=0.0, value=float(DEFAULT_PUBLIC_INPUT["depth_pct"]), step=0.1)
+            crown_angle = st.number_input("Угол короны", min_value=0.0, value=float(DEFAULT_PUBLIC_INPUT["crown_angle"]), step=0.1)
+        with col_b:
+            pavilion_angle = st.number_input("Угол павильона", min_value=0.0, value=float(DEFAULT_PUBLIC_INPUT["pavilion_angle"]), step=0.1)
+            crown_height = st.number_input("Высота короны, %", min_value=0.0, value=float(DEFAULT_PUBLIC_INPUT["crown_height"]), step=0.1)
+            pavilion_depth = st.number_input("Глубина павильона, %", min_value=0.0, value=float(DEFAULT_PUBLIC_INPUT["pavilion_depth"]), step=0.1)
+            girdle = st.number_input("Рундист, %", min_value=0.0, value=float(DEFAULT_PUBLIC_INPUT["girdle"]), step=0.1)
+            fluorescence = st.text_input("Флуоресценция", value=str(DEFAULT_PUBLIC_INPUT["fluorescence"]))
+            report_number = st.text_input("Номер отчёта", value=str(DEFAULT_PUBLIC_INPUT["report_number"]))
+        submitted = st.form_submit_button("Показать предварительную проверку")
+
+    public_input = {
+        "shape": shape,
+        "carat": carat,
+        "color": color,
+        "clarity": clarity,
+        "table_pct": table_pct,
+        "depth_pct": depth_pct,
+        "crown_angle": crown_angle,
+        "pavilion_angle": pavilion_angle,
+        "crown_height": crown_height,
+        "pavilion_depth": pavilion_depth,
+        "girdle": girdle,
+        "fluorescence": fluorescence,
+        "report_number": report_number,
+    }
+    result = analyze_public_stone(public_input)
+    if submitted:
+        _streamlit_result_block(result)
+    else:
+        st.info("Заполните параметры и нажмите кнопку предварительной проверки.")
+    return result
 
 
 def render_analyzer_preview() -> str:
