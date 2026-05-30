@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from ui.pages.tools.analyzer_preview import render_analyzer_preview_controls
 from ui.pages.tools_page import render_tools_page
 
 
@@ -78,6 +79,9 @@ def main() -> None:
         assert fragment in html, f"Missing Analyzer preview UI fragment: {fragment}"
     for fragment in FORBIDDEN_FRAGMENTS:
         assert fragment not in html, f"Forbidden Analyzer preview UI fragment found: {fragment}"
+
+    assert callable(render_analyzer_preview_controls), "Streamlit controls wrapper must be callable"
+    assert render_analyzer_preview_controls.__name__ == "render_analyzer_preview_controls"
     print("Analyzer preview UI smoke checks passed.")
 
 
