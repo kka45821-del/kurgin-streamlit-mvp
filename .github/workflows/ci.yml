@@ -37,6 +37,7 @@ jobs:
           python -m py_compile scripts/smoke_catalog_public_state_contract.py
           python -m py_compile scripts/smoke_analyzer_adapter_contract.py
           python -m py_compile scripts/smoke_analyzer_preview_ui.py
+          python -m py_compile scripts/smoke_analyzer_public_boundary.py
           python -m py_compile ui/mobile_shell.py
           python -m py_compile ui/scripts.py
           python -m py_compile ui/extra_styles.py
@@ -82,3 +83,7 @@ jobs:
       - name: Run Analyzer preview UI smoke checks
         run: |
           python scripts/smoke_analyzer_preview_ui.py
+
+      - name: Run Analyzer public boundary smoke checks
+        run: |
+          python scripts/smoke_analyzer_public_boundary.py
