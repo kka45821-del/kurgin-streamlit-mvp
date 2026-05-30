@@ -156,6 +156,7 @@ def render_mass_analyzer_preview() -> str:
     <div><span>ошибки</span><strong>0</strong></div>
     <div><span>пропущено</span><strong>0</strong></div>
   </div>
+  <button type="button" class="single-file-button disabled">Запустить массовый анализ — позже</button>
   <div class="tool-note">Массовый анализ будет подключён после утверждения batch Analyzer contract.</div>
 </section>
 
