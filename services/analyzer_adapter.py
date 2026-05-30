@@ -4,17 +4,26 @@ from typing import Any
 
 STATUS_OK = "ok"
 STATUS_INCOMPLETE = "incomplete"
-STATUS_UNSUPPORTED_SHAPE = "unsupported_shape"
-STATUS_INVALID_INPUT = "invalid_input"
-STATUS_ENGINE_UNAVAILABLE = "engine_unavailable"
+STATUS_UNSUPPORTED = "unsupported"
+STATUS_ERROR = "error"
 
-REQUIRED_FIELDS = ("shape", "carat", "color", "clarity")
-IMPORTANT_GEOMETRY_FIELDS = ("table_pct", "depth_pct", "crown_angle", "pavilion_angle")
-OPTIONAL_GEOMETRY_FIELDS = ("crown_height", "pavilion_depth", "girdle")
-OPTIONAL_PUBLIC_FIELDS = ("fluorescence", "report_number")
+REQUIRED_GEOMETRY_FIELDS = (
+    "table_pct",
+    "depth_pct",
+    "crown_angle",
+    "pavilion_angle",
+    "crown_height",
+    "pavilion_depth",
+    "girdle",
+)
+OPTIONAL_PUBLIC_FIELDS = ("carat", "color", "clarity", "fluorescence", "report_number")
 SUPPORTED_SHAPES = {"round", "round brilliant", "круг", "круглый"}
 
 FORBIDDEN_OUTPUT_KEYS = {
+    "diagnostics",
+    "breakdown",
+    "triple_score",
+    "structure_modifier",
     "raw_formula",
     "weights",
     "penalty_breakdown",
@@ -39,8 +48,16 @@ BASE_LIMITATIONS = [
     "Не является сертификатом.",
     "Не является оценкой стоимости.",
     "Не является геммологическим заключением.",
-    "Формула и внутренние коэффициенты не раскрываются.",
 ]
+
+ALLOWED_PUBLIC_KEYS = {
+    "status",
+    "score_band",
+    "summary",
+    "warnings",
+    "limitations",
+    "next_action",
+}
 
 
 def _clean_text(value: Any) -> str:
@@ -55,7 +72,7 @@ def _is_missing(value: Any) -> bool:
     if value is None:
         return True
     text = str(value).strip()
-    return text == "" or text.lower() in {"none", "nan", "null"}
+    return text == "" or text.lower() in {"none", "nan", "null", "—", "-"}
 
 
 def _to_positive_float(value: Any, field_name: str) -> tuple[float | None, str | None]:
@@ -73,70 +90,54 @@ def _to_positive_float(value: Any, field_name: str) -> tuple[float | None, str |
 def _response(
     *,
     status: str,
+    score_band: str,
     summary: str,
     warnings: list[str] | None = None,
-    next_action: str,
-    score_band: str | None = None,
-    coefficient: None = None,
+    next_action: str = "request_professional_review",
 ) -> dict[str, Any]:
     response: dict[str, Any] = {
         "status": status,
         "score_band": score_band,
-        "coefficient": coefficient,
         "summary": summary,
         "warnings": warnings or [],
         "limitations": list(BASE_LIMITATIONS),
         "next_action": next_action,
     }
-    for forbidden_key in FORBIDDEN_OUTPUT_KEYS:
-        response.pop(forbidden_key, None)
-    return response
+    return {key: response[key] for key in ALLOWED_PUBLIC_KEYS}
 
 
 def analyze_public_stone(payload: dict) -> dict:
     """Return a public-safe Analyzer preview response.
 
-    This is a Phase 2 boundary stub. It intentionally performs no formula
-    calculation and imports no KURGIN Score Analyzer engine modules.
+    This is a UI-only preview/mock boundary. It performs no live backend call,
+    no Formula Service call, and imports no Analyzer engine modules.
     """
     if not isinstance(payload, dict):
         return _response(
-            status=STATUS_INVALID_INPUT,
-            summary="Некорректный запрос Analyzer preview.",
-            warnings=["Payload must be an object."],
-            next_action="fix_input",
+            status=STATUS_ERROR,
+            score_band="Unavailable",
+            summary="Некорректный запрос Analyzer public preview.",
+            warnings=["Public preview input must be an object."],
         )
 
-    missing_required = [field for field in REQUIRED_FIELDS if _is_missing(payload.get(field))]
-    if missing_required:
-        return _response(
-            status=STATUS_INVALID_INPUT,
-            summary="Не хватает обязательных параметров для Analyzer preview.",
-            warnings=[f"Missing required fields: {', '.join(missing_required)}."],
-            next_action="fix_input",
-        )
-
-    shape = _normalize_shape(payload.get("shape"))
+    shape = _normalize_shape(payload.get("shape") or "Round")
     if shape not in SUPPORTED_SHAPES:
         return _response(
-            status=STATUS_UNSUPPORTED_SHAPE,
+            status=STATUS_UNSUPPORTED,
+            score_band="Unsupported",
             summary="Эта огранка пока не поддерживается в public preview.",
-            warnings=["Текущий public MVP adapter stub поддерживает только Round."],
-            next_action="request_professional_review",
-        )
-
-    _, carat_error = _to_positive_float(payload.get("carat"), "carat")
-    if carat_error:
-        return _response(
-            status=STATUS_INVALID_INPUT,
-            summary="Некорректное значение carat.",
-            warnings=[carat_error],
-            next_action="fix_input",
+            warnings=["Текущий public preview поддерживает только Round."],
         )
 
     numeric_errors: list[str] = []
     missing_geometry: list[str] = []
-    for field in IMPORTANT_GEOMETRY_FIELDS:
+
+    if not _is_missing(payload.get("carat")):
+        _, carat_error = _to_positive_float(payload.get("carat"), "carat")
+        if carat_error:
+            numeric_errors.append(carat_error)
+
+    for field in REQUIRED_GEOMETRY_FIELDS:
         value = payload.get(field)
         if _is_missing(value):
             missing_geometry.append(field)
@@ -145,37 +146,29 @@ def analyze_public_stone(payload: dict) -> dict:
         if error:
             numeric_errors.append(error)
 
-    for field in OPTIONAL_GEOMETRY_FIELDS:
-        value = payload.get(field)
-        if _is_missing(value):
-            continue
-        _, error = _to_positive_float(value, field)
-        if error:
-            numeric_errors.append(error)
-
     if numeric_errors:
         return _response(
-            status=STATUS_INVALID_INPUT,
+            status=STATUS_ERROR,
+            score_band="Unavailable",
             summary="Некоторые числовые параметры заполнены некорректно.",
             warnings=numeric_errors,
-            next_action="fix_input",
         )
 
     if missing_geometry:
         return _response(
             status=STATUS_INCOMPLETE,
+            score_band="Review",
             summary="Недостаточно геометрических параметров для предварительной интерпретации.",
             warnings=[
                 "Missing geometry fields: " + ", ".join(missing_geometry) + ".",
-                "Engine не подключён; это contract-safe preview response.",
+                "Это preview/mock; реальный расчёт формулы не выполняется.",
             ],
-            next_action="add_missing_parameters",
         )
 
     return _response(
         status=STATUS_OK,
-        score_band="preview_ready",
-        summary="Public-safe Analyzer adapter stub принял полный Round input. Реальный расчёт формулы не выполнялся.",
-        warnings=["Engine не подключён; результат является mock response для проверки adapter contract."],
-        next_action="connect_engine_adapter_later",
+        score_band="Review",
+        summary="Public-safe Analyzer preview принял полный Round input. Реальный расчёт формулы не выполнялся.",
+        warnings=["Preview/mock mode: результат не является расчётом Formula Service."],
+        next_action="request_professional_review",
     )
