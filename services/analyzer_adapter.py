@@ -4,8 +4,9 @@ from typing import Any
 
 STATUS_OK = "ok"
 STATUS_INCOMPLETE = "incomplete"
-STATUS_UNSUPPORTED = "unsupported"
-STATUS_ERROR = "error"
+STATUS_INVALID_INPUT = "invalid_input"
+STATUS_UNSUPPORTED_SHAPE = "unsupported_shape"
+STATUS_ENGINE_UNAVAILABLE = "engine_unavailable"
 
 REQUIRED_GEOMETRY_FIELDS = (
     "table_pct",
@@ -16,7 +17,7 @@ REQUIRED_GEOMETRY_FIELDS = (
     "pavilion_depth",
     "girdle",
 )
-OPTIONAL_PUBLIC_FIELDS = ("carat", "color", "clarity", "fluorescence", "report_number")
+OPTIONAL_PUBLIC_FIELDS = ("carat", "color", "clarity", "lab", "fluorescence", "measurements", "report_number")
 SUPPORTED_SHAPES = {"round", "round brilliant", "круг", "круглый"}
 
 FORBIDDEN_OUTPUT_KEYS = {
@@ -107,23 +108,24 @@ def _response(
 
 
 def analyze_public_stone(payload: dict) -> dict:
-    """Return a public-safe Analyzer preview response.
+    """Return a public-safe one-stone Analyzer preview response.
 
     This is a UI-only demonstration boundary. It performs no live backend call,
-    no Formula Service call, and imports no Analyzer engine modules.
+    no Formula Service call, no file upload, and imports no Analyzer engine modules.
     """
     if not isinstance(payload, dict):
         return _response(
-            status=STATUS_ERROR,
+            status=STATUS_INVALID_INPUT,
             score_band="Unavailable",
             summary="Не удалось подготовить предварительный результат.",
             warnings=["Входные данные должны быть переданы в виде объекта."],
+            next_action="fix_parameters",
         )
 
     shape = _normalize_shape(payload.get("shape") or "Round")
     if shape not in SUPPORTED_SHAPES:
         return _response(
-            status=STATUS_UNSUPPORTED,
+            status=STATUS_UNSUPPORTED_SHAPE,
             score_band="Unsupported",
             summary="Эта огранка пока не поддерживается в публичном предварительном просмотре.",
             warnings=["В демонстрационной версии доступна только огранка Round."],
@@ -133,7 +135,7 @@ def analyze_public_stone(payload: dict) -> dict:
     missing_geometry: list[str] = []
 
     if not _is_missing(payload.get("carat")):
-        _, carat_error = _to_positive_float(payload.get("carat"), "carat")
+        _, carat_error = _to_positive_float(payload.get("carat"), "Вес")
         if carat_error:
             numeric_errors.append(carat_error)
 
@@ -148,10 +150,11 @@ def analyze_public_stone(payload: dict) -> dict:
 
     if numeric_errors:
         return _response(
-            status=STATUS_ERROR,
+            status=STATUS_INVALID_INPUT,
             score_band="Unavailable",
             summary="Не удалось подготовить предварительный результат.",
             warnings=numeric_errors,
+            next_action="fix_parameters",
         )
 
     if missing_geometry:
@@ -163,6 +166,7 @@ def analyze_public_stone(payload: dict) -> dict:
                 "Не заполнены параметры: " + ", ".join(missing_geometry) + ".",
                 "Расчётный контур не подключён в этой версии.",
             ],
+            next_action="fix_parameters",
         )
 
     return _response(
