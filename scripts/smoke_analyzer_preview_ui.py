@@ -13,35 +13,43 @@ from ui.pages.tools_page import render_tools_page
 
 REQUIRED_FRAGMENTS = [
     "KURGIN Stone Analyzer",
-    "Предварительная проверка параметров",
-    "Расчётный контур не подключён в этой версии.",
-    "Ручной ввод параметров",
-    "Форма предварительной проверки KURGIN Stone Analyzer",
-    "Огранка",
-    "Каратность",
-    "Цвет",
-    "Чистота",
-    "Площадка, %",
-    "Глубина, %",
-    "Угол короны",
-    "Угол павильона",
-    "Высота короны, %",
-    "Глубина павильона, %",
-    "Рундист, %",
-    "Флуоресценция",
-    "Номер отчёта",
-    "Демонстрационный режим",
-    "Состояние",
+    "Фото",
+    "камера",
+    "Сфотографировать сертификат",
+    "Загрузка",
+    "файл",
+    "Загрузить документ",
+    "Вручную",
+    "форма",
+    "Анализ одного камня",
+    "Базовые данные",
+    "Геометрия",
+    "Проверка данных",
+    "Показать предварительный результат",
+    "Статус анализа",
     "Класс результата",
-    "Пояснение",
+    "Краткое резюме",
     "Предупреждения",
     "Ограничения",
     "Следующий шаг",
-    "Запросить профессиональную проверку",
+    "Задать вопрос по результату",
+    "Подобрать похожий камень",
+    "Сравнить с каталогом",
+    "KURGIN Mass Analyzer",
+    "Массовый анализ Excel",
+    "Загрузка Excel будет позже",
+    "не выполняет расчёт",
+    "не публикует данные",
+    "не меняет каталог",
+    "Не создаёт заказ, резерв или оплату",
+    "ok",
+    "incomplete",
+    "invalid_input",
+    "unsupported_shape",
+    "engine_unavailable",
     "Не является сертификатом.",
     "Не является оценкой стоимости.",
     "Не является геммологическим заключением.",
-    "Это демонстрационный режим, не production integration и не расчёт Formula Service.",
 ]
 
 FORBIDDEN_FRAGMENTS = [
@@ -49,6 +57,9 @@ FORBIDDEN_FRAGMENTS = [
     "Manual public input",
     "Score band",
     "Next action",
+    "Пакетный анализ",
+    "Batch",
+    "Excel upload",
     "raw_formula",
     "weights",
     "penalty_breakdown",
@@ -61,24 +72,32 @@ FORBIDDEN_FRAGMENTS = [
     "certificate_claim",
     "appraisal_claim",
     "price_effect",
-    "order_effect",
-    "reserve_effect",
     "payment_effect",
+    "reserve_effect",
     "diagnostics",
     "breakdown",
     "triple_score",
     "structure_modifier",
     "raw JSON",
+    "Купить по результату анализа",
+    "Оплатить",
+    "Зарезервировать",
+    "Получить сертификат",
+    "Оценить стоимость",
     "kurgin-score-analyzer",
 ]
 
 
 def main() -> None:
     html = render_tools_page()
+    stone_panel = html.split('data-tool-panel="kurgin_index"', 1)[0]
     for fragment in REQUIRED_FRAGMENTS:
         assert fragment in html, f"Missing Analyzer preview UI fragment: {fragment}"
     for fragment in FORBIDDEN_FRAGMENTS:
-        assert fragment not in html, f"Forbidden Analyzer preview UI fragment found: {fragment}"
+        if fragment in {"Пакетный анализ", "Batch", "Excel upload"}:
+            assert fragment not in stone_panel, f"Forbidden Stone Analyzer fragment found: {fragment}"
+        else:
+            assert fragment not in html, f"Forbidden Analyzer preview UI fragment found: {fragment}"
 
     assert callable(render_analyzer_preview_controls), "Streamlit controls wrapper must be callable"
     assert render_analyzer_preview_controls.__name__ == "render_analyzer_preview_controls"
