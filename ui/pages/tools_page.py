@@ -2,6 +2,7 @@ import streamlit as st
 
 from ui.pages.tools.analyzer_preview import render_analyzer_preview
 from ui.pages.tools.index_panel import render_index_panel
+from ui.pages.tools.mass_analyzer_preview import render_mass_analyzer_preview
 
 
 TOOLS = (
@@ -31,6 +32,7 @@ def render_tools_page() -> str:
     tab_click = "const root=this.closest('.tools-page');const active=this.getAttribute('data-tool-tab');root.querySelectorAll('[data-tool-tab]').forEach(t=>t.setAttribute('aria-selected','false'));this.setAttribute('aria-selected','true');root.querySelectorAll('[data-tool-panel]').forEach(p=>p.hidden=p.getAttribute('data-tool-panel')!==active);try{const url=new URL(window.parent.location.href);url.searchParams.set('page','tools');url.searchParams.set('tool',active);window.parent.history.replaceState(null,'',url.toString());}catch(e){}"
     analyzer_preview = render_analyzer_preview()
     index_panel = render_index_panel()
+    mass_analyzer_preview = render_mass_analyzer_preview()
     return f"""
 <div class="tools-page">
   <div class="tools-tabs" role="tablist" aria-label="Инструменты KURGIN">
@@ -54,7 +56,7 @@ def render_tools_page() -> str:
   </div>
 
   <div class="tools-tab-content" data-tool-panel="excel_analyzer"{_hidden(active_tool, 'excel_analyzer')}>
-    <section class="tool-card"><div class="tool-kicker">Mass Analyzer · MVP skeleton</div><div class="tool-title">KURGIN Mass Analyzer</div><div class="tool-text">Массовый анализ Excel. Загрузка Excel будет позже: сейчас раздел не выполняет расчёт, не публикует данные и не меняет каталог.</div><div class="tool-note">Не создаёт заказ, резерв или оплату. Это отдельный инструмент для будущей массовой проверки, не часть Stone Analyzer.</div></section>
+{mass_analyzer_preview}
   </div>
 
   <div class="tools-tab-content" data-tool-panel="kurgin_academy"{_hidden(active_tool, 'kurgin_academy')}>
