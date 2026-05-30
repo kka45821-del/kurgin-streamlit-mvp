@@ -226,7 +226,7 @@ def render_analyzer_preview() -> str:
       <section class="single-workspace analyzer-workspace">
         <div class="workspace-title">Анализ одного камня</div>
         <div class="workspace-text">Предварительная проверка качества по параметрам. Не сертификат, не оценка стоимости и не покупательский триггер.</div>
-        <div class="analyzer-preview-notice">Расчётный контур не подключён в этой версии. Нет checkout, оплаты, заявки, резерва, пакетной загрузки или Excel-загрузки.</div>
+        <div class="analyzer-preview-notice">Расчётный контур не подключён в этой версии. Нет checkout, оплаты, заявки или резерва.</div>
 
         <div class="workspace-title">Базовые данные</div>
         <form class="analyzer-form-grid" aria-label="Базовые данные одного камня">
