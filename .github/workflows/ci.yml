@@ -50,6 +50,7 @@ jobs:
           python -m py_compile ui/pages/tools/__init__.py
           python -m py_compile ui/pages/tools/analyzer_preview.py
           python -m py_compile ui/pages/tools/index_panel.py
+          python -m py_compile ui/pages/tools/mass_analyzer_preview.py
           python -m py_compile ui/pages/favorites_page.py
           python -m py_compile ui/pages/cart_page.py
           python -m py_compile ui/pages/profile_page.py
