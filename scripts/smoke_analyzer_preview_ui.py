@@ -105,6 +105,7 @@ FORBIDDEN_FRAGMENTS = [
     "price_effect",
     "payment_effect",
     "reserve_effect",
+    "order_effect",
     "diagnostics",
     "breakdown",
     "triple_score",
