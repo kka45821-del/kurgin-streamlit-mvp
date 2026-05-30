@@ -100,7 +100,7 @@ def render_analyzer_preview() -> str:
       <section class="single-workspace analyzer-workspace">
         <div class="workspace-title">Manual public input</div>
         <div class="workspace-text">Форма показывает первый безопасный UI слой для ручного ввода. Сейчас это preview/mock: данные не отправляются в backend и не запускают реальный engine.</div>
-        <div class="analyzer-preview-notice">Нет checkout, оплаты, заявки, резерва, batch upload или Excel upload. Внутренние поля формулы не показываются.</div>
+        <div class="analyzer-preview-notice">Нет checkout, оплаты, заявки, резерва, batch upload или Excel upload. Служебные поля анализа не показываются.</div>
 
         <form class="analyzer-form-grid" aria-label="KURGIN Stone Analyzer public preview form">
 {form_fields}
@@ -115,7 +115,7 @@ def render_analyzer_preview() -> str:
       <section class="tool-card">
         <div class="tool-kicker">Safety boundary</div>
         <div class="tool-title">Что скрыто</div>
-        <div class="tool-text">В public preview не выводятся диагностика, breakdown, внутренние коэффициенты, formula internals, stack traces, price/order/reserve/payment effects.</div>
+        <div class="tool-text">В public preview не выводятся внутренние данные формулы, служебная трассировка, коммерческие эффекты или технические детали расчёта.</div>
         <div class="tool-note">Это не production integration и не расчёт Formula Service.</div>
       </section>
     </div>
