@@ -77,13 +77,13 @@ def _is_missing(value: Any) -> bool:
 
 def _to_positive_float(value: Any, field_name: str) -> tuple[float | None, str | None]:
     if _is_missing(value):
-        return None, f"{field_name}: missing"
+        return None, f"{field_name}: не заполнено"
     try:
         number = float(str(value).replace(",", "."))
     except (TypeError, ValueError):
-        return None, f"{field_name}: invalid number"
+        return None, f"{field_name}: некорректное число"
     if number <= 0:
-        return None, f"{field_name}: must be positive"
+        return None, f"{field_name}: значение должно быть больше нуля"
     return number, None
 
 
@@ -109,15 +109,15 @@ def _response(
 def analyze_public_stone(payload: dict) -> dict:
     """Return a public-safe Analyzer preview response.
 
-    This is a UI-only preview/mock boundary. It performs no live backend call,
+    This is a UI-only demonstration boundary. It performs no live backend call,
     no Formula Service call, and imports no Analyzer engine modules.
     """
     if not isinstance(payload, dict):
         return _response(
             status=STATUS_ERROR,
             score_band="Unavailable",
-            summary="Некорректный запрос Analyzer public preview.",
-            warnings=["Public preview input must be an object."],
+            summary="Не удалось подготовить предварительный результат.",
+            warnings=["Входные данные должны быть переданы в виде объекта."],
         )
 
     shape = _normalize_shape(payload.get("shape") or "Round")
@@ -125,8 +125,8 @@ def analyze_public_stone(payload: dict) -> dict:
         return _response(
             status=STATUS_UNSUPPORTED,
             score_band="Unsupported",
-            summary="Эта огранка пока не поддерживается в public preview.",
-            warnings=["Текущий public preview поддерживает только Round."],
+            summary="Эта огранка пока не поддерживается в публичном предварительном просмотре.",
+            warnings=["В демонстрационной версии доступна только огранка Round."],
         )
 
     numeric_errors: list[str] = []
@@ -150,7 +150,7 @@ def analyze_public_stone(payload: dict) -> dict:
         return _response(
             status=STATUS_ERROR,
             score_band="Unavailable",
-            summary="Некоторые числовые параметры заполнены некорректно.",
+            summary="Не удалось подготовить предварительный результат.",
             warnings=numeric_errors,
         )
 
@@ -158,17 +158,17 @@ def analyze_public_stone(payload: dict) -> dict:
         return _response(
             status=STATUS_INCOMPLETE,
             score_band="Review",
-            summary="Недостаточно геометрических параметров для предварительной интерпретации.",
+            summary="Для предварительной интерпретации не хватает геометрических параметров.",
             warnings=[
-                "Missing geometry fields: " + ", ".join(missing_geometry) + ".",
-                "Это preview/mock; реальный расчёт формулы не выполняется.",
+                "Не заполнены параметры: " + ", ".join(missing_geometry) + ".",
+                "Расчётный контур не подключён в этой версии.",
             ],
         )
 
     return _response(
         status=STATUS_OK,
         score_band="Review",
-        summary="Public-safe Analyzer preview принял полный Round input. Реальный расчёт формулы не выполнялся.",
-        warnings=["Preview/mock mode: результат не является расчётом Formula Service."],
+        summary="Параметры приняты. В этой версии показан безопасный демонстрационный результат без запуска Formula Service.",
+        warnings=["Демонстрационный режим: результат показан как пример безопасного публичного вывода."],
         next_action="request_professional_review",
     )
