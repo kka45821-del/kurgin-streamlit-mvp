@@ -54,7 +54,7 @@ def render_tools_page() -> str:
   </div>
 
   <div class="tools-tab-content" data-tool-panel="excel_analyzer"{_hidden(active_tool, 'excel_analyzer')}>
-    <section class="tool-card"><div class="tool-kicker">Mass Analyzer · MVP skeleton</div><div class="tool-title">KURGIN Mass Analyzer</div><div class="tool-text">Будущий Excel / batch-анализ списка камней. Загрузка файлов и расчёты сейчас не подключены в public MVP.</div><div class="tool-note">Не публикация, не checkout, не изменение каталога и не рабочий Analyzer.</div></section>
+    <section class="tool-card"><div class="tool-kicker">Mass Analyzer · MVP skeleton</div><div class="tool-title">KURGIN Mass Analyzer</div><div class="tool-text">Массовый анализ Excel. Загрузка Excel будет позже: сейчас раздел не выполняет расчёт, не публикует данные и не меняет каталог.</div><div class="tool-note">Не создаёт заказ, резерв или оплату. Это отдельный инструмент для будущей массовой проверки, не часть Stone Analyzer.</div></section>
   </div>
 
   <div class="tools-tab-content" data-tool-panel="kurgin_academy"{_hidden(active_tool, 'kurgin_academy')}>
