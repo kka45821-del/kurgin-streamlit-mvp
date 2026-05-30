@@ -86,7 +86,7 @@ def render_mass_analyzer_preview() -> str:
   <div class="tool-kicker">Mass Analyzer · Excel skeleton</div>
   <div class="tool-title">KURGIN Mass Analyzer</div>
   <div class="tool-text">Массовый анализ Excel: анализ группы камней по таблице. Это не сертификат, не оценка цены и не публикация в каталог.</div>
-  <div class="tool-note">Загрузка Excel будет позже. Сейчас раздел не выполняет расчёт, не публикует данные, не меняет каталог и не создаёт заказ, резерв или оплату.</div>
+  <div class="tool-note">Загрузка Excel будет позже. Сейчас раздел не выполняет расчёт, не публикует данные, не меняет каталог. Не создаёт заказ, резерв или оплату.</div>
   <div class="favoriteActions">
     <button type="button" class="favoriteBtn disabled">Загрузить Excel — позже</button>
     <button type="button" class="favoriteBtn disabled">Скачать шаблон — позже</button>
