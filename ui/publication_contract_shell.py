@@ -29,11 +29,16 @@ CONTRACT_FIRST_IS_REQUEST_PRICE = """  function hasComputedField(stone, field){
 
   function isRequestPrice(stone){
     const price = Number(stone.price || stone.price_rub || stone.public_price_rub || 0);
+    const state = String(stone.public_state || '').toLowerCase();
     const status = String(stone.price_status || '').toLowerCase();
     const action = String(stone.public_action || '').toLowerCase();
     const hasAction = hasComputedField(stone, 'public_action');
     const hasCheckoutEnabled = hasComputedField(stone, 'checkout_enabled');
     const hasPublicSellable = hasComputedField(stone, 'public_sellable');
+
+    if(state === 'request_price') return true;
+    if(state === 'sellable_contact' || state === 'checkout') return price <= 0;
+    if(hasComputedField(stone, 'is_request_price')) return fieldIsTrue(stone, 'is_request_price');
 
     if(hasAction && action === 'request_price') return true;
     if(hasAction && action === 'checkout'){
