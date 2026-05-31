@@ -31,6 +31,7 @@ jobs:
         run: |
           python -m py_compile app.py
           python -m py_compile catalog/catalog_core.py
+          python -m py_compile catalog/public_state_contract.py
           python -m py_compile catalog/data_loader.py
           python -m py_compile services/__init__.py
           python -m py_compile services/analyzer_adapter.py
@@ -39,6 +40,7 @@ jobs:
           python -m py_compile scripts/smoke_analyzer_preview_ui.py
           python -m py_compile scripts/smoke_analyzer_public_boundary.py
           python -m py_compile ui/mobile_shell.py
+          python -m py_compile ui/publication_contract_shell.py
           python -m py_compile ui/scripts.py
           python -m py_compile ui/extra_styles.py
           python -m py_compile ui/styles.py
