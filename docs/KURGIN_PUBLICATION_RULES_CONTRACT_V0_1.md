@@ -1,12 +1,12 @@
 # KURGIN PUBLICATION RULES CONTRACT v0.1
 
 Repo: `kka45821-del/kurgin-streamlit-mvp`  
-Scope: docs-only contract lock.  
-Status: publication rules contract / stabilization boundary.  
+Scope: publication rules contract / stabilization boundary.  
+Status: active contract lock.  
 
 This document locks the public catalog publication semantics between the Admin repository and the public Streamlit repository.
 
-It does not change code, data, public Streamlit behavior, Admin behavior, `kurgin-data`, Analyzer, formula, scoring, publication payload, payment, reserve, order, checkout or sold automation.
+It does not change data, Admin behavior, `kurgin-data`, Analyzer, formula, scoring, publication payload, payment, reserve, order, checkout or sold automation.
 
 ---
 
@@ -40,7 +40,7 @@ Potential divergence areas:
 - unavailable states
 - archived / removed-from-sale states
 
-This is an architecture risk, not a request to refactor now.
+This is an architecture risk. Refactor must be phased and tested.
 
 ---
 
@@ -253,20 +253,44 @@ Known duplicated / related responsibilities:
 - `priceHtml()`;
 - `displayPriceText()`.
 
-These locations are documented to guide future stabilization. This contract does not modify them.
+These locations are documented to guide future stabilization. This contract does not remove them.
 
 ---
 
-## 10. Future implementation order
+## 10. Implementation status v0.1
+
+Status after stabilization pass:
+
+- frontend request-price interpretation now prefers Admin-computed fields first;
+- fallback remains only for missing legacy fields;
+- contract smoke script added at `scripts/smoke_publication_rules_contract.py`;
+- no checkout behavior was added;
+- no payment behavior was added;
+- no reserve behavior was added;
+- no sold behavior was added;
+- no `kurgin-data` changes were made;
+- no Analyzer / formula / scoring changes were made.
+
+Current implementation note:
+
+```text
+Public frontend must prefer public_action, checkout_enabled and public_sellable before legacy price_status fallback.
+```
+
+The MVP UI may still keep checkout disabled even when the data contract marks a stone as sellable.
+
+---
+
+## 11. Future implementation order
 
 ### Phase 1 — Contract lock
 
-Create this document.
+Create this document and keep it as the source contract.
 
 Status:
 
 ```text
-current task
+complete
 ```
 
 ### Phase 2 — Contract tests / smoke tests
@@ -279,7 +303,11 @@ Add tests comparing:
 - hidden / removed / unavailable handling;
 - section handling.
 
-No behavior change should be made without a test target.
+Status:
+
+```text
+initial smoke added
+```
 
 ### Phase 3 — Frontend prefers Admin-computed fields
 
@@ -294,6 +322,12 @@ Change frontend request-price logic so it reads Admin-computed fields first:
 
 Fallback logic remains only for missing legacy fields.
 
+Status:
+
+```text
+initial frontend preference added for request-price interpretation
+```
+
 ### Phase 4 — Reduce duplicated frontend business rules
 
 After tests pass, reduce duplicated frontend logic around:
@@ -304,6 +338,12 @@ After tests pass, reduce duplicated frontend logic around:
 - sellable / visible decisions.
 
 Frontend should stay a display layer, not a business-rule layer.
+
+Status:
+
+```text
+future
+```
 
 ### Phase 5 — Optional shared pure module
 
@@ -317,15 +357,18 @@ This must be considered only after contract tests and field-preference stabiliza
 
 Do not start with shared-module refactor.
 
+Status:
+
+```text
+future / not started
+```
+
 ---
 
-## 11. Forbidden in this task
+## 12. Forbidden in this stabilization task
 
 Do not:
 
-- change code;
-- change public Streamlit behavior;
-- change Admin behavior;
 - change `kurgin-data`;
 - change Analyzer / formula / scoring;
 - implement shared module;
@@ -334,41 +377,28 @@ Do not:
 - add payment logic;
 - add reserve logic;
 - add sold logic;
-- refactor;
+- make a large refactor;
 - cleanup files;
 - delete files.
 
 ---
 
-## 12. Acceptance lock
+## 13. Acceptance lock
 
-This task is complete only if:
+This stabilization step is complete only if:
 
-1. Created only:
-
-```text
-docs/KURGIN_PUBLICATION_RULES_CONTRACT_V0_1.md
-```
-
-2. No code changes.
-3. No data changes.
-4. No public Streamlit changes.
-5. No Admin behavior changes.
-6. No `kurgin-data` changes.
-7. No Analyzer / formula / scoring changes.
-8. The document clearly states:
-
-```text
-Admin decides.
-Frontend displays.
-```
-
-9. The document lists current duplication locations.
-10. The document defines future implementation phases.
+1. `scripts/smoke_publication_rules_contract.py` exists.
+2. Frontend request-price interpretation prefers Admin-computed fields first.
+3. Fallback remains only for missing legacy fields.
+4. UI visual design is not changed.
+5. Checkout / payment / reserve / sold behavior is not added.
+6. This document includes `Implementation status v0.1`.
+7. Admin remains the publication authority.
+8. Frontend remains the display layer.
 
 ---
 
-## 13. Final lock statement
+## 14. Final lock statement
 
 This contract locks the publication semantic boundary:
 
