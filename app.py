@@ -4,7 +4,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from catalog.data_loader import load_catalog_state
-from ui.mobile_shell import build_mobile_shell
+from ui.publication_contract_shell import build_mobile_shell
 
 
 st.set_page_config(
