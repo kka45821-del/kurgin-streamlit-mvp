@@ -5,7 +5,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from catalog.catalog_core import normalize_public_stones, normalize_stone
+from catalog.public_state_contract import normalize_public_stones, normalize_stone
 from config.request_contacts import REQUEST_CONTACTS
 from ui.mobile_shell import build_mobile_shell
 
@@ -23,6 +23,9 @@ REQUEST_STONE = {
     "public_action": "request_price",
     "checkout_enabled": False,
     "public_sellable": False,
+    "is_request_price": True,
+    "public_visible": True,
+    "public_state": "request_price",
     "current_status": "available",
     "show_in_catalog": True,
 }
@@ -37,9 +40,12 @@ SELLABLE_STONE = {
     "report_number": "LG-SELL-1",
     "price_rub": 120000,
     "price_status": "confirmed",
-    "public_action": "checkout",
-    "checkout_enabled": True,
+    "public_action": "request_price",
+    "checkout_enabled": False,
     "public_sellable": True,
+    "is_request_price": True,
+    "public_visible": True,
+    "public_state": "sellable_contact",
     "current_status": "available",
     "show_in_catalog": True,
 }
@@ -76,18 +82,19 @@ def run() -> None:
     print("OK: request price state")
 
     sellable_stone = normalize_stone(SELLABLE_STONE)
-    assert sellable_stone["priceText"] != "по запросу", sellable_stone
-    assert sellable_stone["is_request_price"] is False, sellable_stone
-    assert sellable_stone["checkout_enabled"] is True, sellable_stone
-    assert sellable_stone["public_sellable"] is True, sellable_stone
+    assert sellable_stone["priceText"] == "по запросу", sellable_stone
+    assert sellable_stone["is_request_price"] is True, sellable_stone
+    assert sellable_stone["checkout_enabled"] is False, sellable_stone
+    assert sellable_stone["public_sellable"] is False, sellable_stone
+    assert sellable_stone["public_state"] == "sellable_contact", sellable_stone
     assert sellable_stone["price"] == 120000, sellable_stone
-    print("OK: sellable price state")
+    print("OK: sellable contact state stays request-price until payment flow exists")
 
     public_stones = normalize_public_stones([REQUEST_STONE, SELLABLE_STONE])
     assert len(public_stones) == 2, public_stones
     by_id = {stone["id"]: stone for stone in public_stones}
     assert by_id["REQ-1"]["priceText"] == "по запросу", by_id["REQ-1"]
-    assert by_id["SELL-1"]["priceText"] != "по запросу", by_id["SELL-1"]
+    assert by_id["SELL-1"]["priceText"] == "по запросу", by_id["SELL-1"]
     print("OK: normalize_public_stones price states")
 
     shell = build_mobile_shell(page="catalog", stones_json="[]")
