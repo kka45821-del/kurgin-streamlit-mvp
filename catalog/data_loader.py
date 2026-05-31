@@ -3,10 +3,11 @@ import os
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
-from catalog.catalog_core import extract_stones, normalize_public_stones
+from catalog.catalog_core import extract_stones
+from catalog.public_state_contract import normalize_public_stones
 from catalog.stones import STONES as LOCAL_STONES
 
-CATALOG_LOADER_VERSION = "state_v1"
+CATALOG_LOADER_VERSION = "state_v2_public_contract"
 
 DEFAULT_CATALOG_URLS = [
     "https://raw.githubusercontent.com/kka45821-del/kurgin-data/main/catalog.json",
