@@ -6,16 +6,19 @@ def has_value(stone: dict, key: str) -> bool:
 
 
 def request_price_state(stone: dict, price: int | None = None) -> bool:
+    state = core.clean_text(core.first(stone, "public_state", default="")).lower()
+    if state == "request_price":
+        return True
+    if state in {"sellable_contact", "checkout"}:
+        current_price = core.safe_int(price if price is not None else core.first(stone, "price", "price_rub", "public_price_rub", default=0))
+        return current_price <= 0
+
     if has_value(stone, "is_request_price"):
         return core.safe_bool(stone.get("is_request_price"))
 
     action = core.clean_text(core.first(stone, "public_action", default="")).lower()
     if action:
         return action == "request_price"
-
-    state = core.clean_text(core.first(stone, "public_state", default="")).lower()
-    if state:
-        return state != "checkout"
 
     if has_value(stone, "checkout_enabled"):
         return not core.safe_bool(stone.get("checkout_enabled"))
@@ -41,10 +44,10 @@ def normalize_stone(stone: dict) -> dict:
     checkout_enabled = False if request else core.safe_bool(core.first(stone, "checkout_enabled", default=normalized.get("checkout_enabled", False)))
     public_sellable = False if request else core.safe_bool(core.first(stone, "public_sellable", default=normalized.get("public_sellable", False)))
 
-    if not action:
-        action = "request_price" if request else "checkout"
     if not state:
         state = "checkout" if checkout_enabled else "sellable_contact" if public_sellable else "request_price"
+    if not action:
+        action = "checkout" if checkout_enabled else "request_price"
 
     carat = normalized.get("carat", 0) or 0
     price_text = "по запросу" if request else f"{price:,}".replace(",", " ")
