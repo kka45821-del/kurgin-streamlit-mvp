@@ -37,11 +37,26 @@ The site attempts remote public data in this order:
 1. KURGIN_DATA_CATALOG_URL environment override, if set
 2. kurgin-data/public_stones_v1.csv
 3. legacy JSON URLs
-4. legacy kurgin-data/stones.csv
-5. local fallback stones
+4. local fallback stones only if the public CSV is unavailable and legacy JSON has no usable rows
 ```
 
-If `public_stones_v1.csv` does not exist or contains only headers, the site continues trying fallback sources.
+Important empty-export rule:
+
+```text
+If public_stones_v1.csv exists but contains only headers or no accepted public rows, the site shows an empty public catalog.
+It does not silently fall back to demo stones.
+```
+
+The site does not use legacy `stones.csv` as a public fallback source.
+
+## Public-safe row rule
+
+From `public_stones_v1.csv`, the site accepts only these public card statuses:
+
+```text
+public_numeric_price
+public_price_on_request
+```
 
 ## Public-safe price behavior
 
@@ -83,7 +98,7 @@ replace legacy stones.csv silently
 ## Future stages
 
 ```text
-SITE-2 — refine public card detail view for public_stones_v1 fields
 DATA-1 — manual dry-run of public_stones_v1.csv in kurgin-data
+SITE-2 — refine public card detail view for public_stones_v1 fields
 V2 — Timeweb database source of truth
 ```

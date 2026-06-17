@@ -9,7 +9,13 @@ from urllib.request import urlopen
 from catalog.catalog_core import extract_stones, normalize_public_stones
 from catalog.stones import STONES as LOCAL_STONES
 
-CATALOG_LOADER_VERSION = "state_v2_public_stones_v1"
+CATALOG_LOADER_VERSION = "state_v2_public_stones_v1_hardened"
+
+PUBLIC_STONES_V1_FILENAME = "public_stones_v1.csv"
+PUBLIC_CARD_ALLOWED_STATUSES = {
+    "public_numeric_price",
+    "public_price_on_request",
+}
 
 DEFAULT_CATALOG_URLS = [
     "https://raw.githubusercontent.com/kka45821-del/kurgin-data/main/public_stones_v1.csv",
@@ -17,7 +23,6 @@ DEFAULT_CATALOG_URLS = [
     "https://raw.githubusercontent.com/kka45821-del/kurgin-data/main/stones.json",
     "https://raw.githubusercontent.com/kka45821-del/kurgin-data/main/catalog_published.json",
     "https://raw.githubusercontent.com/kka45821-del/kurgin-data/main/data/catalog.json",
-    "https://raw.githubusercontent.com/kka45821-del/kurgin-data/main/stones.csv",
 ]
 
 
@@ -29,7 +34,10 @@ def _read_url(url: str) -> str:
 def _clean(value) -> str:
     if value is None:
         return ""
-    return str(value).strip()
+    text = str(value).strip()
+    if text.lower() in {"nan", "none", "null", "<na>"}:
+        return ""
+    return text
 
 
 def _numeric_price(value: str) -> str:
@@ -54,6 +62,10 @@ def _avg_diameter(row: dict) -> str:
     if max_value > 0:
         return f"{max_value:.2f}"
     return ""
+
+
+def _is_public_stones_v1_url(url: str) -> bool:
+    return url.lower().split("?", 1)[0].endswith(PUBLIC_STONES_V1_FILENAME)
 
 
 def _is_public_stones_v1_row(row: dict) -> bool:
@@ -90,6 +102,7 @@ def _adapt_public_stones_v1_row(row: dict) -> dict:
     score = _clean(row.get("kurgin_score"))
     section = _clean(row.get("catalog_section")) or "main"
     availability = _clean(row.get("availability_status_public")) or "in_stock"
+    fluorescence = _clean(row.get("fluorescence")) or "None"
 
     public_action = "checkout" if is_numeric else "request_price"
     checkout_enabled = "true" if is_numeric else "false"
@@ -98,7 +111,7 @@ def _adapt_public_stones_v1_row(row: dict) -> dict:
 
     adapted.update({
         "id": stone_id or report_number,
-        "stone_id": stone_id,
+        "stone_id": stone_id or report_number,
         "report": report_number,
         "report_number": report_number,
         "carat": weight,
@@ -110,6 +123,8 @@ def _adapt_public_stones_v1_row(row: dict) -> dict:
         "price_rub": numeric_price,
         "public_price_rub": numeric_price,
         "price_status": price_status,
+        "priceText": "по запросу" if not is_numeric else public_price_display.replace("₽", "").strip(),
+        "priceDisplay": "по запросу" if not is_numeric else public_price_display.replace("₽", "").strip(),
         "public_action": public_action,
         "checkout_enabled": checkout_enabled,
         "public_sellable": public_sellable,
@@ -124,8 +139,10 @@ def _adapt_public_stones_v1_row(row: dict) -> dict:
         "cut": _clean(row.get("cut_grade")) or _clean(row.get("cut")),
         "polish": _clean(row.get("polish")),
         "symmetry": _clean(row.get("symmetry")),
-        "fluorescence": _clean(row.get("fluorescence")),
+        "fluorescence": fluorescence,
+        "fluor": fluorescence,
         "diameter_mm": _avg_diameter(row),
+        "diameter": _avg_diameter(row),
         "depth_mm": _clean(row.get("height")) or _clean(row.get("depth_mm")),
         "tags": _clean(row.get("tags")),
         "show_in_catalog": True,
@@ -135,7 +152,7 @@ def _adapt_public_stones_v1_row(row: dict) -> dict:
     return adapted
 
 
-def _load_csv_text(raw: str) -> list[dict]:
+def _load_csv_text(raw: str, *, public_stones_v1: bool = False) -> list[dict]:
     if not raw.strip():
         return []
 
@@ -148,6 +165,12 @@ def _load_csv_text(raw: str) -> list[dict]:
         normalized_row = {_clean(key): _clean(value) for key, value in row.items() if key is not None}
         if not any(normalized_row.values()):
             continue
+
+        if public_stones_v1:
+            public_card_status = _clean(normalized_row.get("public_card_status"))
+            if public_card_status not in PUBLIC_CARD_ALLOWED_STATUSES:
+                continue
+
         rows.append(_adapt_public_stones_v1_row(normalized_row))
     return rows
 
@@ -156,7 +179,7 @@ def _load_url(url: str):
     raw = _read_url(url)
     lower_url = url.lower().split("?", 1)[0]
     if lower_url.endswith(".csv"):
-        return _load_csv_text(raw)
+        return _load_csv_text(raw, public_stones_v1=_is_public_stones_v1_url(url))
     return json.loads(raw)
 
 
@@ -164,7 +187,7 @@ def _catalog_state(status: str, stones: list[dict], *, source: str, attempted_re
     notices = {
         "remote_loaded": "Каталог загружен.",
         "fallback_used": "Показана резервная демо-выборка.",
-        "empty": "Каталог пока пуст. Попробуйте проверить публикацию данных позже.",
+        "empty": "Каталог пока пуст. Проверьте public_stones_v1.csv в kurgin-data.",
         "error": "Каталог временно недоступен. Попробуйте открыть страницу позже.",
     }
     return {
@@ -191,6 +214,7 @@ def load_catalog_state() -> dict:
     remote_errors = 0
 
     for url in urls:
+        is_public_v1_source = _is_public_stones_v1_url(url)
         try:
             payload = _load_url(url)
             stones = normalize_public_stones(extract_stones(payload))
@@ -203,6 +227,19 @@ def load_catalog_state() -> dict:
                     remote_empty=remote_empty,
                     remote_errors=remote_errors,
                 )
+
+            # If public_stones_v1.csv exists but contains no public rows, this is
+            # the public catalog state. Do not silently fall back to demo data.
+            if is_public_v1_source:
+                return _catalog_state(
+                    "empty",
+                    [],
+                    source=url,
+                    attempted_remote=len(urls),
+                    remote_empty=remote_empty + 1,
+                    remote_errors=remote_errors,
+                )
+
             remote_empty += 1
         except (URLError, HTTPError, TimeoutError, json.JSONDecodeError, csv.Error, OSError, UnicodeDecodeError):
             remote_errors += 1

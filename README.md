@@ -10,7 +10,16 @@ The public MVP site can now read the Admin-generated public export contract:
 kurgin-data/public_stones_v1.csv
 ```
 
-The catalog loader still keeps the older remote JSON URLs and local fallback behavior, but `public_stones_v1.csv` is now the first preferred public data source.
+The catalog loader uses `public_stones_v1.csv` as the first preferred public data source.
+
+Loader rules:
+
+```text
+- if public_stones_v1.csv contains public rows, the site renders those rows;
+- if public_stones_v1.csv exists but contains no public rows, the public catalog is empty;
+- legacy JSON fallback is used only when public_stones_v1.csv is unavailable;
+- legacy stones.csv is not used as a public fallback source.
+```
 
 SITE-1 is read-only:
 
