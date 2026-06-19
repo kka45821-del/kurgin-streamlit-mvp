@@ -9,7 +9,7 @@ from urllib.request import urlopen
 from catalog.catalog_core import extract_stones, normalize_public_stones
 from catalog.stones import STONES as LOCAL_STONES
 
-CATALOG_LOADER_VERSION = "state_v2_public_stones_v1_hardened"
+CATALOG_LOADER_VERSION = "state_v3_postgres_first_public_stones_v1"
 
 PUBLIC_STONES_V1_FILENAME = "public_stones_v1.csv"
 PUBLIC_CARD_ALLOWED_STATUSES = {
@@ -81,12 +81,7 @@ def _is_public_stones_v1_row(row: dict) -> bool:
 
 
 def _adapt_public_stones_v1_row(row: dict) -> dict:
-    """Map Admin public_stones_v1.csv rows to the current mobile catalog contract.
-
-    The public site must not calculate prices or infer admin-only state. It only
-    adapts public-safe export fields into the existing display keys used by the
-    MVP shell.
-    """
+    """Map Admin public_stones_v1.csv rows to the current mobile catalog contract."""
     if not _is_public_stones_v1_row(row):
         return row
 
@@ -185,9 +180,10 @@ def _load_url(url: str):
 
 def _catalog_state(status: str, stones: list[dict], *, source: str, attempted_remote: int = 0, remote_empty: int = 0, remote_errors: int = 0) -> dict:
     notices = {
+        "postgres_loaded": "Каталог загружен из PostgreSQL.",
         "remote_loaded": "Каталог загружен.",
         "fallback_used": "Показана резервная демо-выборка.",
-        "empty": "Каталог пока пуст. Проверьте public_stones_v1.csv в kurgin-data.",
+        "empty": "Каталог пока пуст. Проверьте public_stones_v1.csv или PostgreSQL export.",
         "error": "Каталог временно недоступен. Попробуйте открыть страницу позже.",
     }
     return {
@@ -203,7 +199,24 @@ def _catalog_state(status: str, stones: list[dict], *, source: str, attempted_re
     }
 
 
+def _load_postgres_first() -> list[dict]:
+    enabled = os.getenv("KURGIN_POSTGRES_CATALOG", "1").strip().lower() not in {"0", "false", "no"}
+    if not enabled:
+        return []
+    try:
+        from catalog.postgres_loader import has_postgres_config, load_postgres_catalog
+        if not has_postgres_config():
+            return []
+        return normalize_public_stones(extract_stones(load_postgres_catalog()))
+    except Exception:
+        return []
+
+
 def load_catalog_state() -> dict:
+    postgres_stones = _load_postgres_first()
+    if postgres_stones:
+        return _catalog_state("postgres_loaded", postgres_stones, source="postgresql:kurgin_admin.stones")
+
     urls = []
     env_url = os.getenv("KURGIN_DATA_CATALOG_URL")
     if env_url:
@@ -228,8 +241,6 @@ def load_catalog_state() -> dict:
                     remote_errors=remote_errors,
                 )
 
-            # If public_stones_v1.csv exists but contains no public rows, this is
-            # the public catalog state. Do not silently fall back to demo data.
             if is_public_v1_source:
                 return _catalog_state(
                     "empty",
@@ -257,15 +268,4 @@ def load_catalog_state() -> dict:
         )
 
     status = "error" if remote_errors else "empty"
-    return _catalog_state(
-        status,
-        [],
-        source="none",
-        attempted_remote=len(urls),
-        remote_empty=remote_empty,
-        remote_errors=remote_errors,
-    )
-
-
-def load_catalog_stones():
-    return load_catalog_state()["stones"]
+    return _catalog_state(status, [], source="none", attempted_remote=len(urls), remote_empty=remote_empty, remote_errors=remote_errors)
